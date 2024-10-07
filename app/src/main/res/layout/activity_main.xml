@@ -32,7 +32,6 @@
                 app:navigationIcon="@drawable/ic_menu" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Fragment Container to load different screens -->
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="0dp"
@@ -51,7 +50,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:menu="@menu/bottom_navigation_menu"
-            app:itemIconTint="@color/white"
+            app:itemIconTint="@color/black"
             app:itemTextColor="@color/white"
             app:backgroundTint="@color/colorPrimary" />
     </androidx.constraintlayout.widget.ConstraintLayout>

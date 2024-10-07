@@ -1,14 +1,18 @@
 package com.example.universalyoga.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.example.universalyoga.R;
+import com.example.universalyoga.activities.AddClassActivity;
 
 public class FragmentHome extends Fragment {
 
@@ -26,13 +30,13 @@ public class FragmentHome extends Fragment {
         updateDataFromDatabase();
 
         view.findViewById(R.id.btn_add_class).setOnClickListener(v -> {
-            // Chuyển đến màn hình thêm lớp học mới
-            // Ví dụ: getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AddClassFragment()).commit();
+            Intent intent = new Intent(getActivity(), AddClassActivity.class);
+            startActivity(intent);
         });
 
         view.findViewById(R.id.btn_search_class).setOnClickListener(v -> {
             // Chuyển đến màn hình tìm kiếm lớp học
-            // Ví dụ: getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SearchClassFragment()).commit();
+            // Bạn có thể thêm logic cho việc chuyển sang màn hình tìm kiếm
         });
 
         return view;

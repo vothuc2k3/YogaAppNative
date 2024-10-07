@@ -2,4 +2,9 @@
     <string name="app_name">UniversalYoga</string>
     <string name="open_drawer">Open Drawer</string>
     <string name="close_drawer">Close Drawer</string>
+    <string-array name="class_type_array">
+        <item>Flow Yoga</item>
+        <item>Aerial Yoga</item>
+        <item>Family Yoga</item>
+    </string-array>
 </resources>
