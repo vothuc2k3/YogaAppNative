@@ -43,8 +43,6 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.workmanager)
     implementation(libs.coordinatorlayout)
-    implementation(libs.glide)
-    annotationProcessor(libs.glide.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

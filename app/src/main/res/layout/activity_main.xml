@@ -6,58 +6,63 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Main content with AppBar, Fragment and Bottom Navigation -->
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/main"
+    <!-- Main content using ConstraintLayout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- AppBar -->
+        <!-- AppBar with Toolbar -->
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                android:title="Home"
-                android:titleTextColor="@android:color/white" />
+                app:title="Home"
+                app:titleTextColor="@android:color/white"
+                app:navigationIcon="@drawable/ic_menu" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Fragment Container to load child screens -->
+        <!-- Fragment Container to load different screens -->
         <FrameLayout
             android:id="@+id/fragment_container"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
+            app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <!-- Bottom Navigation -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            app:menu="@menu/bottom_navigation_menu" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:menu="@menu/bottom_navigation_menu"
+            app:itemIconTint="@color/white"
+            app:itemTextColor="@color/white"
+            app:backgroundTint="@color/colorPrimary" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Button to open drawer -->
-        <Button
-            android:id="@+id/open_drawer_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Open Drawer"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp" />
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-    <!-- End Drawer -->
+    <!-- Navigation Drawer for end drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/end_drawer"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="end"
-        app:menu="@menu/drawer_menu" />
+        app:menu="@menu/drawer_menu"
+        app:headerLayout="@layout/nav_header" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

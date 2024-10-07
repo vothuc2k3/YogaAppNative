@@ -1,69 +1,108 @@
 package com.example.universalyoga.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-
-import com.bumptech.glide.Glide;
 import com.example.universalyoga.R;
+import com.example.universalyoga.fragments.FragmentHome;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private NavigationView endDrawer;
-    private Button openDrawerButton;
-    private ImageView profileImage;
+    private ActionBarDrawerToggle toggle;
+    private UserDAO userDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize the views
-        drawerLayout = findViewById(R.id.drawer_layout);
-        endDrawer = findViewById(R.id.end_drawer);
-        openDrawerButton = findViewById(R.id.open_drawer_button);
-        profileImage = findViewById(R.id.profile_image);
-
-        // Fetch the current user
-        UserDAO userDAO = new UserDAO(this);
-        UserModel currentUser = userDAO.getCurrentUser();
-
-        if (currentUser != null) {
-            String profileImageUrl = currentUser.getProfileImage();
-
-            if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-                Glide.with(this)
-                        .load("https://firebasestorage.googleapis.com/v0/b/yoga-application-63a57.appspot.com/o/defaultAvatar.png?alt=media&token=8199f3df-0c74-418d-b65d-c5c2e306a1fa")
-                        .placeholder(R.drawable.ic_default_profile_image) // Set placeholder if loading fails
-                        .into(profileImage);
-            } else {
-                Glide.with(this)
-                        .load(R.drawable.ic_default_profile_image)
-                        .into(profileImage);
-            }
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new FragmentHome())
+                    .commit();
         }
 
-        // Edge to Edge display
-        EdgeToEdge.enable(this);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+        userDAO = new UserDAO(this);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        endDrawer = findViewById(R.id.end_drawer);
+
+        endDrawer.setNavigationItemSelectedListener(item ->{
+            if(item.getItemId() == R.id.nav_logout){
+                handleLogout();
+            }
+            drawerLayout.closeDrawer(GravityCompat.END);
+            return true;
         });
 
-        // Set up the button to open the drawer
-        openDrawerButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.END));
+        toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer) {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                super.onDrawerSlide(drawerView, slideOffset);
+            }
+        };
+
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        toolbar.setNavigationOnClickListener(v -> {
+            if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                drawerLayout.closeDrawer(GravityCompat.END); // Close end drawer if open
+            } else {
+                drawerLayout.openDrawer(GravityCompat.END); // Open end drawer
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Close drawer if it's open when the back button is pressed
+        if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
+            drawerLayout.closeDrawer(GravityCompat.END); // Close end drawer if open
+        } else {
+            super.onBackPressed(); // Otherwise, perform default back behavior
+        }
+    }
+
+    private void handleLogout(){
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        mAuth.signOut();
+        UserModel currentUser = userDAO.getCurrentUser();
+        if(currentUser != null){
+            userDAO.deleteUser(currentUser.getUid());
+        }
+        Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(MainActivity.this, SignInActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }
