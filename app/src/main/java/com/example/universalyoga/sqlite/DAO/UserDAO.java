@@ -69,4 +69,20 @@ public class UserDAO {
     public void deleteUser(String uid) {
         db.delete(TABLE_USER, COLUMN_USER_ID + "=?", new String[]{uid});
     }
+
+    public UserModel getCurrentUser() {
+        Cursor cursor = db.query(TABLE_USER, null, null, null, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            UserModel user = new UserModel();
+            user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
+            user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
+            user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
+            user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
+            user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
+            user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
+            cursor.close();
+            return user;
+        }
+        return null;
+    }
 }

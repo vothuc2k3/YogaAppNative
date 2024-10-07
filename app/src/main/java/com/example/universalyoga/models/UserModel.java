@@ -13,8 +13,8 @@ public class UserModel {
 
     public UserModel(){}
 
-    public UserModel(String name, String email, String phoneNumber) {
-        this.uid = "";
+    public UserModel(String uid, String name, String email, String phoneNumber) {
+        this.uid = uid;
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;

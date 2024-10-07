@@ -17,6 +17,7 @@ import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.example.universalyoga.worker.SyncManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -106,21 +107,33 @@ public class SignUpActivity extends AppCompatActivity {
                         Toast.makeText(SignUpActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
 
                         if (firebaseUser != null) {
-                            UserModel userModel = new UserModel(name, email, phoneNumber);
-                            userModel.setUid(firebaseUser.getUid());
-                            userDAO.addUser(userModel);
+                            String uid = firebaseUser.getUid();
+                            UserModel userModel = new UserModel(uid, name, email, phoneNumber);
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-                            SyncManager.startSync(this);
+                            db.collection("users").document(uid)
+                                    .set(userModel.toMap())
+                                    .addOnSuccessListener(aVoid -> {
+                                        userDAO.addUser(userModel);
+                                        Toast.makeText(SignUpActivity.this, "User data synced to Firestore and SQLite", Toast.LENGTH_SHORT).show();
+
+                                        SyncManager.startSync(this);
+
+                                        Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(SignUpActivity.this, "Failed to sync user data to Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
                         }
-
-                        Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
                     } else {
                         Toast.makeText(SignUpActivity.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
 
                     progressBar.setVisibility(View.GONE);
                 });
+
     }
+
 }
