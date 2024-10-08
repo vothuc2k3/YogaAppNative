@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/class_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Class Name"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Mô tả lớp học -->
+    <TextView
+        android:id="@+id/class_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Class Description"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/class_name"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Giảng viên -->
+    <TextView
+        android:id="@+id/instructor_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Instructor: "
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/class_description"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Sức chứa -->
+    <TextView
+        android:id="@+id/capacity_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Capacity: "
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/instructor_name"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Thời gian bắt đầu -->
+    <TextView
+        android:id="@+id/start_time_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Start: "
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/capacity_value"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Thời lượng -->
+    <TextView
+        android:id="@+id/duration_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Duration: "
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/start_time_value"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Giá tiền -->
+    <TextView
+        android:id="@+id/price_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Price: "
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/duration_value"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

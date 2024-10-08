@@ -2,8 +2,8 @@ package com.example.universalyoga.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -15,15 +15,19 @@ import com.example.universalyoga.R;
 import com.example.universalyoga.fragments.FragmentHome;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
+
+import com.example.universalyoga.fragments.FragmentSearch;  // Import FragmentSearch
 
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private NavigationView endDrawer;
     private ActionBarDrawerToggle toggle;
+    private UserModel currentUser;
     private UserDAO userDAO;
 
     @Override
@@ -31,13 +35,40 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        userDAO = new UserDAO(this);
+        currentUser = userDAO.getCurrentUser();
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new FragmentHome())
                     .commit();
         }
 
-        userDAO = new UserDAO(this);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_home) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new FragmentHome())
+                        .commit();
+            } else if (itemId == R.id.nav_search) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new FragmentSearch())
+                        .commit();
+            } else if (itemId == R.id.nav_profile) {
+            }
+            return true;
+        });
+
+        NavigationView navigationView = findViewById(R.id.end_drawer);
+        View headerView = navigationView.getHeaderView(0);
+        TextView nameTextView = headerView.findViewById(R.id.profile_name);
+        TextView emailTextView = headerView.findViewById(R.id.profile_email);
+
+        nameTextView.setText(currentUser.getName());
+        emailTextView.setText(currentUser.getEmail());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -45,8 +76,8 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawer_layout);
         endDrawer = findViewById(R.id.end_drawer);
 
-        endDrawer.setNavigationItemSelectedListener(item ->{
-            if(item.getItemId() == R.id.nav_logout){
+        endDrawer.setNavigationItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.nav_logout) {
                 handleLogout();
             }
             drawerLayout.closeDrawer(GravityCompat.END);
@@ -84,19 +115,18 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // Close drawer if it's open when the back button is pressed
         if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
-            drawerLayout.closeDrawer(GravityCompat.END); // Close end drawer if open
+            drawerLayout.closeDrawer(GravityCompat.END);
         } else {
-            super.onBackPressed(); // Otherwise, perform default back behavior
+            super.onBackPressed();
         }
     }
 
-    private void handleLogout(){
+    private void handleLogout() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         mAuth.signOut();
-        UserModel currentUser = userDAO.getCurrentUser();
-        if(currentUser != null){
+        currentUser = userDAO.getCurrentUser();
+        if (currentUser != null) {
             userDAO.deleteUser(currentUser.getUid());
         }
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
@@ -106,3 +136,4 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 }
+

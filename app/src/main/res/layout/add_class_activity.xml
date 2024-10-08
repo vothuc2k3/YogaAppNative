@@ -8,19 +8,16 @@
     tools:context=".activities.AddClassActivity"
     android:padding="16dp">
 
-    <!-- Title for Add Class -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create New Yoga Class"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:id="@+id/title_add_class"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:gravity="center"
-        android:layout_marginBottom="24dp" />
+    <!-- Toolbar with Back Button -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:title="Create new class"
+        android:textColor="@color/white"
+        app:navigationIcon="@drawable/ic_back_arrow"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Class Type -->
     <TextView
@@ -28,20 +25,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Class Type"
-        app:layout_constraintTop_toBottomOf="@id/title_add_class"
-    app:layout_constraintStart_toStartOf="parent"
-    android:textStyle="bold"
-    android:layout_marginTop="16dp" />
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp"/>
 
     <Spinner
         android:id="@+id/spinner_class_type"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:entries="@array/class_type_array"
+        app:layout_constraintTop_toBottomOf="@id/label_class_type"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/label_class_type"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"/>
 
     <!-- Class Capacity -->
     <TextView
@@ -49,10 +46,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Capacity"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/spinner_class_type"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp"
-        android:textStyle="bold" />
+        android:layout_marginTop="16dp"/>
 
     <NumberPicker
         android:id="@+id/number_picker_capacity"
@@ -61,8 +58,7 @@
         app:layout_constraintTop_toBottomOf="@id/label_class_capacity"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp"
-        android:layout_gravity="center"/>
+        android:layout_marginTop="8dp"/>
 
     <!-- Class Duration -->
     <TextView
@@ -70,10 +66,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Duration (minutes)"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/number_picker_capacity"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp"
-        android:textStyle="bold" />
+        android:layout_marginTop="16dp"/>
 
     <EditText
         android:id="@+id/input_class_duration"
@@ -81,10 +77,10 @@
         android:layout_height="wrap_content"
         android:hint="e.g., 60"
         android:inputType="number"
+        app:layout_constraintTop_toBottomOf="@id/label_class_duration"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/label_class_duration"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"/>
 
     <!-- Class Price -->
     <TextView
@@ -92,10 +88,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Price (in USD)"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/input_class_duration"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp"
-        android:textStyle="bold" />
+        android:layout_marginTop="16dp"/>
 
     <EditText
         android:id="@+id/input_class_price"
@@ -103,10 +99,10 @@
         android:layout_height="wrap_content"
         android:hint="e.g., 15.00"
         android:inputType="numberDecimal"
+        app:layout_constraintTop_toBottomOf="@id/label_class_price"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/label_class_price"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"/>
 
     <!-- Class Start Time -->
     <TextView
@@ -114,10 +110,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Start Time"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/input_class_price"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp"
-        android:textStyle="bold" />
+        android:layout_marginTop="16dp"/>
 
     <EditText
         android:id="@+id/input_class_start_time"
@@ -125,10 +121,10 @@
         android:layout_height="wrap_content"
         android:hint="Select Time"
         android:focusable="false"
+        app:layout_constraintTop_toBottomOf="@id/label_class_start_time"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/label_class_start_time"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"/>
 
     <!-- Description -->
     <TextView
@@ -136,10 +132,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Description"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/input_class_start_time"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp"
-        android:textStyle="bold" />
+        android:layout_marginTop="16dp"/>
 
     <EditText
         android:id="@+id/input_class_description"
@@ -148,10 +144,10 @@
         android:hint="Optional"
         android:inputType="textMultiLine"
         android:minLines="3"
+        app:layout_constraintTop_toBottomOf="@id/label_class_description"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/label_class_description"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"/>
 
     <!-- Submit Button -->
     <Button
@@ -164,6 +160,6 @@
         app:layout_constraintTop_toBottomOf="@id/input_class_description"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

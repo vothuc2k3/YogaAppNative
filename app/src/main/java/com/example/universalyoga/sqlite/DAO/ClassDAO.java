@@ -3,38 +3,45 @@ package com.example.universalyoga.sqlite.DAO;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.universalyoga.models.ClassModel;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import com.example.universalyoga.utils.Util;
 
 public class ClassDAO extends SQLiteOpenHelper {
 
     // Database info
-    private static final String DATABASE_NAME = "yoga_classes.db";
+    private static final String DATABASE_NAME = "yoga_app.db";
     private static final int DATABASE_VERSION = 1;
 
     // Table name and columns
     private static final String TABLE_CLASSES = "classes";
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_CREATOR_UID = "creator_uid";
-    private static final String COLUMN_INSTRUCTOR_UID = "instructor_uid";
+    private static final String COLUMN_CREATOR_UID = "creatorUid";
+    private static final String COLUMN_INSTRUCTOR_UID = "instructorUid";
     private static final String COLUMN_CAPACITY = "capacity";
     private static final String COLUMN_DURATION = "duration";
     private static final String COLUMN_PRICE = "price";
     private static final String COLUMN_TYPE = "type";
     private static final String COLUMN_DESCRIPTION = "description";
     private static final String COLUMN_STATUS = "status";
-    private static final String COLUMN_START_AT = "start_at";
-    private static final String COLUMN_CREATED_AT = "created_at";
+    private static final String COLUMN_START_AT = "startAt";
+    private static final String COLUMN_CREATED_AT = "createdAt";
+    private static final String COLUMN_END_AT = "endAt";
 
     public ClassDAO(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+
+    SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -49,6 +56,7 @@ public class ClassDAO extends SQLiteOpenHelper {
                 + COLUMN_DESCRIPTION + " TEXT, "
                 + COLUMN_STATUS + " TEXT, "
                 + COLUMN_START_AT + " TEXT, "
+                + COLUMN_END_AT + " TEXT, "
                 + COLUMN_CREATED_AT + " TEXT)";
         db.execSQL(CREATE_CLASSES_TABLE);
     }
@@ -73,14 +81,14 @@ public class ClassDAO extends SQLiteOpenHelper {
         values.put(COLUMN_TYPE, classModel.getType());
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
-        values.put(COLUMN_START_AT, classModel.getStartAt().toDate().toString()); // Save as string
-        values.put(COLUMN_CREATED_AT, classModel.getCreatedAt().toDate().toString()); // Save as string
+        values.put(COLUMN_START_AT, classModel.getStartAt().toDate().toString());
+        values.put(COLUMN_CREATED_AT, classModel.getCreatedAt().toDate().toString());
+        values.put(COLUMN_END_AT, classModel.getEndAt().toDate().toString());
 
-        // Inserting row
         long result = db.insert(TABLE_CLASSES, null, values);
         db.close();
 
-        return result != -1;  // Return true if insert is successful
+        return result != -1;
     }
 
     // Retrieve a class by ID
@@ -122,6 +130,7 @@ public class ClassDAO extends SQLiteOpenHelper {
         values.put(COLUMN_STATUS, classModel.getStatus());
         values.put(COLUMN_START_AT, classModel.getStartAt().toDate().toString());
         values.put(COLUMN_CREATED_AT, classModel.getCreatedAt().toDate().toString());
+        values.put(COLUMN_END_AT, classModel.getEndAt().toDate().toString());
 
         int result = db.update(TABLE_CLASSES, values, COLUMN_ID + "=?", new String[]{classModel.getId()});
         db.close();
@@ -136,7 +145,6 @@ public class ClassDAO extends SQLiteOpenHelper {
         return result > 0;
     }
 
-    // Retrieve all classes
     public List<ClassModel> getAllClasses() {
         List<ClassModel> classList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -155,6 +163,16 @@ public class ClassDAO extends SQLiteOpenHelper {
                 classModel.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
                 classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
 
+                // Convert TEXT from SQLite back to Firebase Timestamp
+                String createdAtString = cursor.getString(cursor.getColumnIndex(COLUMN_CREATED_AT));
+                classModel.setCreatedAt(Util.convertStringToTimestamp(createdAtString));
+
+                String startAtString = cursor.getString(cursor.getColumnIndex(COLUMN_START_AT));
+                classModel.setStartAt(Util.convertStringToTimestamp(startAtString));
+
+                String endAtString = cursor.getString(cursor.getColumnIndex(COLUMN_END_AT));
+                classModel.setEndAt(Util.convertStringToTimestamp(endAtString));
+
                 classList.add(classModel);
             } while (cursor.moveToNext());
         }
@@ -163,4 +181,6 @@ public class ClassDAO extends SQLiteOpenHelper {
         db.close();
         return classList;
     }
+
+
 }

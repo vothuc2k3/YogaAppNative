@@ -13,15 +13,19 @@ import androidx.fragment.app.Fragment;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.activities.AddClassActivity;
+import com.example.universalyoga.firestore.ClassFirestore;
 
 public class FragmentHome extends Fragment {
 
     private TextView totalClassesTextView;
     private TextView totalBookingsTextView;
+    private ClassFirestore classFirestore;
+    private int totalClasses = 0;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         totalClassesTextView = view.findViewById(R.id.total_classes_value);
@@ -35,20 +39,25 @@ public class FragmentHome extends Fragment {
         });
 
         view.findViewById(R.id.btn_search_class).setOnClickListener(v -> {
-            // Chuyển đến màn hình tìm kiếm lớp học
-            // Bạn có thể thêm logic cho việc chuyển sang màn hình tìm kiếm
         });
 
         return view;
     }
 
     private void updateDataFromDatabase() {
-        // Giả sử dữ liệu từ cơ sở dữ liệu được lấy như thế này
-        int totalClasses = 10; // Ví dụ: lấy tổng số lớp học từ cơ sở dữ liệu
-        int totalBookings = 50; // Ví dụ: lấy tổng số lượt đặt lớp học từ cơ sở dữ liệu
+        classFirestore = new ClassFirestore();
 
-        // Cập nhật giao diện với dữ liệu thực
-        totalClassesTextView.setText(String.valueOf(totalClasses));
-        totalBookingsTextView.setText(String.valueOf(totalBookings));
+        classFirestore.getClassesCount(new ClassFirestore.ClassesCountCallback() {
+            @Override
+            public void onSuccess(int totalClasses) {
+                totalClassesTextView.setText(String.valueOf(totalClasses));
+                totalBookingsTextView.setText(String.valueOf(50));
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                totalClassesTextView.setText("Error");
+            }
+        });
     }
 }

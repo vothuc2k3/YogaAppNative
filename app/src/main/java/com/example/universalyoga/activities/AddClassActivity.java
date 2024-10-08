@@ -1,8 +1,10 @@
 package com.example.universalyoga.activities;
 
 import android.app.TimePickerDialog;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
@@ -10,12 +12,19 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassModel;
+import com.example.universalyoga.models.UserModel;
+import com.example.universalyoga.sqlite.DAO.ClassDAO;
+import com.example.universalyoga.sqlite.DAO.UserDAO;
+import com.example.universalyoga.worker.SyncManager;
 import com.google.firebase.Timestamp;
 
 import java.util.Calendar;
+import java.util.UUID;
 
 public class AddClassActivity extends AppCompatActivity {
 
@@ -23,12 +32,30 @@ public class AddClassActivity extends AppCompatActivity {
     private EditText inputClassDuration, inputClassPrice, inputClassStartTime, inputClassDescription;
     private NumberPicker numberPickerCapacity;
     private Button btnSubmitClass;
-    private int startHour = 0, startMinute = 0;  // Default start time values
+    private int startHour = 0, startMinute = 0;
+    private UserDAO userDAO;
+    private ClassDAO classDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_class_activity);
+
+        userDAO = new UserDAO(this);
+        classDAO = new ClassDAO(this);
+
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_back_arrow);
+        drawable.setBounds(0, 0, 60, 60);
+        toolbar.setNavigationIcon(drawable);
+
+        toolbar.setNavigationOnClickListener(v -> finish());
 
         numberPickerCapacity = findViewById(R.id.number_picker_capacity);
         numberPickerCapacity.setMinValue(10);
@@ -48,7 +75,6 @@ public class AddClassActivity extends AppCompatActivity {
     }
 
     private void showTimePickerDialog() {
-        // Khởi tạo TimePickerDialog để chọn giờ
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
@@ -62,14 +88,12 @@ public class AddClassActivity extends AppCompatActivity {
     }
 
     private void createClass() {
-        // Lấy giá trị từ Spinner Class Type
         String classType = spinnerClassType.getSelectedItem().toString();
         int classCapacity = numberPickerCapacity.getValue();  // Lấy giá trị từ NumberPicker
         String classDuration = inputClassDuration.getText().toString();
         String classPrice = inputClassPrice.getText().toString();
         String classDescription = inputClassDescription.getText().toString();
 
-        // Kiểm tra tính hợp lệ của dữ liệu đầu vào
         if (TextUtils.isEmpty(classDuration)) {
             inputClassDuration.setError("Duration is required");
             return;
@@ -85,26 +109,40 @@ public class AddClassActivity extends AppCompatActivity {
             return;
         }
 
+        UserModel currentUser = userDAO.getCurrentUser();
+
         ClassModel newClass = new ClassModel();
+
+        newClass.setId(UUID.randomUUID().toString());
+        newClass.setCreatorUid(currentUser.getUid());
+        newClass.setInstructorUid(currentUser.getUid());
         newClass.setType(classType);
+        newClass.setStatus("open");
         newClass.setCapacity(classCapacity);
         newClass.setDuration(Integer.parseInt(classDuration));
         newClass.setPrice(Double.parseDouble(classPrice));
         newClass.setDescription(classDescription);
-        newClass.setStartAt(Timestamp.now());
 
-        Toast.makeText(this, "Class Created Successfully", Toast.LENGTH_SHORT).show();
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.set(Calendar.HOUR_OF_DAY, startHour);
+        startCalendar.set(Calendar.MINUTE, startMinute);
+        Timestamp startTimestamp = new Timestamp(startCalendar.getTime());
+        newClass.setStartAt(startTimestamp);
 
-        // Reset form
-        resetForm();
-    }
+        int durationMinutes = Integer.parseInt(classDuration);
+        startCalendar.add(Calendar.MINUTE, durationMinutes);
+        Timestamp endTimestamp = new Timestamp(startCalendar.getTime());
+        newClass.setEndAt(endTimestamp);
 
-    private void resetForm() {
-        spinnerClassType.setSelection(0);
-        numberPickerCapacity.setValue(10);
-        inputClassDuration.setText("");
-        inputClassPrice.setText("");
-        inputClassStartTime.setText("");
-        inputClassDescription.setText("");
+        Log.d("Class: ",newClass.toString());
+
+        boolean result = classDAO.addClass(newClass);
+
+        Toast.makeText(this, String.valueOf(result), Toast.LENGTH_SHORT).show();
+
+        SyncManager.startSync(this);
+
+        finish();
+
     }
 }

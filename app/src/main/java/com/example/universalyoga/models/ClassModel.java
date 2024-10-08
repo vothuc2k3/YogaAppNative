@@ -99,9 +99,7 @@ public class ClassModel {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
+    public void setCreatedAt(Timestamp timestamp){this.createdAt = timestamp;}
 
     public Timestamp getStartAt() {
         return startAt;
@@ -134,5 +132,23 @@ public class ClassModel {
         map.put("startAt", startAt);
         map.put("endAt", endAt);
         return map;
+    }
+
+    @Override
+    public String toString() {
+        return "ClassModel{" +
+                "id='" + id + '\'' +
+                ", creatorUid='" + creatorUid + '\'' +
+                ", instructorUid='" + instructorUid + '\'' +
+                ", capacity=" + capacity +
+                ", duration=" + duration +
+                ", price=" + price +
+                ", type='" + type + '\'' +
+                ", status='" + status + '\'' +
+                ", description='" + description + '\'' +
+                ", createdAt=" + createdAt +
+                ", startAt=" + startAt +
+                ", endAt=" + endAt +
+                '}';
     }
 }

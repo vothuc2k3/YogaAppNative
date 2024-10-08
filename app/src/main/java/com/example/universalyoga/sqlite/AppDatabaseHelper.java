@@ -17,6 +17,20 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             + "profileImage TEXT, "
             + "role TEXT)";
 
+    private static final String CREATE_TABLE_CLASS = "CREATE TABLE classes ("
+            + "id TEXT PRIMARY KEY, "
+            + "creatorUid TEXT, "
+            + "instructorUid TEXT, "
+            + "capacity INTEGER, "
+            + "duration INTEGER, "
+            + "price REAL, "
+            + "type TEXT, "
+            + "status TEXT, "
+            + "description TEXT, "
+            + "createdAt TEXT, "
+            + "startAt TEXT, "
+            + "endAt TEXT)";
+
     public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -24,11 +38,13 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_USERS);
+        db.execSQL(CREATE_TABLE_CLASS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS users");
+        db.execSQL("DROP TABLE IF EXISTS classes");
         onCreate(db);
     }
 }
