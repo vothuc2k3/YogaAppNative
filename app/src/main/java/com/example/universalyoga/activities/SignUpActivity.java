@@ -117,8 +117,6 @@ public class SignUpActivity extends AppCompatActivity {
                                         userDAO.addUser(userModel);
                                         Toast.makeText(SignUpActivity.this, "User data synced to Firestore and SQLite", Toast.LENGTH_SHORT).show();
 
-                                        SyncManager.startSync(this);
-
                                         Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                                         startActivity(intent);
                                         finish();

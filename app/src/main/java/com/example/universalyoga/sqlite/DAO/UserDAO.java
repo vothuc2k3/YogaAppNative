@@ -9,9 +9,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.AppDatabaseHelper;
 
-public class UserDAO {
-    public static final String TABLE_USER = "users";
+import java.util.ArrayList;
+import java.util.List;
 
+public class UserDAO {
+
+    public static final String TABLE_USER = "users";
     public static final String COLUMN_USER_ID = "uid";
     public static final String COLUMN_USER_NAME = "name";
     public static final String COLUMN_USER_EMAIL = "email";
@@ -19,15 +22,33 @@ public class UserDAO {
     public static final String COLUMN_USER_PROFILE_IMAGE = "profileImage";
     public static final String COLUMN_USER_ROLE = "role";
 
+    private final SQLiteOpenHelper dbHelper;
     private SQLiteDatabase db;
-    private SQLiteOpenHelper dbHelper;
 
     public UserDAO(Context context) {
         dbHelper = new AppDatabaseHelper(context);
-        db = dbHelper.getWritableDatabase();
+    }
+
+    private void openWritableDb() {
+        if (db == null || !db.isOpen()) {
+            db = dbHelper.getWritableDatabase();
+        }
+    }
+
+    private void openReadableDb() {
+        if (db == null || !db.isOpen()) {
+            db = dbHelper.getReadableDatabase();
+        }
+    }
+
+    public void close() {
+        if (db != null && db.isOpen()) {
+            db.close();
+        }
     }
 
     public long addUser(UserModel user) {
+        openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ID, user.getUid());
         values.put(COLUMN_USER_NAME, user.getName());
@@ -36,26 +57,33 @@ public class UserDAO {
         values.put(COLUMN_USER_PROFILE_IMAGE, user.getProfileImage());
         values.put(COLUMN_USER_ROLE, user.getRole());
 
-        return db.insert(TABLE_USER, null, values);
+        long result = db.insert(TABLE_USER, null, values);
+        close();
+        return result;
     }
 
     public UserModel getUserByUid(String uid) {
+        openReadableDb();
         Cursor cursor = db.query(TABLE_USER, null, COLUMN_USER_ID + "=?", new String[]{uid}, null, null, null);
+        UserModel user = null;
         if (cursor != null && cursor.moveToFirst()) {
-            UserModel user = new UserModel();
+            user = new UserModel();
             user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
             user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
             user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
             user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
             user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
             user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
-            cursor.close();
-            return user;
         }
-        return null;
+        if (cursor != null) {
+            cursor.close();
+        }
+        close();
+        return user;
     }
 
     public int updateUser(UserModel user) {
+        openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_NAME, user.getName());
         values.put(COLUMN_USER_EMAIL, user.getEmail());
@@ -63,26 +91,45 @@ public class UserDAO {
         values.put(COLUMN_USER_PROFILE_IMAGE, user.getProfileImage());
         values.put(COLUMN_USER_ROLE, user.getRole());
 
-        return db.update(TABLE_USER, values, COLUMN_USER_ID + "=?", new String[]{user.getUid()});
+        int rowsAffected = db.update(TABLE_USER, values, COLUMN_USER_ID + "=?", new String[]{user.getUid()});
+        close();
+        return rowsAffected;
     }
 
     public void deleteUser(String uid) {
+        openWritableDb();
         db.delete(TABLE_USER, COLUMN_USER_ID + "=?", new String[]{uid});
+        close();
     }
 
-    public UserModel getCurrentUser() {
+    public List<UserModel> getAllUsers() {
+        List<UserModel> userList = new ArrayList<>();
+
+        openReadableDb();
+
         Cursor cursor = db.query(TABLE_USER, null, null, null, null, null, null);
+
         if (cursor != null && cursor.moveToFirst()) {
-            UserModel user = new UserModel();
-            user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
-            user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
-            user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
-            user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
-            user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
-            user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
-            cursor.close();
-            return user;
+            do {
+                // Khởi tạo đối tượng UserModel và gán các giá trị từ cursor
+                UserModel user = new UserModel();
+                user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
+                user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
+                user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
+                user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
+                user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
+                user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
+
+                userList.add(user);
+            } while (cursor.moveToNext());
         }
-        return null;
+
+        if (cursor != null) {
+            cursor.close();
+        }
+        close();
+
+        return userList;
     }
+
 }

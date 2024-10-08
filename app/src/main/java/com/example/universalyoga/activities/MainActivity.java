@@ -15,12 +15,14 @@ import com.example.universalyoga.R;
 import com.example.universalyoga.fragments.FragmentHome;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
+import com.example.universalyoga.worker.SyncManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 
 import com.example.universalyoga.fragments.FragmentSearch;  // Import FragmentSearch
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,7 +38,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         userDAO = new UserDAO(this);
-        currentUser = userDAO.getCurrentUser();
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        UserModel currentUser = userDAO.getUserByUid(fbUser.getUid());
+
+        if (currentUser != null) {
+            SyncManager.startSyncing(this);
+        }
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -125,10 +132,6 @@ public class MainActivity extends AppCompatActivity {
     private void handleLogout() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         mAuth.signOut();
-        currentUser = userDAO.getCurrentUser();
-        if (currentUser != null) {
-            userDAO.deleteUser(currentUser.getUid());
-        }
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(MainActivity.this, SignInActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

@@ -5,12 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.example.universalyoga.models.ClassModel;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -176,6 +178,48 @@ public class ClassDAO extends SQLiteOpenHelper {
                 classList.add(classModel);
             } while (cursor.moveToNext());
         }
+
+        cursor.close();
+        db.close();
+        return classList;
+    }
+
+    public List<ClassModel> searchClassesByName(String query) {
+        List<ClassModel> classList = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sqlQuery = "SELECT * FROM " + TABLE_CLASSES + " WHERE " + COLUMN_TYPE + " LIKE ?";
+        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                ClassModel classModel = new ClassModel();
+                classModel.setId(cursor.getString(cursor.getColumnIndex(COLUMN_ID)));
+                classModel.setCreatorUid(cursor.getString(cursor.getColumnIndex(COLUMN_CREATOR_UID)));
+                classModel.setInstructorUid(cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_UID)));
+                classModel.setCapacity(cursor.getInt(cursor.getColumnIndex(COLUMN_CAPACITY)));
+                classModel.setDuration(cursor.getInt(cursor.getColumnIndex(COLUMN_DURATION)));
+                classModel.setPrice(cursor.getDouble(cursor.getColumnIndex(COLUMN_PRICE)));
+                classModel.setType(cursor.getString(cursor.getColumnIndex(COLUMN_TYPE)));
+                classModel.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
+                classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
+
+                // Convert TEXT to Firebase Timestamp for startAt and endAt
+                String startAtString = cursor.getString(cursor.getColumnIndex(COLUMN_START_AT));
+                classModel.setStartAt(Util.convertStringToTimestamp(startAtString));
+
+                String endAtString = cursor.getString(cursor.getColumnIndex(COLUMN_END_AT));
+                classModel.setEndAt(Util.convertStringToTimestamp(endAtString));
+
+                // Convert TEXT to Firebase Timestamp for createdAt
+                String createdAtString = cursor.getString(cursor.getColumnIndex(COLUMN_CREATED_AT));
+                classModel.setCreatedAt(Util.convertStringToTimestamp(createdAtString));
+
+                classList.add(classModel);
+            } while (cursor.moveToNext());
+        }
+
+        Log.d("Class Searching Query", String.valueOf(classList.size()));
 
         cursor.close();
         db.close();

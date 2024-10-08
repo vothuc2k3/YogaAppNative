@@ -1,14 +1,18 @@
 package com.example.universalyoga.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassModel;
+import com.example.universalyoga.models.UserModel;
+import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
@@ -18,9 +22,11 @@ import java.util.Locale;
 public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHolder> {
 
     private List<ClassModel> classList;
+    private Context context;
 
-    public ClassAdapter(List<ClassModel> classList) {
+    public ClassAdapter(List<ClassModel> classList, Context context) {
         this.classList = classList;
+        this.context = context;
     }
 
     @NonNull
@@ -32,13 +38,18 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
     @Override
     public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
+        UserDAO userDAO = new UserDAO(this.context);
+
         ClassModel classModel = classList.get(position);
+
+        UserModel instructorModel = userDAO.getUserByUid(classModel.getInstructorUid());
 
         holder.classNameTextView.setText(classModel.getType());
 
         holder.classDescriptionTextView.setText(classModel.getDescription());
 
-        holder.instructorTextView.setText("Instructor: " + classModel.getInstructorUid());
+
+        holder.instructorTextView.setText("Instructor: " + instructorModel.getName());
 
         holder.capacityTextView.setText("Capacity: " + classModel.getCapacity());
 
@@ -61,10 +72,17 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         return classList.size();
     }
 
+    public void updateData(List<ClassModel> newClassList) {
+        this.classList.clear();
+        this.classList.addAll(newClassList);
+        notifyDataSetChanged();
+    }
+
     public void updateClassList(List<ClassModel> newClassList) {
         this.classList = newClassList;
         notifyDataSetChanged();
     }
+
 
     public static class ClassViewHolder extends RecyclerView.ViewHolder {
         TextView classNameTextView;

@@ -22,6 +22,8 @@ import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.example.universalyoga.worker.SyncManager;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Calendar;
 import java.util.UUID;
@@ -109,7 +111,8 @@ public class AddClassActivity extends AppCompatActivity {
             return;
         }
 
-        UserModel currentUser = userDAO.getCurrentUser();
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        UserModel currentUser = userDAO.getUserByUid(fbUser.getUid());
 
         ClassModel newClass = new ClassModel();
 
@@ -134,14 +137,11 @@ public class AddClassActivity extends AppCompatActivity {
         Timestamp endTimestamp = new Timestamp(startCalendar.getTime());
         newClass.setEndAt(endTimestamp);
 
-        Log.d("Class: ",newClass.toString());
+        Log.d("Class: ", newClass.toString());
 
-        boolean result = classDAO.addClass(newClass);
+        classDAO.addClass(newClass);
 
-        Toast.makeText(this, String.valueOf(result), Toast.LENGTH_SHORT).show();
-
-        SyncManager.startSync(this);
-
+        Toast.makeText(this, "New Class Added!", Toast.LENGTH_SHORT).show();
         finish();
 
     }
