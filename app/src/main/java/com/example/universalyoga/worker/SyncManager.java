@@ -1,6 +1,7 @@
 package com.example.universalyoga.worker;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
@@ -13,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 public class SyncManager {
 
+    private static String TAG = "SyncManager";
+
     public static void startSyncing(Context context) {
         Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
 
@@ -21,5 +24,7 @@ public class SyncManager {
                 .build();
 
         WorkManager.getInstance(context).enqueue(syncRequest);
+
+        Log.d(TAG, "Started syncing!");
     }
 }

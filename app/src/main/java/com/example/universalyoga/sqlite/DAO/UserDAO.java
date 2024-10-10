@@ -132,4 +132,26 @@ public class UserDAO {
         return userList;
     }
 
+    public List<UserModel> searchUsersByName(String nameQuery) {
+        openReadableDb();
+        List<UserModel> userList = new ArrayList<>();
+        String query = "SELECT * FROM " + TABLE_USER + " WHERE " + COLUMN_USER_NAME + " LIKE ?";
+        Cursor cursor = db.rawQuery(query, new String[]{"%" + nameQuery + "%"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                UserModel user = new UserModel();
+                user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
+                user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
+                user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
+                user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
+                user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
+                user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
+                userList.add(user);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        close();
+        return userList;
+    }
 }

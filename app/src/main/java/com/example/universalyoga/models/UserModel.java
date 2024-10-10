@@ -1,9 +1,10 @@
 package com.example.universalyoga.models;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UserModel {
+public class UserModel implements Serializable {
     private String uid;
     private String name;
     private String email;

@@ -76,11 +76,10 @@ public class SyncWorker extends Worker {
         for (ClassModel localClass : localClasses) {
             db.collection(CLASSES_COLLECTION)
                     .document(localClass.getId())
-                    .set(localClass)
+                    .set(localClass.toMap())
                     .addOnSuccessListener(aVoid -> Log.d(TAG, "Class uploaded to Firestore: " + localClass.getId()))
                     .addOnFailureListener(e -> Log.e(TAG, "Failed to upload class to Firestore", e));
         }
-
         List<UserModel> localUsers = userDAO.getAllUsers();
         for (UserModel localUser : localUsers) {
             db.collection(USERS_COLLECTION)

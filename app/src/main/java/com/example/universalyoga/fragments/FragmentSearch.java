@@ -47,6 +47,9 @@ public class FragmentSearch extends Fragment {
 
         classDAO = new ClassDAO(getContext());
 
+        searchView.setIconified(false);
+        searchView.requestFocus();
+
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         classAdapter = new ClassAdapter(new ArrayList<>(), getContext());
         recyclerView.setAdapter(classAdapter);

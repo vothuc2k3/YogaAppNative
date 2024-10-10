@@ -1,5 +1,6 @@
 package com.example.universalyoga.activities;
 
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -20,7 +21,6 @@ import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
-import com.example.universalyoga.worker.SyncManager;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -46,12 +46,14 @@ public class AddClassActivity extends AppCompatActivity {
         userDAO = new UserDAO(this);
         classDAO = new ClassDAO(this);
 
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("User Management");
         }
+
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
 
         Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_back_arrow);
         drawable.setBounds(0, 0, 60, 60);
@@ -71,9 +73,38 @@ public class AddClassActivity extends AppCompatActivity {
         inputClassDescription = findViewById(R.id.input_class_description);
         btnSubmitClass = findViewById(R.id.btn_submit_class);
 
-        inputClassStartTime.setOnClickListener(v -> showTimePickerDialog());
+        // Thiết lập sự kiện click cho EditText chọn ngày giờ
+        inputClassStartTime.setOnClickListener(v -> showDatePickerDialog());
 
         btnSubmitClass.setOnClickListener(v -> createClass());
+    }
+
+    private void showDatePickerDialog() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        // Ngày hiện tại
+        long today = calendar.getTimeInMillis();
+
+        // Ngày tối đa là 7 ngày sau
+        calendar.add(Calendar.DAY_OF_MONTH, 7);
+        long maxDate = calendar.getTimeInMillis();
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, selectedYear, selectedMonth, selectedDay) -> {
+            // Lưu trữ ngày đã chọn và hiển thị trên EditText
+            String selectedDate = String.format("%02d/%02d/%d", selectedDay, selectedMonth + 1, selectedYear);
+            inputClassStartTime.setText(selectedDate);
+            // Gọi phương thức để hiển thị TimePicker
+            showTimePickerDialog();
+        }, year, month, day);
+
+        // Thiết lập ngày tối thiểu và tối đa
+        datePickerDialog.getDatePicker().setMinDate(today);
+        datePickerDialog.getDatePicker().setMaxDate(maxDate);
+
+        datePickerDialog.show();
     }
 
     private void showTimePickerDialog() {
@@ -84,8 +115,10 @@ public class AddClassActivity extends AppCompatActivity {
         TimePickerDialog timePickerDialog = new TimePickerDialog(this, (view, hourOfDay, minuteOfHour) -> {
             startHour = hourOfDay;
             startMinute = minuteOfHour;
-            inputClassStartTime.setText(String.format("%02d:%02d", startHour, startMinute));
+            // Hiển thị thời gian đã chọn
+            inputClassStartTime.append(String.format(" %02d:%02d", startHour, startMinute));
         }, hour, minute, true);
+
         timePickerDialog.show();
     }
 
@@ -123,12 +156,17 @@ public class AddClassActivity extends AppCompatActivity {
         newClass.setStatus("open");
         newClass.setCapacity(classCapacity);
         newClass.setDuration(Integer.parseInt(classDuration));
-        newClass.setPrice(Double.parseDouble(classPrice));
+        newClass.setPrice(Integer.parseInt(classPrice));
         newClass.setDescription(classDescription);
 
+        String[] dateTime = inputClassStartTime.getText().toString().split(" ");
+        String[] dateParts = dateTime[0].split("/");
+        int selectedDay = Integer.parseInt(dateParts[0]);
+        int selectedMonth = Integer.parseInt(dateParts[1]) - 1; // Tháng bắt đầu từ 0
+        int selectedYear = Integer.parseInt(dateParts[2]);
+
         Calendar startCalendar = Calendar.getInstance();
-        startCalendar.set(Calendar.HOUR_OF_DAY, startHour);
-        startCalendar.set(Calendar.MINUTE, startMinute);
+        startCalendar.set(selectedYear, selectedMonth, selectedDay, startHour, startMinute);
         Timestamp startTimestamp = new Timestamp(startCalendar.getTime());
         newClass.setStartAt(startTimestamp);
 
@@ -143,6 +181,5 @@ public class AddClassActivity extends AppCompatActivity {
 
         Toast.makeText(this, "New Class Added!", Toast.LENGTH_SHORT).show();
         finish();
-
     }
 }

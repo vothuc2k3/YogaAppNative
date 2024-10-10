@@ -11,7 +11,7 @@ public class ClassModel {
     private String instructorUid;
     private int capacity;
     private int duration;
-    private double price;
+    private int price;
     private String type;
     private String status;
     private String description;
@@ -63,11 +63,11 @@ public class ClassModel {
         this.duration = duration;
     }
 
-    public double getPrice() {
+    public int getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(int price) {
         this.price = price;
     }
 

@@ -12,7 +12,6 @@ import com.example.universalyoga.models.ClassModel;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,7 +30,7 @@ public class ClassDAO extends SQLiteOpenHelper {
     private static final String COLUMN_INSTRUCTOR_UID = "instructorUid";
     private static final String COLUMN_CAPACITY = "capacity";
     private static final String COLUMN_DURATION = "duration";
-    private static final String COLUMN_PRICE = "price";
+    private static final String COLUMN_PRICE = "price"; // Trường giá đã chuyển sang int
     private static final String COLUMN_TYPE = "type";
     private static final String COLUMN_DESCRIPTION = "description";
     private static final String COLUMN_STATUS = "status";
@@ -53,7 +52,7 @@ public class ClassDAO extends SQLiteOpenHelper {
                 + COLUMN_INSTRUCTOR_UID + " TEXT, "
                 + COLUMN_CAPACITY + " INTEGER, "
                 + COLUMN_DURATION + " INTEGER, "
-                + COLUMN_PRICE + " REAL, "
+                + COLUMN_PRICE + " INTEGER, " // Thay đổi ở đây: giá đã thành int
                 + COLUMN_TYPE + " TEXT, "
                 + COLUMN_DESCRIPTION + " TEXT, "
                 + COLUMN_STATUS + " TEXT, "
@@ -79,7 +78,7 @@ public class ClassDAO extends SQLiteOpenHelper {
         values.put(COLUMN_INSTRUCTOR_UID, classModel.getInstructorUid());
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
-        values.put(COLUMN_PRICE, classModel.getPrice());
+        values.put(COLUMN_PRICE, classModel.getPrice()); // Chỉ định giá như int
         values.put(COLUMN_TYPE, classModel.getType());
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
@@ -105,7 +104,7 @@ public class ClassDAO extends SQLiteOpenHelper {
             classModel.setInstructorUid(cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_UID)));
             classModel.setCapacity(cursor.getInt(cursor.getColumnIndex(COLUMN_CAPACITY)));
             classModel.setDuration(cursor.getInt(cursor.getColumnIndex(COLUMN_DURATION)));
-            classModel.setPrice(cursor.getDouble(cursor.getColumnIndex(COLUMN_PRICE)));
+            classModel.setPrice(cursor.getInt(cursor.getColumnIndex(COLUMN_PRICE))); // Nhận giá như int
             classModel.setType(cursor.getString(cursor.getColumnIndex(COLUMN_TYPE)));
             classModel.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
             classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
@@ -139,7 +138,6 @@ public class ClassDAO extends SQLiteOpenHelper {
         return result > 0;
     }
 
-    // Delete a class by ID
     public boolean deleteClass(String classId) {
         SQLiteDatabase db = this.getWritableDatabase();
         int result = db.delete(TABLE_CLASSES, COLUMN_ID + "=?", new String[]{classId});
@@ -147,6 +145,7 @@ public class ClassDAO extends SQLiteOpenHelper {
         return result > 0;
     }
 
+    // Retrieve all classes
     public List<ClassModel> getAllClasses() {
         List<ClassModel> classList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -160,7 +159,7 @@ public class ClassDAO extends SQLiteOpenHelper {
                 classModel.setInstructorUid(cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_UID)));
                 classModel.setCapacity(cursor.getInt(cursor.getColumnIndex(COLUMN_CAPACITY)));
                 classModel.setDuration(cursor.getInt(cursor.getColumnIndex(COLUMN_DURATION)));
-                classModel.setPrice(cursor.getDouble(cursor.getColumnIndex(COLUMN_PRICE)));
+                classModel.setPrice(cursor.getInt(cursor.getColumnIndex(COLUMN_PRICE))); // Nhận giá như int
                 classModel.setType(cursor.getString(cursor.getColumnIndex(COLUMN_TYPE)));
                 classModel.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
                 classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
@@ -184,6 +183,7 @@ public class ClassDAO extends SQLiteOpenHelper {
         return classList;
     }
 
+    // Search classes by name
     public List<ClassModel> searchClassesByName(String query) {
         List<ClassModel> classList = new ArrayList<>();
 
@@ -199,32 +199,27 @@ public class ClassDAO extends SQLiteOpenHelper {
                 classModel.setInstructorUid(cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_UID)));
                 classModel.setCapacity(cursor.getInt(cursor.getColumnIndex(COLUMN_CAPACITY)));
                 classModel.setDuration(cursor.getInt(cursor.getColumnIndex(COLUMN_DURATION)));
-                classModel.setPrice(cursor.getDouble(cursor.getColumnIndex(COLUMN_PRICE)));
+                classModel.setPrice(cursor.getInt(cursor.getColumnIndex(COLUMN_PRICE))); // Nhận giá như int
                 classModel.setType(cursor.getString(cursor.getColumnIndex(COLUMN_TYPE)));
                 classModel.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
                 classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
 
-                // Convert TEXT to Firebase Timestamp for startAt and endAt
+                // Convert TEXT from SQLite back to Firebase Timestamp
+                String createdAtString = cursor.getString(cursor.getColumnIndex(COLUMN_CREATED_AT));
+                classModel.setCreatedAt(Util.convertStringToTimestamp(createdAtString));
+
                 String startAtString = cursor.getString(cursor.getColumnIndex(COLUMN_START_AT));
                 classModel.setStartAt(Util.convertStringToTimestamp(startAtString));
 
                 String endAtString = cursor.getString(cursor.getColumnIndex(COLUMN_END_AT));
                 classModel.setEndAt(Util.convertStringToTimestamp(endAtString));
 
-                // Convert TEXT to Firebase Timestamp for createdAt
-                String createdAtString = cursor.getString(cursor.getColumnIndex(COLUMN_CREATED_AT));
-                classModel.setCreatedAt(Util.convertStringToTimestamp(createdAtString));
-
                 classList.add(classModel);
             } while (cursor.moveToNext());
         }
-
-        Log.d("Class Searching Query", String.valueOf(classList.size()));
 
         cursor.close();
         db.close();
         return classList;
     }
-
-
 }

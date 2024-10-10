@@ -43,6 +43,8 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.workmanager)
     implementation(libs.coordinatorlayout)
+    implementation(libs.picasso)
+    implementation(libs.swipeRefresh)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

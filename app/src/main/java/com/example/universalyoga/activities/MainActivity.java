@@ -20,14 +20,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
-
 import com.example.universalyoga.fragments.FragmentSearch;  // Import FragmentSearch
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
-    private NavigationView endDrawer;
+    private NavigationView navigationView;
     private ActionBarDrawerToggle toggle;
     private UserModel currentUser;
     private UserDAO userDAO;
@@ -69,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        NavigationView navigationView = findViewById(R.id.end_drawer);
+        navigationView = findViewById(R.id.end_drawer);
         View headerView = navigationView.getHeaderView(0);
         TextView nameTextView = headerView.findViewById(R.id.profile_name);
         TextView emailTextView = headerView.findViewById(R.id.profile_email);
@@ -81,9 +80,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout);
-        endDrawer = findViewById(R.id.end_drawer);
 
-        endDrawer.setNavigationItemSelectedListener(item -> {
+        navigationView.setNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_logout) {
                 handleLogout();
             }
@@ -139,4 +137,3 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 }
-

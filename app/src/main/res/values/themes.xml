@@ -1,9 +1,42 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.UniversalYoga" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorOnPrimary">@color/textOnPrimary</item>
+
+        <item name="android:colorBackground">@color/backgroundLight</item>
+        <item name="colorOnBackground">@color/textPrimary</item>
+        <item name="colorSurface">@color/white</item>
+
+        <item name="colorError">@color/colorError</item>
+        <item name="colorOnError">@color/white</item>
+
+        <item name="android:navigationBarColor">@color/navBarColor</item>
+
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:fontFamily">sans-serif</item>
+
+        <item name="buttonStyle">@style/Widget.Button</item>
+
+        <item name="android:divider">@color/dividerColor</item>
     </style>
 
-    <style name="Theme.UniversalYoga" parent="Base.Theme.UniversalYoga" />
+    <!-- Light theme variant -->
+    <style name="Theme.UniversalYoga" parent="Base.Theme.UniversalYoga">
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:colorBackground">@color/backgroundLight</item>
+    </style>
+
+    <!-- Dark theme variant -->
+    <style name="Theme.UniversalYoga.Dark" parent="Base.Theme.UniversalYoga">
+        <item name="android:colorBackground">@color/backgroundDark</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Widget.Button" parent="Widget.Material3.Button">
+        <item name="android:background">@drawable/rounded_bg</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
 </resources>

@@ -95,14 +95,19 @@ public class SignInActivity extends AppCompatActivity {
                                             if (document != null && document.exists()) {
                                                 UserModel userModel = document.toObject(UserModel.class);
                                                 if (userModel != null) {
-                                                    boolean isUserStored = userDAO.getUserByUid(userModel.getUid()) != null;
-                                                    if (!isUserStored) {
-                                                        userDAO.addUser(userModel);
+                                                    String role = userModel.getRole();
+                                                    if (role.equals("admin") || role.equals("instructor")) {
+                                                        boolean isUserStored = userDAO.getUserByUid(userModel.getUid()) != null;
+                                                        if (!isUserStored) {
+                                                            userDAO.addUser(userModel);
+                                                        }
+                                                        Toast.makeText(SignInActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                                                        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                                                        startActivity(intent);
+                                                        finish();
+                                                    } else {
+                                                        Toast.makeText(SignInActivity.this, "Access denied", Toast.LENGTH_SHORT).show();
                                                     }
-                                                    Toast.makeText(SignInActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                                                    Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-                                                    startActivity(intent);
-                                                    finish();
                                                 } else {
                                                     Toast.makeText(SignInActivity.this, "User data conversion failed.", Toast.LENGTH_SHORT).show();
                                                 }
@@ -122,5 +127,6 @@ public class SignInActivity extends AppCompatActivity {
                     }
                 });
     }
+
 }
 
