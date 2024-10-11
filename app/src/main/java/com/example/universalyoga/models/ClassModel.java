@@ -1,27 +1,45 @@
 package com.example.universalyoga.models;
 
-import com.google.firebase.Timestamp;
-
+import java.sql.Time;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ClassModel {
-    private String id;
-    private String creatorUid;
-    private String instructorUid;
-    private int capacity;
-    private int duration;
-    private int price;
-    private String type;
-    private String status;
-    private String description;
-    private Timestamp createdAt;
-    private Timestamp startAt;
-    private Timestamp endAt;
+    private String id; // id of the class
+    private String instructorUid; // uid of the instructor
+    private String dayOfWeek; // monday, tuesday, etc.
+    private Time timeStart; // 11h, 12h, etc.
+    private int capacity; // 15, 20, 25, etc.
+    private int duration; // 1h, 2h, etc.
+    private int price; // 10, 20, 30, etc.
+    private String type; // yoga, pilates, etc.
+    private String status; // active, inactive, etc.
+    private String description; // description of the class
+    private long createdAt; // epoch time
+    private long startAt; // epoch time
+    private long endAt; // epoch time
 
     public ClassModel() {
-        this.createdAt = Timestamp.now();
+        this.createdAt = System.currentTimeMillis();
     }
+
+    public ClassModel(String id, String instructorUid, String dayOfWeek, Time timeStart, int capacity, int duration, int price, String type, String status, String description, long startAt, long endAt) {
+        this.id = id;
+        this.instructorUid = instructorUid;
+        this.dayOfWeek = dayOfWeek;
+        this.timeStart = timeStart;
+        this.capacity = capacity;
+        this.duration = duration;
+        this.price = price;
+        this.type = type;
+        this.status = status;
+        this.description = description; // Đảm bảo trường này không bị bỏ sót
+        this.createdAt = System.currentTimeMillis();
+        this.startAt = startAt;
+        this.endAt = endAt;
+    }
+
+    // Getters và Setters
 
     public String getId() {
         return id;
@@ -31,16 +49,8 @@ public class ClassModel {
         this.id = id;
     }
 
-    public String getCreatorUid() {
-        return creatorUid;
-    }
-
-    public void setCreatorUid(String creatorUid) {
-        this.creatorUid = creatorUid;
-    }
-
     public String getInstructorUid() {
-        return instructorUid;
+        return this.instructorUid;
     }
 
     public void setInstructorUid(String instructorUid) {
@@ -95,39 +105,57 @@ public class ClassModel {
         this.status = status;
     }
 
-    public Timestamp getCreatedAt() {
+    public long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp timestamp){this.createdAt = timestamp;}
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
+    }
 
-    public Timestamp getStartAt() {
+    public long getStartAt() {
         return startAt;
     }
 
-    public void setStartAt(Timestamp startAt) {
+    public void setStartAt(long startAt) {
         this.startAt = startAt;
     }
 
-    public Timestamp getEndAt() {
+    public long getEndAt() {
         return endAt;
     }
 
-    public void setEndAt(Timestamp endAt) {
+    public void setEndAt(long endAt) {
         this.endAt = endAt;
     }
 
+    public String getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public void setDayOfWeek(String dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
+    }
+
+    public Time getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(Time timeStart) {
+        this.timeStart = timeStart;
+    }
+
+    // Chuyển đổi đối tượng thành map để lưu trữ trong Firestore
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
-        map.put("creatorUid", creatorUid);
         map.put("instructorUid", instructorUid);
         map.put("capacity", capacity);
         map.put("duration", duration);
         map.put("price", price);
         map.put("type", type);
         map.put("status", status);
-        map.put("description", description);
+        map.put("description", description); // Đảm bảo trường description có mặt trong map
         map.put("createdAt", createdAt);
         map.put("startAt", startAt);
         map.put("endAt", endAt);
@@ -138,14 +166,12 @@ public class ClassModel {
     public String toString() {
         return "ClassModel{" +
                 "id='" + id + '\'' +
-                ", creatorUid='" + creatorUid + '\'' +
-                ", instructorUid='" + instructorUid + '\'' +
                 ", capacity=" + capacity +
                 ", duration=" + duration +
                 ", price=" + price +
                 ", type='" + type + '\'' +
                 ", status='" + status + '\'' +
-                ", description='" + description + '\'' +
+                ", description='" + description + '\'' + // Bảo đảm không bỏ sót description
                 ", createdAt=" + createdAt +
                 ", startAt=" + startAt +
                 ", endAt=" + endAt +

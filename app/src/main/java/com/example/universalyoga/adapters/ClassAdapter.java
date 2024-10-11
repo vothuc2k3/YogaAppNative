@@ -13,9 +13,9 @@ import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
-import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -23,17 +23,19 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
     private List<ClassModel> classList;
     private Context context;
+    private OnItemClickListener onItemClickListener;
 
-    public ClassAdapter(List<ClassModel> classList, Context context) {
+    public ClassAdapter(List<ClassModel> classList, Context context, OnItemClickListener onItemClickListener) {
         this.classList = classList;
         this.context = context;
+        this.onItemClickListener = onItemClickListener;
     }
 
     @NonNull
     @Override
     public ClassViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_class, parent, false);
-        return new ClassViewHolder(view);
+        return new ClassViewHolder(view, onItemClickListener);
     }
 
     @Override
@@ -48,23 +50,27 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
         holder.classDescriptionTextView.setText(classModel.getDescription());
 
-
         holder.instructorTextView.setText("Instructor: " + instructorModel.getName());
 
         holder.capacityTextView.setText("Capacity: " + classModel.getCapacity());
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
-        if (classModel.getStartAt() != null) {
-            Timestamp startAt = classModel.getStartAt();
-            holder.startTimeTextView.setText("Start: " + sdf.format(startAt.toDate()));
+
+        if (classModel.getStartAt() > 0) {  // Kiểm tra nếu startAt hợp lệ
+            holder.startTimeTextView.setText("Start: " + sdf.format(new Date(classModel.getStartAt())));
         } else {
             holder.startTimeTextView.setText("Start: N/A");
         }
 
         holder.durationTextView.setText("Duration: " + classModel.getDuration() + " minutes");
 
-        // Hiển thị giá tiền (price)
         holder.priceTextView.setText("Price: $" + classModel.getPrice());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(classModel);
+            }
+        });
     }
 
     @Override
@@ -83,7 +89,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         notifyDataSetChanged();
     }
 
-
     public static class ClassViewHolder extends RecyclerView.ViewHolder {
         TextView classNameTextView;
         TextView classDescriptionTextView;
@@ -93,7 +98,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         TextView durationTextView;
         TextView priceTextView;
 
-        public ClassViewHolder(@NonNull View itemView) {
+        public ClassViewHolder(@NonNull View itemView, OnItemClickListener onItemClickListener) {
             super(itemView);
             classNameTextView = itemView.findViewById(R.id.class_name);
             classDescriptionTextView = itemView.findViewById(R.id.class_description);
@@ -103,5 +108,9 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             durationTextView = itemView.findViewById(R.id.duration_value);
             priceTextView = itemView.findViewById(R.id.price_value);
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(ClassModel classModel);
     }
 }

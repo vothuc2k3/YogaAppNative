@@ -82,4 +82,15 @@ public class UserModel implements Serializable {
         userMap.put("role", role);
         return userMap;
     }
+
+    public UserModel fromMap(Map<String, Object> map) {
+        UserModel user = new UserModel();
+        user.setUid((String) map.get("uid"));
+        user.setName((String) map.get("name"));
+        user.setEmail((String) map.get("email"));
+        user.setPhoneNumber((String) map.get("phoneNumber"));
+        user.setProfileImage((String) map.get("profileImage"));
+        user.setRole((String) map.get("role"));
+        return user;
+    }
 }

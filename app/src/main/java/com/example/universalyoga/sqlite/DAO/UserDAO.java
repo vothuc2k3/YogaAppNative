@@ -154,4 +154,31 @@ public class UserDAO {
         close();
         return userList;
     }
+
+    public List<UserModel> getAllInstructors() {
+        openReadableDb();
+        List<UserModel> instructorList = new ArrayList<>();
+        String query = "SELECT * FROM " + TABLE_USER + " WHERE " + COLUMN_USER_ROLE + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{"instructor"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                UserModel instructor = new UserModel();
+                instructor.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
+                instructor.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
+                instructor.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
+                instructor.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
+                instructor.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
+                instructor.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
+                instructorList.add(instructor);
+            } while (cursor.moveToNext());
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+        close();
+        return instructorList;
+    }
+
 }

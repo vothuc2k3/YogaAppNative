@@ -17,7 +17,7 @@ import com.example.universalyoga.activities.AddClassActivity;
 import com.example.universalyoga.activities.UserManagementActivity;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 
-public class FragmentHome extends Fragment {
+public class HomeFragment extends Fragment {
 
     private TextView totalClassesTextView;
     private TextView totalBookingsTextView;
@@ -50,8 +50,6 @@ public class FragmentHome extends Fragment {
             startActivity(intent);
         });
 
-        view.findViewById(R.id.btn_search_class).setOnClickListener(v -> {
-        });
 
         view.findViewById(R.id.btn_user_management).setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), UserManagementActivity.class);

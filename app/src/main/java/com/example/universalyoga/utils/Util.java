@@ -22,6 +22,7 @@ public class Util {
         }
     }
 
+
     public static String capitalizeFirstLetter(String input) {
         if (input == null || input.isEmpty()) {
             return input;

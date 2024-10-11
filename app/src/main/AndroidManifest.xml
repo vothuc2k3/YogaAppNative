@@ -42,5 +42,9 @@
             android:name=".activities.UserDetailActivity"
             android:exported="true" />
 
+        <activity
+            android:name=".activities.ClassDetailsActivity"
+            android:exported="true" />
+
     </application>
 </manifest>

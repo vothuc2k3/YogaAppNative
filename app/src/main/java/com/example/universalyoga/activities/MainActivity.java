@@ -12,7 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.example.universalyoga.R;
-import com.example.universalyoga.fragments.FragmentHome;
+import com.example.universalyoga.fragments.HomeFragment;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.example.universalyoga.worker.SyncManager;
@@ -20,7 +20,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
-import com.example.universalyoga.fragments.FragmentSearch;  // Import FragmentSearch
+import com.example.universalyoga.fragments.SearchFragment;  // Import FragmentSearch
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new FragmentHome())
+                    .replace(R.id.fragment_container, new HomeFragment())
                     .commit();
         }
 
@@ -57,11 +57,11 @@ public class MainActivity extends AppCompatActivity {
 
             if (itemId == R.id.nav_home) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new FragmentHome())
+                        .replace(R.id.fragment_container, new HomeFragment())
                         .commit();
             } else if (itemId == R.id.nav_search) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new FragmentSearch())
+                        .replace(R.id.fragment_container, new SearchFragment())
                         .commit();
             } else if (itemId == R.id.nav_profile) {
             }

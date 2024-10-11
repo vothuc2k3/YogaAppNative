@@ -110,12 +110,12 @@
                 app:cornerRadius="16dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_search_class"
+                android:id="@+id/btn_class_management"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:backgroundTint="@color/colorPrimary"
-                android:text="Search Classes"
+                android:text="Classes Management"
                 android:textColor="@android:color/white"
                 app:cornerRadius="16dp" />
         </LinearLayout>

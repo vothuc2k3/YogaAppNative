@@ -7,4 +7,18 @@
         <item>Aerial Yoga</item>
         <item>Family Yoga</item>
     </string-array>
+    <string-array name="dummy_instructor_array">
+        <item>Instructor 1</item>
+        <item>Instructor 2</item>
+        <item>Instructor 3</item>
+    </string-array>
+    <string-array name="days_of_week_array">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
 </resources>
