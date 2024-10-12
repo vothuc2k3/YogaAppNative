@@ -64,23 +64,31 @@ public class UserDAO {
 
     public UserModel getUserByUid(String uid) {
         openReadableDb();
-        Cursor cursor = db.query(TABLE_USER, null, COLUMN_USER_ID + "=?", new String[]{uid}, null, null, null);
+        Cursor cursor = null;
         UserModel user = null;
-        if (cursor != null && cursor.moveToFirst()) {
-            user = new UserModel();
-            user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
-            user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
-            user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
-            user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
-            user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
-            user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
+        try {
+            cursor = db.query(TABLE_USER, null, COLUMN_USER_ID + "=?", new String[]{uid}, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                user = new UserModel();
+                user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
+                user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
+                user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
+                user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
+                user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
+                user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+            close();
         }
-        if (cursor != null) {
-            cursor.close();
-        }
-        close();
         return user;
     }
+
 
     public int updateUser(UserModel user) {
         openWritableDb();

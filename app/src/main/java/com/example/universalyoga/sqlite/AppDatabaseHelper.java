@@ -7,8 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "yoga_app.db";
-    private static final int DATABASE_VERSION = 1; // Tăng version để trigger onUpgrade
-
+    private static final int DATABASE_VERSION = 1;
     private static final String CREATE_TABLE_USERS = "CREATE TABLE users ("
             + "uid TEXT PRIMARY KEY, "
             + "name TEXT, "
@@ -17,7 +16,6 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             + "profileImage TEXT, "
             + "role TEXT)";
 
-    // Bảng lớp học (classes)
     private static final String CREATE_TABLE_CLASS = "CREATE TABLE classes ("
             + "id TEXT PRIMARY KEY, "
             + "instructorUid TEXT, "
@@ -25,20 +23,21 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             + "timeStart TEXT, "
             + "capacity INTEGER, "
             + "duration INTEGER, "
-            + "price INTEGER, "
+            + "sessionCount INTEGER, "
             + "type TEXT, "
             + "status TEXT, "
             + "description TEXT, "
-            + "createdAt INTEGER, "  // Lưu trữ dưới dạng INTEGER (long)
-            + "startAt INTEGER, "    // Lưu trữ dưới dạng INTEGER (long)
-            + "endAt INTEGER)";      // Lưu trữ dưới dạng INTEGER (long)
+            + "createdAt INTEGER, "
+            + "startAt INTEGER, "
+            + "endAt INTEGER)";
 
-    // Bảng phiên học (class sessions)
     private static final String CREATE_TABLE_CLASS_SESSION = "CREATE TABLE class_sessions ("
             + "id TEXT PRIMARY KEY, "
             + "classId TEXT, "
-            + "startAt INTEGER, "  // Lưu trữ dưới dạng INTEGER (long)
-            + "endAt INTEGER, "    // Lưu trữ dưới dạng INTEGER (long)
+            + "instructorId TEXT, "
+            + "date INTEGER, "
+            + "price INTEGER, "
+            + "room TEXT, "
             + "note TEXT, "
             + "FOREIGN KEY (classId) REFERENCES classes(id))";
 
@@ -55,7 +54,6 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Xóa bảng cũ và tạo bảng mới khi có sự thay đổi version
         db.execSQL("DROP TABLE IF EXISTS users");
         db.execSQL("DROP TABLE IF EXISTS classes");
         db.execSQL("DROP TABLE IF EXISTS class_sessions");

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -43,20 +44,15 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         UserDAO userDAO = new UserDAO(this.context);
 
         ClassModel classModel = classList.get(position);
-
         UserModel instructorModel = userDAO.getUserByUid(classModel.getInstructorUid());
 
         holder.classNameTextView.setText(classModel.getType());
-
-        holder.classDescriptionTextView.setText(classModel.getDescription());
-
         holder.instructorTextView.setText("Instructor: " + instructorModel.getName());
-
         holder.capacityTextView.setText("Capacity: " + classModel.getCapacity());
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
 
-        if (classModel.getStartAt() > 0) {  // Kiểm tra nếu startAt hợp lệ
+        if (classModel.getStartAt() > 0) {
             holder.startTimeTextView.setText("Start: " + sdf.format(new Date(classModel.getStartAt())));
         } else {
             holder.startTimeTextView.setText("Start: N/A");
@@ -64,8 +60,14 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
         holder.durationTextView.setText("Duration: " + classModel.getDuration() + " minutes");
 
-        holder.priceTextView.setText("Price: $" + classModel.getPrice());
+        // Delete event
+        holder.btnDelete.setOnClickListener(v -> {
+            if (onItemClickListener != null) {
+                onItemClickListener.onDeleteClick(classModel);
+            }
+        });
 
+        // Item click event
         holder.itemView.setOnClickListener(v -> {
             if (onItemClickListener != null) {
                 onItemClickListener.onItemClick(classModel);
@@ -84,33 +86,27 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         notifyDataSetChanged();
     }
 
-    public void updateClassList(List<ClassModel> newClassList) {
-        this.classList = newClassList;
-        notifyDataSetChanged();
-    }
-
     public static class ClassViewHolder extends RecyclerView.ViewHolder {
         TextView classNameTextView;
-        TextView classDescriptionTextView;
         TextView instructorTextView;
         TextView capacityTextView;
         TextView startTimeTextView;
         TextView durationTextView;
-        TextView priceTextView;
+        Button btnDelete;
 
         public ClassViewHolder(@NonNull View itemView, OnItemClickListener onItemClickListener) {
             super(itemView);
             classNameTextView = itemView.findViewById(R.id.class_name);
-            classDescriptionTextView = itemView.findViewById(R.id.class_description);
             instructorTextView = itemView.findViewById(R.id.instructor_name);
             capacityTextView = itemView.findViewById(R.id.capacity_value);
             startTimeTextView = itemView.findViewById(R.id.start_time_value);
             durationTextView = itemView.findViewById(R.id.duration_value);
-            priceTextView = itemView.findViewById(R.id.price_value);
+            btnDelete = itemView.findViewById(R.id.btn_delete_class);
         }
     }
 
     public interface OnItemClickListener {
         void onItemClick(ClassModel classModel);
+        void onDeleteClick(ClassModel classModel);
     }
 }

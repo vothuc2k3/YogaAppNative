@@ -11,7 +11,7 @@ public class ClassModel {
     private Time timeStart; // 11h, 12h, etc.
     private int capacity; // 15, 20, 25, etc.
     private int duration; // 1h, 2h, etc.
-    private int price; // 10, 20, 30, etc.
+    private int sessionCount; // number of sessions of the class    
     private String type; // yoga, pilates, etc.
     private String status; // active, inactive, etc.
     private String description; // description of the class
@@ -23,14 +23,14 @@ public class ClassModel {
         this.createdAt = System.currentTimeMillis();
     }
 
-    public ClassModel(String id, String instructorUid, String dayOfWeek, Time timeStart, int capacity, int duration, int price, String type, String status, String description, long startAt, long endAt) {
+    public ClassModel(String id, String instructorUid, String dayOfWeek, Time timeStart, int capacity, int duration, int sessions, String type, String status, String description, long startAt, long endAt) {
         this.id = id;
-        this.instructorUid = instructorUid;
+        this.instructorUid = instructorUid;         
         this.dayOfWeek = dayOfWeek;
         this.timeStart = timeStart;
         this.capacity = capacity;
         this.duration = duration;
-        this.price = price;
+        this.sessionCount = sessions;
         this.type = type;
         this.status = status;
         this.description = description; // Đảm bảo trường này không bị bỏ sót
@@ -63,7 +63,7 @@ public class ClassModel {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
-    }
+            }
 
     public int getDuration() {
         return duration;
@@ -71,14 +71,6 @@ public class ClassModel {
 
     public void setDuration(int duration) {
         this.duration = duration;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
     }
 
     public String getType() {
@@ -145,6 +137,14 @@ public class ClassModel {
         this.timeStart = timeStart;
     }
 
+    public int getSessionCount() {
+        return sessionCount;
+    }
+
+    public void setSessionCount(int sessionCount) {
+        this.sessionCount = sessionCount;
+    }   
+
     // Chuyển đổi đối tượng thành map để lưu trữ trong Firestore
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -152,7 +152,7 @@ public class ClassModel {
         map.put("instructorUid", instructorUid);
         map.put("capacity", capacity);
         map.put("duration", duration);
-        map.put("price", price);
+        map.put("sessionCount", sessionCount);
         map.put("type", type);
         map.put("status", status);
         map.put("description", description); // Đảm bảo trường description có mặt trong map
@@ -168,7 +168,7 @@ public class ClassModel {
                 "id='" + id + '\'' +
                 ", capacity=" + capacity +
                 ", duration=" + duration +
-                ", price=" + price +
+                ", sessionCount=" + sessionCount +
                 ", type='" + type + '\'' +
                 ", status='" + status + '\'' +
                 ", description='" + description + '\'' + // Bảo đảm không bỏ sót description

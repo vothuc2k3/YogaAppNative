@@ -5,31 +5,34 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.sqlite.AppDatabaseHelper;
 
 import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class ClassDAO {
 
     public static final String TABLE_CLASS = "classes";
+    public static final String TABLE_CLASS_SESSIONS = "class_sessions";
+
+    public static final String COLUMN_CLASS_SESSION_CLASS_ID = "classId";
     public static final String COLUMN_CLASS_ID = "id";
     public static final String COLUMN_INSTRUCTOR_UID = "instructorUid";
     public static final String COLUMN_CAPACITY = "capacity";
     public static final String COLUMN_DURATION = "duration";
-    public static final String COLUMN_PRICE = "price";
+    public static final String COLUMN_SESSION_COUNT = "sessionCount";
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_STATUS = "status";
     public static final String COLUMN_CREATED_AT = "createdAt";
     public static final String COLUMN_START_AT = "startAt";
     public static final String COLUMN_END_AT = "endAt";
-    public static final String COLUMN_DAY_OF_WEEK = "dayOfWeek";  // Thêm dayOfWeek
-    public static final String COLUMN_TIME_START = "timeStart";   // Thêm timeStart
+    public static final String COLUMN_DAY_OF_WEEK = "dayOfWeek";
+    public static final String COLUMN_TIME_START = "timeStart";
 
     private final SQLiteOpenHelper dbHelper;
     private SQLiteDatabase db;
@@ -62,7 +65,7 @@ public class ClassDAO {
         classModel.setInstructorUid(cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_UID)));
         classModel.setCapacity(cursor.getInt(cursor.getColumnIndex(COLUMN_CAPACITY)));
         classModel.setDuration(cursor.getInt(cursor.getColumnIndex(COLUMN_DURATION)));
-        classModel.setPrice(cursor.getInt(cursor.getColumnIndex(COLUMN_PRICE)));
+        classModel.setSessionCount(cursor.getInt(cursor.getColumnIndex(COLUMN_SESSION_COUNT)));  // xử lý sessionCount
         classModel.setType(cursor.getString(cursor.getColumnIndex(COLUMN_TYPE)));
         classModel.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
         classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
@@ -91,7 +94,7 @@ public class ClassDAO {
         values.put(COLUMN_INSTRUCTOR_UID, classModel.getInstructorUid());
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
-        values.put(COLUMN_PRICE, classModel.getPrice());
+        values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());  // lưu sessionCount
         values.put(COLUMN_TYPE, classModel.getType());
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
@@ -133,7 +136,7 @@ public class ClassDAO {
         values.put(COLUMN_INSTRUCTOR_UID, classModel.getInstructorUid());
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
-        values.put(COLUMN_PRICE, classModel.getPrice());
+        values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());  // cập nhật sessionCount
         values.put(COLUMN_TYPE, classModel.getType());
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
@@ -191,4 +194,44 @@ public class ClassDAO {
         close();
         return classList;
     }
+
+    public void deleteClass(String classId) {
+        openWritableDb();
+
+        String query = "SELECT * FROM " + TABLE_CLASS_SESSIONS + " WHERE " + COLUMN_CLASS_SESSION_CLASS_ID + "=?";
+        Cursor cursor = db.rawQuery(query, new String[]{classId});
+
+        if (cursor.getCount() > 0) {
+            db.delete(TABLE_CLASS_SESSIONS, COLUMN_CLASS_SESSION_CLASS_ID + "=?", new String[]{classId});
+            Log.d("deleteClass", "Class sessions deleted for classId: " + classId);
+        } else {
+            Log.d("deleteClass", "No class sessions found for classId: " + classId);
+        }
+
+        db.delete(TABLE_CLASS, COLUMN_CLASS_ID + "=?", new String[]{classId});
+        Log.d("deleteClass", "Class deleted with classId: " + classId);
+
+        cursor.close();
+        close();
+    }
+
+    public List<ClassModel> searchClassesByNameAndDay(String query, String dayOfWeek) {
+        List<ClassModel> classList = new ArrayList<>();
+        openReadableDb();
+
+        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_DAY_OF_WEEK + "=?";
+        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", dayOfWeek});
+        if (cursor.moveToFirst()) {
+            do {
+                classList.add(populateClassModel(cursor));
+            } while (cursor.moveToNext());
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+        close();
+        return classList;
+    }
+
 }

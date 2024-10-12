@@ -1,12 +1,14 @@
 package com.example.universalyoga.fragments;
 
-import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,22 +22,16 @@ import com.example.universalyoga.activities.ClassDetailsActivity;
 import com.example.universalyoga.adapters.ClassAdapter;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
-import com.example.universalyoga.utils.Util;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 public class SearchFragment extends Fragment {
 
     private SearchView searchView;
     private RecyclerView recyclerView;
     private ClassAdapter classAdapter;
-    private TextView tvSelectDate;
     private TextView tvPrompt;
-    private Calendar selectedDate = Calendar.getInstance();
+    private Spinner spinnerFilterDay;
     private ClassDAO classDAO;
     private List<ClassModel> classModels;
 
@@ -46,69 +42,69 @@ public class SearchFragment extends Fragment {
 
         searchView = view.findViewById(R.id.search_view_classes);
         recyclerView = view.findViewById(R.id.rv_search_results);
-        tvSelectDate = view.findViewById(R.id.tv_select_date);
+        spinnerFilterDay = view.findViewById(R.id.spinner_filter_day);
         tvPrompt = view.findViewById(R.id.tv_prompt);
 
         classDAO = new ClassDAO(getContext());
         classModels = classDAO.getAllClasses();
 
-        searchView.setIconified(false);
-        searchView.requestFocus();
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
         setupAdapter(classModels);
-
         recyclerView.setAdapter(classAdapter);
 
-        showPrompt(true);
+        performSearch("", "");
 
+        // Setup SearchView listener
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                performSearch(query);
+                performSearch(query, spinnerFilterDay.getSelectedItem().toString());
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.isEmpty()) {
-                    showPrompt(true);
+                    performSearch("", spinnerFilterDay.getSelectedItem().toString());
+                    showPrompt(false); // Show all when text is cleared
                 } else {
-                    performSearch(newText);
+                    performSearch(newText, spinnerFilterDay.getSelectedItem().toString());
                     showPrompt(false);
                 }
                 return true;
             }
         });
 
-        tvSelectDate.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(
-                    getContext(),
-                    (view1, year, month, dayOfMonth) -> {
-                        selectedDate.set(year, month, dayOfMonth);
-                        updateDateText();
-                    },
-                    selectedDate.get(Calendar.YEAR),
-                    selectedDate.get(Calendar.MONTH),
-                    selectedDate.get(Calendar.DAY_OF_MONTH)
-            );
-            datePickerDialog.show();
+        // Setup Spinner listener for filtering by day of the week
+        spinnerFilterDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                performSearch(searchView.getQuery().toString(), parentView.getItemAtPosition(position).toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                performSearch(searchView.getQuery().toString(), "");
+            }
         });
 
         return view;
     }
 
-    private void updateDateText() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
-        tvSelectDate.setText(dateFormat.format(selectedDate.getTime()));
-    }
+    // Perform search with name and day of the week
+    private void performSearch(String name, String dayOfWeek) {
+        List<ClassModel> result;
+        if (!dayOfWeek.isEmpty() && !dayOfWeek.equals("All Days")) {
+            result = classDAO.searchClassesByNameAndDay(name, dayOfWeek);
+        } else {
+            result = classDAO.searchClassesByName(name);
+        }
 
-    private void performSearch(String name) {
-        List<ClassModel> result = classDAO.searchClassesByName(name);
         classAdapter.updateData(result);
         if (result.isEmpty()) {
             showPrompt(true);
+        } else {
+            showPrompt(false);
         }
     }
 
@@ -124,23 +120,43 @@ public class SearchFragment extends Fragment {
 
     private void setupAdapter(List<ClassModel> classList) {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        classAdapter = new ClassAdapter(classList, getContext(), classModel -> {
-            Intent intent = new Intent(getActivity(), ClassDetailsActivity.class);
-            intent.putExtra("id", classModel.getId());
-            intent.putExtra("instructorUid", classModel.getInstructorUid());
-            intent.putExtra("capacity", classModel.getCapacity());
-            intent.putExtra("duration", classModel.getDuration());
-            intent.putExtra("price", classModel.getPrice());
-            intent.putExtra("type", classModel.getType());
-            intent.putExtra("status", classModel.getStatus());
-            intent.putExtra("description", classModel.getDescription());
-            intent.putExtra("startAt", classModel.getStartAt());
-            intent.putExtra("endAt", classModel.getEndAt());
-            intent.putExtra("dayOfWeek", classModel.getDayOfWeek());
-            intent.putExtra("timeStart", classModel.getTimeStart().toString());
-            startActivity(intent);
+        classAdapter = new ClassAdapter(classList, getContext(), new ClassAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(ClassModel classModel) {
+                Intent intent = new Intent(getActivity(), ClassDetailsActivity.class);
+                intent.putExtra("id", classModel.getId());
+                intent.putExtra("instructorUid", classModel.getInstructorUid());
+                intent.putExtra("capacity", classModel.getCapacity());
+                intent.putExtra("duration", classModel.getDuration());
+                intent.putExtra("sessionCount", classModel.getSessionCount()); // Added sessionCount
+                intent.putExtra("type", classModel.getType());
+                intent.putExtra("status", classModel.getStatus());
+                intent.putExtra("description", classModel.getDescription());
+                intent.putExtra("createdAt", classModel.getCreatedAt());
+                intent.putExtra("startAt", classModel.getStartAt());
+                intent.putExtra("endAt", classModel.getEndAt());
+                intent.putExtra("dayOfWeek", classModel.getDayOfWeek());
+                if (classModel.getTimeStart() != null) {
+                    intent.putExtra("timeStart", classModel.getTimeStart().toString());
+                }
+                startActivity(intent);
+            }
+
+            @Override
+            public void onDeleteClick(ClassModel classModel) {
+                new androidx.appcompat.app.AlertDialog.Builder(getContext())
+                        .setTitle("Delete Class")
+                        .setMessage("Are you sure you want to delete this class?")
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            classDAO.deleteClass(classModel.getId());
+                            classModels = classDAO.getAllClasses();
+                            classAdapter.updateData(classModels);
+                            Toast.makeText(getContext(), "Class deleted", Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+            }
         });
         recyclerView.setAdapter(classAdapter);
     }
 }
-

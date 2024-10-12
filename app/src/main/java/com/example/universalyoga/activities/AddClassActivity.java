@@ -25,15 +25,14 @@ import com.example.universalyoga.sqlite.DAO.UserDAO;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 public class AddClassActivity extends AppCompatActivity {
 
     private Spinner spinnerInstructor, spinnerClassType, spinnerDayOfWeek;
-    private EditText inputClassDuration, inputClassPrice, inputClassStartTime, inputClassDescription, inputFirstDay, inputLastDay;
-    private NumberPicker numberPickerCapacity;
+    private EditText inputClassDuration, inputClassStartTime, inputClassDescription, inputFirstDay;
+    private NumberPicker numberPickerCapacity, numberPickerSessions;
     private Button btnSubmitClass;
     private int startHour = 0, startMinute = 0;
     private UserDAO userDAO;
@@ -58,8 +57,10 @@ public class AddClassActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
 
         Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_back_arrow);
-        drawable.setBounds(0, 0, 60, 60);
-        toolbar.setNavigationIcon(drawable);
+        if (drawable != null) {
+            drawable.setBounds(0, 0, 60, 60);
+            toolbar.setNavigationIcon(drawable);
+        }
 
         toolbar.setNavigationOnClickListener(v -> finish());
 
@@ -68,12 +69,15 @@ public class AddClassActivity extends AppCompatActivity {
         numberPickerCapacity.setMaxValue(20);
         numberPickerCapacity.setWrapSelectorWheel(true);
 
+        numberPickerSessions = findViewById(R.id.number_picker_sessions);
+        numberPickerSessions.setMinValue(1);
+        numberPickerSessions.setMaxValue(10);
+        numberPickerSessions.setWrapSelectorWheel(true);
+
         inputClassDuration = findViewById(R.id.input_class_duration);
-        inputClassPrice = findViewById(R.id.input_class_price);
         inputClassStartTime = findViewById(R.id.input_class_start_time);
         inputClassDescription = findViewById(R.id.input_class_description);
         inputFirstDay = findViewById(R.id.input_start_at);
-        inputLastDay = findViewById(R.id.input_end_at);
         btnSubmitClass = findViewById(R.id.btn_submit_class);
         spinnerInstructor = findViewById(R.id.spinner_instructor);
         spinnerDayOfWeek = findViewById(R.id.spinner_day_of_week);
@@ -84,8 +88,6 @@ public class AddClassActivity extends AppCompatActivity {
         inputClassStartTime.setOnClickListener(v -> showTimePickerDialog());
 
         inputFirstDay.setOnClickListener(v -> showDatePickerDialog(inputFirstDay));
-
-        inputLastDay.setOnClickListener(v -> showDatePickerDialog(inputLastDay));
 
         btnSubmitClass.setOnClickListener(v -> createClass());
     }
@@ -112,11 +114,25 @@ public class AddClassActivity extends AppCompatActivity {
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, selectedYear, selectedMonth, selectedDay) -> {
             String selectedDate = String.format("%02d/%02d/%d", selectedDay, selectedMonth + 1, selectedYear);
-            editText.setText(selectedDate);
+
+            Calendar selectedCalendar = Calendar.getInstance();
+            selectedCalendar.set(Calendar.YEAR, selectedYear);
+            selectedCalendar.set(Calendar.MONTH, selectedMonth);
+            selectedCalendar.set(Calendar.DAY_OF_MONTH, selectedDay);
+
+            String dayOfWeek = spinnerDayOfWeek.getSelectedItem().toString();
+            int selectedDayOfWeek = getDayOfWeekInt(dayOfWeek);
+
+            if (selectedCalendar.get(Calendar.DAY_OF_WEEK) != selectedDayOfWeek) {
+                editText.setError("Selected date must be a " + dayOfWeek);
+                editText.setText("");
+            } else {
+                editText.setText(selectedDate);
+                editText.setError(null);
+            }
         }, year, month, day);
 
         datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis());
-
         datePickerDialog.show();
     }
 
@@ -125,7 +141,7 @@ public class AddClassActivity extends AppCompatActivity {
         List<String> instructorNames = new ArrayList<>();
 
         for (UserModel instructor : instructorList) {
-            instructorNames.add(instructor.getName());  // Hiển thị tên instructor
+            instructorNames.add(instructor.getName());
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, instructorNames);
@@ -137,17 +153,11 @@ public class AddClassActivity extends AppCompatActivity {
         String classType = spinnerClassType.getSelectedItem().toString();
         int classCapacity = numberPickerCapacity.getValue();
         String classDurationStr = inputClassDuration.getText().toString();
-        String classPriceStr = inputClassPrice.getText().toString();
         String classDescription = inputClassDescription.getText().toString();
         String dayOfWeek = spinnerDayOfWeek.getSelectedItem().toString();
 
         if (TextUtils.isEmpty(classDurationStr)) {
             inputClassDuration.setError("Duration is required");
-            return;
-        }
-
-        if (TextUtils.isEmpty(classPriceStr)) {
-            inputClassPrice.setError("Price is required");
             return;
         }
 
@@ -161,28 +171,40 @@ public class AddClassActivity extends AppCompatActivity {
             return;
         }
 
-        if (TextUtils.isEmpty(inputLastDay.getText())) {
-            inputLastDay.setError("End date is required");
-            return;
-        }
-
-        if (inputFirstDay.getText().toString().compareTo(inputLastDay.getText().toString()) > 0) {
-            inputLastDay.setError("End date must be greater than start date");
-            return;
-        }
-
         String timeStartStr = inputClassStartTime.getText().toString();
-
         String[] timeParts = timeStartStr.split(":");
         int hour = Integer.parseInt(timeParts[0]);
         int minute = Integer.parseInt(timeParts[1]);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, hour);
-        calendar.set(Calendar.MINUTE, minute);
+        String[] startDateParts = inputFirstDay.getText().toString().split("/");
+        int startDay = Integer.parseInt(startDateParts[0]);
+        int startMonth = Integer.parseInt(startDateParts[1]) - 1;
+        int startYear = Integer.parseInt(startDateParts[2]);
 
-        Time timeStart = new Time(calendar.getTimeInMillis());
-        Date startDate = calendar.getTime(); 
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.set(Calendar.YEAR, startYear);
+        startCalendar.set(Calendar.MONTH, startMonth);
+        startCalendar.set(Calendar.DAY_OF_MONTH, startDay);
+        startCalendar.set(Calendar.HOUR_OF_DAY, hour);
+        startCalendar.set(Calendar.MINUTE, minute);
+        startCalendar.set(Calendar.SECOND, 0);
+
+        int selectedDayOfWeek = getDayOfWeekInt(dayOfWeek);
+        if (startCalendar.get(Calendar.DAY_OF_WEEK) != selectedDayOfWeek) {
+            inputFirstDay.setError("Start date must be a " + dayOfWeek);
+            return;
+        }
+
+        int numberOfSessions = numberPickerSessions.getValue();
+        Calendar endCalendar = (Calendar) startCalendar.clone();
+        endCalendar.add(Calendar.DAY_OF_YEAR, (numberOfSessions - 1) * 7);
+        endCalendar.set(Calendar.HOUR_OF_DAY, 23);
+        endCalendar.set(Calendar.MINUTE, 59);
+        endCalendar.set(Calendar.SECOND, 59);
+
+        long startAt = startCalendar.getTimeInMillis();
+        long endAt = endCalendar.getTimeInMillis();
+        Time timeStart = new Time(startAt);
 
         int selectedInstructorPosition = spinnerInstructor.getSelectedItemPosition();
         String instructorUid = instructorList.get(selectedInstructorPosition).getUid();
@@ -192,22 +214,39 @@ public class AddClassActivity extends AppCompatActivity {
         newClass.setInstructorUid(instructorUid);
         newClass.setDayOfWeek(dayOfWeek);
         newClass.setTimeStart(timeStart);
-        newClass.setStartAt(startDate.getTime()); 
+        newClass.setStartAt(startAt);
+        newClass.setSessionCount(numberOfSessions);
+        newClass.setEndAt(endAt);
         newClass.setType(classType);
         newClass.setStatus("open");
         newClass.setCapacity(classCapacity);
         newClass.setDuration(Integer.parseInt(classDurationStr));
-        newClass.setPrice(Integer.parseInt(classPriceStr));
         newClass.setDescription(classDescription);
-
-        calendar.add(Calendar.MINUTE, Integer.parseInt(classDurationStr));
-        Date endDate = calendar.getTime();
-        newClass.setEndAt(endDate.getTime());
 
         classDAO.addClass(newClass);
 
         Toast.makeText(this, "New Class Added!", Toast.LENGTH_SHORT).show();
-
         finish();
+    }
+
+    private int getDayOfWeekInt(String dayOfWeek) {
+        switch (dayOfWeek) {
+            case "Sunday":
+                return Calendar.SUNDAY;
+            case "Monday":
+                return Calendar.MONDAY;
+            case "Tuesday":
+                return Calendar.TUESDAY;
+            case "Wednesday":
+                return Calendar.WEDNESDAY;
+            case "Thursday":
+                return Calendar.THURSDAY;
+            case "Friday":
+                return Calendar.FRIDAY;
+            case "Saturday":
+                return Calendar.SATURDAY;
+            default:
+                return -1;
+        }
     }
 }

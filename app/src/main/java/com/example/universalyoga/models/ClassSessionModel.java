@@ -7,56 +7,77 @@ import java.util.UUID;
 public class ClassSessionModel {
     private String id;
     private String classId;
-    private Timestamp startAt;
-    private Timestamp endAt;
+    private String instructorId;
+    private long date;
+    private int price;
+    private String room;
     private String note;
 
-    public ClassSessionModel(String id, String classId, Timestamp startAt, Timestamp endAt, String note) {
+    public ClassSessionModel(){}
+
+    public ClassSessionModel(String id, String classId, String instructorId, long date, int price, String room, String note){
         this.id = id;
         this.classId = classId;
-        this.startAt = startAt;
-        this.endAt = endAt;
+        this.instructorId = instructorId;
+        this.date = date;
+        this.price = price;
+        this.room = room;
         this.note = note;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getClassId() {
-        return classId;
-    }
-
-
-    public Timestamp getStartAt() {
-        return startAt;
-    }
-
-    public Timestamp getEndAt() {
-        return endAt;
     }
 
     public String getNote() {
         return note;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+        }
+
+    public long getDate() {
+        return date;
+    }
+
+    public void setDate(long date){
+        this.date = date;
+    }
+
+    public String getClassId() {
+        return classId;
     }
 
     public void setClassId(String classId) {
-        this.classId = id;
+        this.classId = classId;
     }
 
-    public void setStartAt(Timestamp startAt) {
-        this.startAt = startAt;
+    public String getInstructorId() {
+        return instructorId;
     }
 
-    public void setEndAt(Timestamp endAt) {
-        this.endAt = endAt;
+    public void setInstructorId(String instructorId) {
+        this.instructorId = instructorId;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

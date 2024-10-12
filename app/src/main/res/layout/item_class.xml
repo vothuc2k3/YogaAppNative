@@ -1,92 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="6dp">
 
-    <TextView
-        android:id="@+id/class_name"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Class Name"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:padding="16dp">
 
-    <!-- Mô tả lớp học -->
-    <TextView
-        android:id="@+id/class_description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Class Description"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/class_name"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- Class Name -->
+        <ImageView
+            android:id="@+id/icon_class_name"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_classroom"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Giảng viên -->
-    <TextView
-        android:id="@+id/instructor_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Instructor: "
-        android:textSize="14sp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/class_description"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- Class Description -->
 
-    <!-- Sức chứa -->
-    <TextView
-        android:id="@+id/capacity_value"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Capacity: "
-        android:textSize="14sp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/instructor_name"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- Instructor Name -->
+        <TextView
+            android:id="@+id/class_name"
+            android:layout_width="308dp"
+            android:layout_height="24dp"
+            android:text="Class Name"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.685"
+            app:layout_constraintStart_toEndOf="@id/icon_class_name"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Thời gian bắt đầu -->
-    <TextView
-        android:id="@+id/start_time_value"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Start: "
-        android:textSize="14sp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/capacity_value"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- Capacity -->
 
-    <!-- Thời lượng -->
-    <TextView
-        android:id="@+id/duration_value"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Duration: "
-        android:textSize="14sp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/start_time_value"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- Start Time -->
 
-    <!-- Giá tiền -->
-    <TextView
-        android:id="@+id/price_value"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Price: "
-        android:textSize="14sp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/duration_value"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- Duration -->
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/icon_instructor"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="20dp"
+            android:src="@drawable/ic_instructor"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/icon_class_name" />
+
+        <TextView
+            android:id="@+id/instructor_name"
+            android:layout_width="314dp"
+            android:layout_height="19dp"
+            android:layout_marginTop="24dp"
+            android:text="Instructor: "
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.84"
+            app:layout_constraintStart_toEndOf="@id/icon_instructor"
+            app:layout_constraintTop_toBottomOf="@+id/class_name" />
+
+        <ImageView
+            android:id="@+id/icon_capacity"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_capacity"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/icon_instructor" />
+
+        <TextView
+            android:id="@+id/capacity_value"
+            android:layout_width="313dp"
+            android:layout_height="21dp"
+            android:layout_marginTop="16dp"
+            android:text="Capacity: "
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.846"
+            app:layout_constraintStart_toEndOf="@id/icon_capacity"
+            app:layout_constraintTop_toBottomOf="@id/instructor_name" />
+
+        <ImageView
+            android:id="@+id/icon_start_time"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/icon_capacity" />
+
+        <TextView
+            android:id="@+id/start_time_value"
+            android:layout_width="313dp"
+            android:layout_height="23dp"
+            android:layout_marginTop="20dp"
+            android:text="Start: "
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.807"
+            app:layout_constraintStart_toEndOf="@id/icon_start_time"
+            app:layout_constraintTop_toBottomOf="@id/capacity_value" />
+
+        <ImageView
+            android:id="@+id/icon_duration"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_duration"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/icon_start_time" />
+
+        <TextView
+            android:id="@+id/duration_value"
+            android:layout_width="316dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="20dp"
+            android:text="Duration: "
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.913"
+            app:layout_constraintStart_toEndOf="@id/icon_duration"
+            app:layout_constraintTop_toBottomOf="@id/start_time_value" />
+
+        <Button
+            android:id="@+id/btn_edit_class"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Edit"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.541"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/duration_value" />
+
+        <Button
+            android:id="@+id/btn_delete_class"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Delete"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.959"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/duration_value" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

@@ -65,7 +65,7 @@ public class SyncWorker extends Worker {
                 classModel.setInstructorUid(document.getString("instructorUid"));
                 classModel.setCapacity(document.getLong("capacity").intValue());
                 classModel.setDuration(document.getLong("duration").intValue());
-                classModel.setPrice(document.getLong("price").intValue());
+                classModel.setSessionCount(document.getLong("sessionCount").intValue()); // Cập nhật sessionCount
                 classModel.setType(document.getString("type"));
                 classModel.setDescription(document.getString("description"));
                 classModel.setStatus(document.getString("status"));
@@ -107,7 +107,16 @@ public class SyncWorker extends Worker {
         CollectionReference classSessionsRef = db.collection(CLASS_SESSIONS_COLLECTION);
         classSessionsRef.get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                ClassSessionModel classSessionModel = document.toObject(ClassSessionModel.class);
+                ClassSessionModel classSessionModel = new ClassSessionModel();
+
+                classSessionModel.setId(document.getString("id"));
+                classSessionModel.setClassId(document.getString("classId"));
+                classSessionModel.setInstructorId(document.getString("instructorId")); // Thêm instructorId
+                classSessionModel.setDate(document.getTimestamp("date").toDate().getTime()); // Đổi sang epoch time
+                classSessionModel.setPrice(document.getLong("price").intValue()); // Cập nhật giá trị price
+                classSessionModel.setRoom(document.getString("room")); // Cập nhật giá trị room
+                classSessionModel.setNote(document.getString("note")); // Cập nhật giá trị note
+
                 if (classSessionDAO.getClassSessionById(classSessionModel.getId()) == null) {
                     classSessionDAO.addClassSession(classSessionModel);
                     Log.d(TAG, "Class session added to SQLite: " + classSessionModel.getId());
@@ -132,6 +141,7 @@ public class SyncWorker extends Worker {
                     .addOnSuccessListener(aVoid -> Log.d(TAG, "Class uploaded to Firestore: " + localClass.getId()))
                     .addOnFailureListener(e -> Log.e(TAG, "Failed to upload class to Firestore", e));
         }
+
         List<UserModel> localUsers = userDAO.getAllUsers();
         for (UserModel localUser : localUsers) {
             db.collection(USERS_COLLECTION)

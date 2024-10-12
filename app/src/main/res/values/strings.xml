@@ -21,4 +21,61 @@
         <item>Saturday</item>
         <item>Sunday</item>
     </string-array>
+    <string-array name="rooms_array">
+        <!-- Tầng 1 -->
+        <item>G101</item>
+        <item>G102</item>
+        <item>G103</item>
+        <item>G104</item>
+        <item>G105</item>
+        <item>G106</item>
+        <item>G107</item>
+        <item>G108</item>
+        <item>G109</item>
+        <item>G110</item>
+        <!-- Tầng 2 -->
+        <item>G201</item>
+        <item>G202</item>
+        <item>G203</item>
+        <item>G204</item>
+        <item>G205</item>
+        <item>G206</item>
+        <item>G207</item>
+        <item>G208</item>
+        <item>G209</item>
+        <item>G210</item>
+        <!-- Tầng 3 -->
+        <item>G301</item>
+        <item>G302</item>
+        <item>G303</item>
+        <item>G304</item>
+        <item>G305</item>
+        <item>G306</item>
+        <item>G307</item>
+        <item>G308</item>
+        <item>G309</item>
+        <item>G310</item>
+        <!-- Tầng 4 -->
+        <item>G401</item>
+        <item>G402</item>
+        <item>G403</item>
+        <item>G404</item>
+        <item>G405</item>
+        <item>G406</item>
+        <item>G407</item>
+        <item>G408</item>
+        <item>G409</item>
+        <item>G410</item>
+        <!-- Tầng 5 -->
+        <item>G501</item>
+        <item>G502</item>
+        <item>G503</item>
+        <item>G504</item>
+        <item>G505</item>
+        <item>G506</item>
+        <item>G507</item>
+        <item>G508</item>
+        <item>G509</item>
+        <item>G510</item>
+    </string-array>
 </resources>

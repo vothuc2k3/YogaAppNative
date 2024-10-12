@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.coordinatorlayout)
     implementation(libs.picasso)
     implementation(libs.swipeRefresh)
+    implementation(libs.car.ui.lib)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

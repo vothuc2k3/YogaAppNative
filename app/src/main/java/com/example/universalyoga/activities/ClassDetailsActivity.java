@@ -1,25 +1,40 @@
 package com.example.universalyoga.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
+import com.example.universalyoga.adapters.ClassSessionAdapter;
+import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.models.UserModel;
+import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
+import android.view.MenuItem;
+import android.widget.Toast;
+
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+
 
 public class ClassDetailsActivity extends AppCompatActivity {
 
-    private TextView tvClassId, tvInstructorName, tvCapacity, tvDuration, tvPrice,
+    private TextView  tvInstructorName, tvCapacity, tvDuration, tvPrice,
             tvType, tvStatus, tvDescription, tvStartAt, tvEndAt,
             tvDayOfWeek, tvTimeStart;
+    private RecyclerView recyclerViewClassSessions;
+    private ClassSessionAdapter classSessionAdapter;
+    private ClassSessionDAO classSessionDAO;
     private UserDAO userDAO;
 
     @Override
@@ -28,8 +43,11 @@ public class ClassDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_class_details);
 
         userDAO = new UserDAO(this);
+        classSessionDAO = new ClassSessionDAO(this);
 
-        tvClassId = findViewById(R.id.tv_class_id);
+        recyclerViewClassSessions = findViewById(R.id.recycler_view_sessions);
+        recyclerViewClassSessions.setLayoutManager(new LinearLayoutManager(this));
+
         tvInstructorName = findViewById(R.id.tv_instructor_name);
         tvCapacity = findViewById(R.id.tv_capacity);
         tvDuration = findViewById(R.id.tv_duration);
@@ -61,7 +79,6 @@ public class ClassDetailsActivity extends AppCompatActivity {
         Log.d("ClassDetailsActivity", "Start at: " + startAtLong);
         Log.d("ClassDetailsActivity", "End at: " + endAtLong);
 
-        tvClassId.setText(id);
         tvInstructorName.setText(instructor.getName());
         tvCapacity.setText(String.valueOf(capacity));
         tvDuration.setText(String.valueOf(duration) + " minutes");
@@ -73,6 +90,7 @@ public class ClassDetailsActivity extends AppCompatActivity {
         if (startAtLong > 0) {
             tvStartAt.setText(formatDate(new Date(startAtLong)));
         }
+
         if (endAtLong > 0) {
             tvEndAt.setText(formatDate(new Date(endAtLong)));
         }
@@ -84,12 +102,46 @@ public class ClassDetailsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Hiển thị nút back trên toolbar
+            getSupportActionBar().setTitle("Class Details");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         toolbar.setNavigationOnClickListener(v -> {
             finish();
         });
+
+        loadClassSessions(id);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.class_details_toolbar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_add_session) {
+            navigateToAddSession();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void navigateToAddSession() {
+        Intent intent = new Intent(this, AddSessionActivity.class);
+        intent.putExtra("CLASS_ID", getIntent().getStringExtra("id"));
+        intent.putExtra("INSTRUCTOR_ID", getIntent().getStringExtra("instructorUid"));
+        startActivity(intent);
+    }
+
+
+    private void loadClassSessions(String classId) {
+        List<ClassSessionModel> classSessions = classSessionDAO.getClassSessionsByClassId(classId);
+
+        classSessionAdapter = new ClassSessionAdapter(classSessions, this);
+        recyclerViewClassSessions.setAdapter(classSessionAdapter);
     }
 
     private String formatDate(Date date) {
