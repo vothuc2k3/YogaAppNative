@@ -50,6 +50,8 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         holder.instructorTextView.setText("Instructor: " + instructorModel.getName());
         holder.capacityTextView.setText("Capacity: " + classModel.getCapacity());
 
+        holder.sessionCountTextView.setText("Sessions: "+ classModel.getSessionCount());
+
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
 
         if (classModel.getStartAt() > 0) {
@@ -92,6 +94,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         TextView capacityTextView;
         TextView startTimeTextView;
         TextView durationTextView;
+        TextView sessionCountTextView;
         Button btnDelete;
 
         public ClassViewHolder(@NonNull View itemView, OnItemClickListener onItemClickListener) {
@@ -101,6 +104,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             capacityTextView = itemView.findViewById(R.id.capacity_value);
             startTimeTextView = itemView.findViewById(R.id.start_time_value);
             durationTextView = itemView.findViewById(R.id.duration_value);
+            sessionCountTextView = itemView.findViewById(R.id.session_count_value);
             btnDelete = itemView.findViewById(R.id.btn_delete_class);
         }
     }

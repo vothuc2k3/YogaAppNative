@@ -15,6 +15,8 @@ import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 
+import java.util.Calendar;
+import java.util.List;
 import java.util.UUID;
 
 public class AddSessionActivity extends AppCompatActivity {
@@ -25,6 +27,7 @@ public class AddSessionActivity extends AppCompatActivity {
     private ClassSessionDAO classSessionDAO;
     private String classId;
     private String instructorUid;
+    private int sessionCount;  // Biến sessionCount từ Intent
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +43,13 @@ public class AddSessionActivity extends AppCompatActivity {
 
         ArrayAdapter<CharSequence> roomAdapter = ArrayAdapter.createFromResource(
                 this, R.array.rooms_array, android.R.layout.simple_dropdown_item_1line);
-
         inputRoom.setAdapter(roomAdapter);
 
         inputRoom.setOnClickListener(v -> inputRoom.showDropDown());
 
-        classId = getIntent().getStringExtra("CLASS_ID");
+        classId = getIntent().getStringExtra("classId");
         instructorUid = getIntent().getStringExtra("instructorUid");
+        sessionCount = getIntent().getIntExtra("sessionCount", 1);  // Giá trị mặc định là 1
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -57,6 +60,13 @@ public class AddSessionActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         btnAddSession.setOnClickListener(v -> addSession());
+
+        inputRoom.setOnClickListener(v -> inputRoom.showDropDown());
+        inputRoom.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                inputRoom.showDropDown();
+            }
+        });
     }
 
     private void addSession() {
@@ -71,19 +81,35 @@ public class AddSessionActivity extends AppCompatActivity {
 
         int price = Integer.parseInt(priceStr);
 
-        ClassSessionModel newSession = new ClassSessionModel();
-        newSession.setId(UUID.randomUUID().toString());
-        newSession.setClassId(classId);
-        newSession.setPrice(price);
-        newSession.setRoom(room);
-        newSession.setNote(notes);
+        List<ClassSessionModel> existingSessions = classSessionDAO.getClassSessionsByClassId(classId);
+        long date;
 
-        long result = classSessionDAO.addClassSession(newSession);
-        if (result != -1) {
-            Toast.makeText(this, "Session added successfully!", Toast.LENGTH_SHORT).show();
-            finish();
+        if (existingSessions.isEmpty()) {
+            Calendar calendar = Calendar.getInstance();
+            date = calendar.getTimeInMillis();
         } else {
-            Toast.makeText(this, "Failed to add session", Toast.LENGTH_SHORT).show();
+            date = existingSessions.get(existingSessions.size() - 1).getDate() + (7 * 24 * 60 * 60 * 1000);
         }
+
+        for (int i = 0; i < sessionCount; i++) {
+            ClassSessionModel newSession = new ClassSessionModel();
+            newSession.setId(UUID.randomUUID().toString());
+            newSession.setClassId(classId);
+            newSession.setPrice(price);
+            newSession.setInstructorId(instructorUid);
+            newSession.setDate(date);  // Đặt ngày cho session
+            newSession.setRoom(room);
+            newSession.setNote(notes);
+
+            long result = classSessionDAO.addClassSession(newSession);
+            if (result == -1) {
+                Toast.makeText(this, "Failed to add session", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            date += 7 * 24 * 60 * 60 * 1000;
+        }
+
+        Toast.makeText(this, "Sessions added successfully!", Toast.LENGTH_SHORT).show();
+        finish();
     }
 }

@@ -17,6 +17,7 @@ import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
+
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -29,7 +30,7 @@ import java.util.Locale;
 
 public class ClassDetailsActivity extends AppCompatActivity {
 
-    private TextView  tvInstructorName, tvCapacity, tvDuration, tvPrice,
+    private TextView tvInstructorName, tvCapacity, tvDuration, tvPrice,
             tvType, tvStatus, tvDescription, tvStartAt, tvEndAt,
             tvDayOfWeek, tvTimeStart;
     private RecyclerView recyclerViewClassSessions;
@@ -131,8 +132,9 @@ public class ClassDetailsActivity extends AppCompatActivity {
 
     private void navigateToAddSession() {
         Intent intent = new Intent(this, AddSessionActivity.class);
-        intent.putExtra("CLASS_ID", getIntent().getStringExtra("id"));
-        intent.putExtra("INSTRUCTOR_ID", getIntent().getStringExtra("instructorUid"));
+        intent.putExtra("classId", getIntent().getStringExtra("id"));
+        intent.putExtra("instructorUid", getIntent().getStringExtra("instructorUid"));
+        intent.putExtra("sessionCount", getIntent().getIntExtra("sessionCount", 0));
         startActivity(intent);
     }
 
