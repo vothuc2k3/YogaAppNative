@@ -17,6 +17,7 @@ import com.example.universalyoga.activities.AddClassActivity;
 import com.example.universalyoga.activities.BookingManagementActivity;
 import com.example.universalyoga.activities.ClassManagementActivity;
 import com.example.universalyoga.activities.UserManagementActivity;
+import com.example.universalyoga.sqlite.DAO.BookingDAO;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 
 public class HomeFragment extends Fragment {
@@ -24,7 +25,7 @@ public class HomeFragment extends Fragment {
     private TextView totalClassesTextView;
     private TextView totalBookingsTextView;
     private ClassDAO classDAO;
-    private int totalClasses = 0;
+    private BookingDAO bookingDAO;
     private SwipeRefreshLayout swipeRefreshLayout;
 
     @Nullable
@@ -34,6 +35,7 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         classDAO = new ClassDAO(view.getContext());
+        bookingDAO = new BookingDAO(view.getContext());
 
         totalClassesTextView = view.findViewById(R.id.total_classes_value);
         totalBookingsTextView = view.findViewById(R.id.total_bookings_value);
@@ -52,7 +54,6 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-
         view.findViewById(R.id.btn_user_management).setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), UserManagementActivity.class);
             startActivity(intent);
@@ -70,5 +71,7 @@ public class HomeFragment extends Fragment {
     private void updateDataFromSQLite() {
         int classesCount = classDAO.getAllClasses().size();
         totalClassesTextView.setText(String.valueOf(classesCount));
+        int bookingCount = bookingDAO.getAllBookings().size();
+        totalBookingsTextView.setText(String.valueOf(bookingCount));
     }
 }

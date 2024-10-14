@@ -12,26 +12,59 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- User Info (Avatar + Name) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- User Avatar -->
+            <ImageView
+                android:id="@+id/user_avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/ic_default_profile_image"
+                android:scaleType="centerCrop"
+                android:background="@drawable/circle_background"
+                android:contentDescription="User Avatar" />
+
+            <!-- User Name -->
+            <TextView
+                android:id="@+id/tv_user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+
+        </LinearLayout>
+
+        <!-- Booking Title -->
         <TextView
             android:id="@+id/tv_booking_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_marginTop="12dp" />
 
+        <!-- Total Price -->
         <TextView
             android:id="@+id/tv_total_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="@color/colorAccent" />
+            android:textColor="@color/colorAccent"
+            android:layout_marginTop="4dp" />
 
+        <!-- Session Details -->
         <TextView
             android:id="@+id/tv_session_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:paddingTop="8dp" />
-
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -6,16 +6,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassSessionModel;
+import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
+import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.google.android.material.textfield.TextInputEditText;
+import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,17 +33,17 @@ import java.util.Locale;
 
 public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessionAdapter.EditClassSessionViewHolder> {
 
+    private UserDAO userDAO;
     private List<ClassSessionModel> sessionList;
     private Context context;
     private OnSaveSessionListener onSaveSessionListener;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-    private long classStartDate;
     private int dayOfWeek;
 
-    public EditClassSessionAdapter(List<ClassSessionModel> sessionList, Context context, long classStartDate, int dayOfWeek, OnSaveSessionListener onSaveSessionListener) {
+    public EditClassSessionAdapter(List<ClassSessionModel> sessionList, Context context, int dayOfWeek, UserDAO userDAO,OnSaveSessionListener onSaveSessionListener) {
+        this.userDAO = userDAO;
         this.sessionList = sessionList;
         this.context = context;
-        this.classStartDate = classStartDate;
         this.dayOfWeek = dayOfWeek;
         this.onSaveSessionListener = onSaveSessionListener;
     }
@@ -52,13 +59,31 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
     public void onBindViewHolder(@NonNull EditClassSessionViewHolder holder, int position) {
         ClassSessionModel sessionModel = sessionList.get(position);
 
+        UserModel instructor = userDAO.getUserByUid(sessionModel.getInstructorId());
+
+        if (instructor != null) {
+            holder.tvInstructorName.setText(instructor.getName());
+
+            Picasso.get()
+                    .load(instructor.getProfileImage())
+                    .placeholder(R.drawable.ic_default_profile_image)
+                    .into(holder.ivInstructorAvatar);
+        } else {
+            holder.tvInstructorName.setText("Unknown Instructor");
+            holder.ivInstructorAvatar.setImageResource(R.drawable.ic_default_profile_image);
+        }
+
+        View.OnClickListener changeInstructorListener = v -> showInstructorSelectionDialog(sessionModel, holder);
+
+        holder.tvInstructorName.setOnClickListener(changeInstructorListener);
+        holder.ivInstructorAvatar.setOnClickListener(changeInstructorListener);
+
         holder.etSessionNumber.setText(String.valueOf(sessionModel.getSessionNumber()));
         holder.etSessionDate.setText(dateFormat.format(new Date(sessionModel.getDate())));
         holder.etSessionPrice.setText(String.valueOf(sessionModel.getPrice()));
         holder.etSessionRoom.setText(sessionModel.getRoom());
         holder.etSessionNote.setText(sessionModel.getNote());
 
-        // Bấm vào trường ngày sẽ mở DatePicker
         holder.etSessionDate.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(sessionModel.getDate());
@@ -82,7 +107,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
 
         holder.btnSaveSession.setOnClickListener(v -> {
             try {
-                // Lấy các thông tin từ các trường nhập liệu
                 int sessionNumber = Integer.parseInt(holder.etSessionNumber.getText().toString().trim());
                 String sessionDate = holder.etSessionDate.getText().toString().trim();
                 double sessionPrice = Double.parseDouble(holder.etSessionPrice.getText().toString().trim());
@@ -92,7 +116,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
                 Date date = dateFormat.parse(sessionDate);
                 long dateMillis = date != null ? date.getTime() : System.currentTimeMillis();
 
-                // Kiểm tra ngày có trùng với thứ trong tuần quy định của lớp hay không
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(dateMillis);
                 int selectedDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
@@ -102,7 +125,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
                     return;
                 }
 
-                // Kiểm tra xem có session nào khác đã được lên lịch cùng ngày hay không
                 for (ClassSessionModel session : sessionList) {
                     if (!session.getId().equals(sessionModel.getId()) && isSameDay(session.getDate(), dateMillis)) {
                         Toast.makeText(context, "Another session is already scheduled on this date.", Toast.LENGTH_SHORT).show();
@@ -135,6 +157,38 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
         });
     }
 
+    private void showInstructorSelectionDialog(ClassSessionModel sessionModel, EditClassSessionViewHolder holder) {
+        List<UserModel> instructors = userDAO.getAllInstructors();
+
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_instructor_selection, null);
+        RecyclerView recyclerView = dialogView.findViewById(R.id.recycler_view_instructors);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Select Instructor")
+                .setView(dialogView)
+                .setNegativeButton("Cancel", null);
+
+        AlertDialog dialog = builder.create();
+
+        InstructorAdapter adapter = new InstructorAdapter(context, instructors, selectedInstructor -> {
+            sessionModel.setInstructorId(selectedInstructor.getUid());
+            holder.tvInstructorName.setText(selectedInstructor.getName());
+            Picasso.get()
+                    .load(selectedInstructor.getProfileImage())
+                    .placeholder(R.drawable.ic_default_profile_image)
+                    .into(holder.ivInstructorAvatar);
+
+            dialog.dismiss();
+        });
+
+        recyclerView.setAdapter(adapter);
+        dialog.show();
+    }
+
+
+
+
 
     private boolean isSameDay(long date1, long date2) {
         Calendar cal1 = Calendar.getInstance();
@@ -153,6 +207,8 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
     public static class EditClassSessionViewHolder extends RecyclerView.ViewHolder {
         TextInputEditText etSessionNumber, etSessionDate, etSessionPrice, etSessionRoom, etSessionNote;
         Button btnSaveSession;
+        TextView tvInstructorName;
+        ImageView ivInstructorAvatar;
 
         public EditClassSessionViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -163,6 +219,8 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
             etSessionRoom = itemView.findViewById(R.id.et_session_room);
             etSessionNote = itemView.findViewById(R.id.et_session_note);
             btnSaveSession = itemView.findViewById(R.id.btn_save_session);
+            tvInstructorName = itemView.findViewById(R.id.tv_instructor_name);
+            ivInstructorAvatar = itemView.findViewById(R.id.iv_instructor_avatar);
         }
     }
 

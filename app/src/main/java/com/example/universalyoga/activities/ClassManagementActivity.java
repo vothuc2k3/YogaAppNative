@@ -1,5 +1,6 @@
 package com.example.universalyoga.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -38,7 +39,6 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
         toolbar.setNavigationOnClickListener(v -> finish());
 
         classDAO = new ClassDAO(this);
-
         recyclerViewClasses = findViewById(R.id.recycler_view_classes);
         recyclerViewClasses.setLayoutManager(new LinearLayoutManager(this));
 
@@ -46,27 +46,53 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
     }
 
     private void loadClassData() {
-        classList = classDAO.getAllClasses(); // Load all classes from SQLite
+        classList = classDAO.getAllClasses();
         if (classList != null && !classList.isEmpty()) {
-            classAdapter = new ClassAdapter(classList, this, this);
-            recyclerViewClasses.setAdapter(classAdapter);
+            // Setup adapter after data is loaded
+            setupAdapter(classList);
         } else {
             Toast.makeText(this, "No classes found", Toast.LENGTH_SHORT).show();
         }
     }
 
+    private void setupAdapter(List<ClassModel> classList) {
+        classAdapter = new ClassAdapter(classList, this, this);
+        recyclerViewClasses.setAdapter(classAdapter);
+    }
+
     @Override
     public void onItemClick(ClassModel classModel) {
-        // Handle class item click (e.g., navigate to class details, edit class, etc.)
-        Toast.makeText(this, "Clicked on: " + classModel.getType(), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(ClassManagementActivity.this, ClassDetailsActivity.class);
+        intent.putExtra("id", classModel.getId());
+        intent.putExtra("instructorUid", classModel.getInstructorUid());
+        intent.putExtra("capacity", classModel.getCapacity());
+        intent.putExtra("duration", classModel.getDuration());
+        intent.putExtra("sessionCount", classModel.getSessionCount());
+        intent.putExtra("type", classModel.getType());
+        intent.putExtra("status", classModel.getStatus());
+        intent.putExtra("description", classModel.getDescription());
+        intent.putExtra("createdAt", classModel.getCreatedAt());
+        intent.putExtra("startAt", classModel.getStartAt());
+        intent.putExtra("endAt", classModel.getEndAt());
+        intent.putExtra("dayOfWeek", classModel.getDayOfWeek());
+        if (classModel.getTimeStart() != null) {
+            intent.putExtra("timeStart", classModel.getTimeStart().toString());
+        }
+        startActivity(intent);
     }
 
     @Override
     public void onDeleteClick(ClassModel classModel) {
-        // Handle delete class
-        classDAO.softDeleteClass(classModel.getId()); // Delete class from SQLite
-        classList.remove(classModel); // Remove from the list
-        classAdapter.notifyDataSetChanged(); // Update RecyclerView
-        Toast.makeText(this, "Class deleted", Toast.LENGTH_SHORT).show();
+        new androidx.appcompat.app.AlertDialog.Builder(ClassManagementActivity.this)
+                .setTitle("Delete Class")
+                .setMessage("Are you sure you want to delete this class?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    classDAO.softDeleteClass(classModel.getId());
+                    classList = classDAO.getAllClasses();
+                    classAdapter.updateData(classList);
+                    Toast.makeText(ClassManagementActivity.this, "Class deleted", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 }

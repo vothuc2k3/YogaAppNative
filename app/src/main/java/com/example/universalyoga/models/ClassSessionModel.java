@@ -1,10 +1,7 @@
 package com.example.universalyoga.models;
 
-import com.google.firebase.Timestamp;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class ClassSessionModel {
     private String id;
@@ -16,9 +13,12 @@ public class ClassSessionModel {
     private String room;
     private String note;
 
-    public ClassSessionModel(){}
+    private long lastSyncTime;
+    private boolean isDeleted;
 
-    public ClassSessionModel(String id, String classId, int sessionNumber, String instructorId, long date, int price, String room, String note){
+    public ClassSessionModel() {}
+
+    public ClassSessionModel(String id, String classId, int sessionNumber, String instructorId, long date, int price, String room, String note) {
         this.id = id;
         this.classId = classId;
         this.sessionNumber = sessionNumber;
@@ -65,7 +65,7 @@ public class ClassSessionModel {
         return date;
     }
 
-    public void setDate(long date){
+    public void setDate(long date) {
         this.date = date;
     }
 
@@ -93,7 +93,7 @@ public class ClassSessionModel {
         this.id = id;
     }
 
-    public Map<String, Object> toMap(){
+    public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
         map.put("classId", classId);
@@ -103,6 +103,42 @@ public class ClassSessionModel {
         map.put("price", price);
         map.put("room", room);
         map.put("note", note);
+        map.put("lastSyncTime", lastSyncTime);
+        map.put("isDeleted", isDeleted);
         return map;
+    }
+
+    public static ClassSessionModel fromMap(Map<String, Object> map) {
+        ClassSessionModel sessionModel = new ClassSessionModel();
+
+        sessionModel.setId((String) map.get("id"));
+        sessionModel.setClassId((String) map.get("classId"));
+        sessionModel.setSessionNumber(map.get("sessionNumber") != null ? ((Number) map.get("sessionNumber")).intValue() : 0);
+        sessionModel.setInstructorId((String) map.get("instructorId"));
+        sessionModel.setDate(map.get("date") != null ? ((Number) map.get("date")).longValue() : 0L);
+        sessionModel.setPrice(map.get("price") != null ? ((Number) map.get("price")).intValue() : 0);
+        sessionModel.setRoom((String) map.get("room"));
+        sessionModel.setNote((String) map.get("note"));
+        sessionModel.setLastSyncTime(map.get("lastSyncTime") != null ? ((Number) map.get("lastSyncTime")).longValue() : 0L);
+        sessionModel.setDeleted(map.get("isDeleted") != null && (Boolean) map.get("isDeleted"));
+
+        return sessionModel;
+    }
+
+
+    public long getLastSyncTime() {
+        return lastSyncTime;
+    }
+
+    public void setLastSyncTime(long lastSyncTime) {
+        this.lastSyncTime = lastSyncTime;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

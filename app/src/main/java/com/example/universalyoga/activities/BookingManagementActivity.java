@@ -22,6 +22,7 @@ import com.example.universalyoga.sqlite.DAO.BookingDAO;
 import com.example.universalyoga.sqlite.DAO.BookingSessionDAO;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
+import com.example.universalyoga.sqlite.DAO.UserDAO;
 
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class BookingManagementActivity extends AppCompatActivity {
     private ClassSessionDAO classSessionDAO;
     private ClassDAO classDAO;
     private BookingSessionDAO bookingSessionDAO;
+    private UserDAO userDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +52,7 @@ public class BookingManagementActivity extends AppCompatActivity {
         classSessionDAO = new ClassSessionDAO(this);
         classDAO = new ClassDAO(this);
         bookingSessionDAO = new BookingSessionDAO(this);
+        userDAO = new UserDAO(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -80,7 +83,7 @@ public class BookingManagementActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
             tvEmptyState.setVisibility(View.GONE);
 
-            bookingAdapter = new BookingAdapter(bookings, classSessionDAO, classDAO, bookingSessionDAO);
+            bookingAdapter = new BookingAdapter(bookings, classSessionDAO, classDAO, bookingSessionDAO, userDAO);
             recyclerViewBookings.setLayoutManager(new LinearLayoutManager(this));
             recyclerViewBookings.setAdapter(bookingAdapter);
         }

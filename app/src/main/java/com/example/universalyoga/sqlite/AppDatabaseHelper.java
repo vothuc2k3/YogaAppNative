@@ -36,7 +36,6 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             + "lastSyncTime INTEGER, "
             + "isDeleted INTEGER DEFAULT 0)";
 
-
     // Table for Class Sessions
     private static final String CREATE_TABLE_CLASS_SESSION = "CREATE TABLE class_sessions ("
             + "id TEXT PRIMARY KEY, "
@@ -47,7 +46,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             + "price INTEGER, "
             + "room TEXT, "
             + "note TEXT, "
+            + "lastSyncTime INTEGER, "
+            + "isDeleted INTEGER DEFAULT 0, "
             + "FOREIGN KEY (classId) REFERENCES classes(id))";
+
 
     // Table for Bookings
     private static final String CREATE_TABLE_BOOKINGS = "CREATE TABLE bookings ("
@@ -74,8 +76,8 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_USERS);
         db.execSQL(CREATE_TABLE_CLASS);
         db.execSQL(CREATE_TABLE_CLASS_SESSION);
-        db.execSQL(CREATE_TABLE_BOOKINGS);           // Add bookings table
-        db.execSQL(CREATE_TABLE_BOOKING_SESSIONS);   // Add booking_sessions table
+        db.execSQL(CREATE_TABLE_BOOKINGS);
+        db.execSQL(CREATE_TABLE_BOOKING_SESSIONS);
     }
 
     @Override

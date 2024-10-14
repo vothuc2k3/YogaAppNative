@@ -142,29 +142,10 @@ public class SyncWorker extends Worker {
         CollectionReference classSessionsRef = db.collection(CLASS_SESSIONS_COLLECTION);
         classSessionsRef.get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                ClassSessionModel classSessionModel = new ClassSessionModel();
+                Map<String, Object> sessionData = document.getData();
+                sessionData.put("id", document.getId());
 
-                classSessionModel.setId(document.getString("id"));
-                classSessionModel.setClassId(document.getString("classId"));
-                classSessionModel.setSessionNumber(document.getLong("sessionNumber").intValue());
-                classSessionModel.setInstructorId(document.getString("instructorId"));
-
-                Long dateEpoch = document.getLong("date");
-                if (dateEpoch != null) {
-                    classSessionModel.setDate(dateEpoch);
-                } else {
-                    Log.w(TAG, "Field 'date' is missing or not a number in document: " + document.getId());
-                }
-
-                Long price = document.getLong("price");  // Thêm logic lấy giá trị price
-                if (price != null) {
-                    classSessionModel.setPrice(price.intValue());
-                } else {
-                    Log.w(TAG, "Field 'price' is missing or not a number in document: " + document.getId());
-                }
-
-                classSessionModel.setRoom(document.getString("room"));
-                classSessionModel.setNote(document.getString("note"));
+                ClassSessionModel classSessionModel = ClassSessionModel.fromMap(sessionData);  // Sử dụng hàm fromMap để chuyển đổi
 
                 if (classSessionDAO.getClassSessionById(classSessionModel.getId()) == null) {
                     classSessionDAO.addClassSession(classSessionModel);
@@ -172,6 +153,7 @@ public class SyncWorker extends Worker {
                 }
             }
         }).addOnFailureListener(e -> Log.e(TAG, "Failed to fetch class sessions from Firestore", e));
+
 
 
         CollectionReference bookingsRef = db.collection(BOOKINGS_COLLECTION);
@@ -251,7 +233,6 @@ public class SyncWorker extends Worker {
                     .addOnSuccessListener(aVoid -> Log.d(TAG, "Booking uploaded to Firestore: " + localBooking.getId()))
                     .addOnFailureListener(e -> Log.e(TAG, "Failed to upload booking to Firestore", e));
 
-            // Đồng bộ sessionIds trong bảng booking_sessions
             List<String> sessionIds = bookingSessionDAO.getSessionIdsByBookingId(localBooking.getId());
             db.collection(BOOKINGS_COLLECTION)
                     .document(localBooking.getId())

@@ -64,6 +64,40 @@ public class ClassDAO {
         }
     }
 
+    public List<ClassModel> searchClassesByNameAndDay(String query, String dayOfWeek) {
+        List<ClassModel> classList = new ArrayList<>();
+        openReadableDb();
+        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_DAY_OF_WEEK + "=? AND " + COLUMN_IS_DELETED + "=?";
+        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", dayOfWeek, "0"});
+        if (cursor.moveToFirst()) {
+            do {
+                classList.add(populateClassModel(cursor));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        close();
+        return classList;
+    }
+
+    public List<ClassModel> searchClassesByInstructorName(String query) {
+        List<ClassModel> classList = new ArrayList<>();
+        openReadableDb();
+        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_IS_DELETED + "=?";
+        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", "0"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                classList.add(populateClassModel(cursor));
+            } while (cursor.moveToNext());
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+        close();
+        return classList;
+    }
+
     private ClassModel populateClassModel(Cursor cursor) {
         ClassModel classModel = new ClassModel();
         classModel.setId(cursor.getString(cursor.getColumnIndex(COLUMN_CLASS_ID)));
@@ -76,23 +110,21 @@ public class ClassDAO {
         classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
         classModel.setDayOfWeek(cursor.getString(cursor.getColumnIndex(COLUMN_DAY_OF_WEEK)));
 
-        // Xử lý timeStart
         long timeStartMillis = cursor.getLong(cursor.getColumnIndex(COLUMN_TIME_START));
         if (timeStartMillis > 0) {
             classModel.setTimeStart(new Time(timeStartMillis));
         }
+
         classModel.setCreatedAt(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATED_AT)));
         classModel.setStartAt(cursor.getLong(cursor.getColumnIndex(COLUMN_START_AT)));
         classModel.setEndAt(cursor.getLong(cursor.getColumnIndex(COLUMN_END_AT)));
 
         classModel.setDeleted(cursor.getInt(cursor.getColumnIndex(COLUMN_IS_DELETED)) == 1);
-
         classModel.setLastSyncTime(cursor.getLong(cursor.getColumnIndex(COLUMN_LAST_SYNC_TIME)));
 
         return classModel;
     }
 
-    // Thêm class mới
     public long addClass(ClassModel classModel) {
         openWritableDb();
         ContentValues values = new ContentValues();
@@ -106,7 +138,6 @@ public class ClassDAO {
         values.put(COLUMN_STATUS, classModel.getStatus());
         values.put(COLUMN_DAY_OF_WEEK, classModel.getDayOfWeek());
 
-        // Lưu các giá trị thời gian dạng long
         values.put(COLUMN_CREATED_AT, classModel.getCreatedAt());
         values.put(COLUMN_START_AT, classModel.getStartAt());
         values.put(COLUMN_END_AT, classModel.getEndAt());
@@ -115,11 +146,9 @@ public class ClassDAO {
             values.put(COLUMN_TIME_START, classModel.getTimeStart().getTime());
         }
 
-        // Đảm bảo isDeleted luôn khởi tạo là false
         values.put(COLUMN_IS_DELETED, 0);
 
-        // Cập nhật lastSyncTime
-        values.put(COLUMN_LAST_SYNC_TIME, classModel.getLastSyncTime());
+        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
 
         long result = db.insert(TABLE_CLASS, null, values);
         close();
@@ -151,7 +180,6 @@ public class ClassDAO {
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
         values.put(COLUMN_DAY_OF_WEEK, classModel.getDayOfWeek());
-
         values.put(COLUMN_CREATED_AT, classModel.getCreatedAt());
         values.put(COLUMN_START_AT, classModel.getStartAt());
         values.put(COLUMN_END_AT, classModel.getEndAt());
@@ -171,6 +199,7 @@ public class ClassDAO {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_IS_DELETED, 1);
+        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis()); // Cập nhật lastSyncTime khi soft delete
         db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
         close();
     }
@@ -189,48 +218,6 @@ public class ClassDAO {
         if (cursor != null) {
             cursor.close();
         }
-        close();
-        return classList;
-    }
-
-    public List<ClassModel> searchClassesByName(String query) {
-        List<ClassModel> classList = new ArrayList<>();
-        openReadableDb();
-        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_IS_DELETED + "=?";
-        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", "0"});
-
-        if (cursor.moveToFirst()) {
-            do {
-                classList.add(populateClassModel(cursor));
-            } while (cursor.moveToNext());
-        }
-
-        if (cursor != null) {
-            cursor.close();
-        }
-        close();
-        return classList;
-    }
-
-    public void updateLastSyncTime(String classId, long lastSyncTime) {
-        openWritableDb();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_LAST_SYNC_TIME, lastSyncTime);
-        db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
-        close();
-    }
-
-    public List<ClassModel> searchClassesByNameAndDay(String query, String dayOfWeek) {
-        List<ClassModel> classList = new ArrayList<>();
-        openReadableDb();
-        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_DAY_OF_WEEK + "=? AND " + COLUMN_IS_DELETED + "=?";
-        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", dayOfWeek, "0"});
-        if (cursor.moveToFirst()) {
-            do {
-                classList.add(populateClassModel(cursor));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
         close();
         return classList;
     }
@@ -258,6 +245,8 @@ public class ClassDAO {
         ContentValues values = new ContentValues();
         values.put(COLUMN_START_AT, minDate);
         values.put(COLUMN_END_AT, maxDate);
+
+        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
 
         openWritableDb();
         db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});

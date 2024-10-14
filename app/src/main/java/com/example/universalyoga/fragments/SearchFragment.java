@@ -94,7 +94,7 @@ public class SearchFragment extends Fragment {
         if (!dayOfWeek.isEmpty() && !dayOfWeek.equals("All Days")) {
             result = classDAO.searchClassesByNameAndDay(name, dayOfWeek);
         } else {
-            result = classDAO.searchClassesByName(name);
+            result = classDAO.searchClassesByInstructorName(name);
         }
 
         classAdapter.updateData(result);
@@ -125,7 +125,7 @@ public class SearchFragment extends Fragment {
                 intent.putExtra("instructorUid", classModel.getInstructorUid());
                 intent.putExtra("capacity", classModel.getCapacity());
                 intent.putExtra("duration", classModel.getDuration());
-                intent.putExtra("sessionCount", classModel.getSessionCount()); // Added sessionCount
+                intent.putExtra("sessionCount", classModel.getSessionCount());
                 intent.putExtra("type", classModel.getType());
                 intent.putExtra("status", classModel.getStatus());
                 intent.putExtra("description", classModel.getDescription());

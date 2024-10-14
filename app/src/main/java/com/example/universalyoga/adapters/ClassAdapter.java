@@ -82,7 +82,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             holder.sessionWarningTextView.setVisibility(View.GONE);
         }
 
-        // Handle Add Session button click
         holder.btnAddSession.setOnClickListener(v -> {
             if (currentSessionCount >= classModel.getSessionCount()) {
                 // Show confirmation dialog if sessions are full
