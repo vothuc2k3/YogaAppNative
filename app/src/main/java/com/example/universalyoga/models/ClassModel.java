@@ -19,6 +19,9 @@ public class ClassModel {
     private long startAt; // epoch time
     private long endAt; // epoch time
 
+    private long lastSyncTime;
+    private boolean isDeleted;
+
     public ClassModel() {
         this.createdAt = System.currentTimeMillis();
     }
@@ -145,7 +148,6 @@ public class ClassModel {
         this.sessionCount = sessionCount;
     }   
 
-    // Chuyển đổi đối tượng thành map để lưu trữ trong Firestore
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
@@ -159,6 +161,10 @@ public class ClassModel {
         map.put("createdAt", createdAt);
         map.put("startAt", startAt);
         map.put("endAt", endAt);
+        map.put("dayOfWeek", dayOfWeek);
+        map.put("timeStart", timeStart);
+        map.put("isDeleted", isDeleted);
+        map.put("lastSyncTime", lastSyncTime);
         return map;
     }
 
@@ -171,10 +177,30 @@ public class ClassModel {
                 ", sessionCount=" + sessionCount +
                 ", type='" + type + '\'' +
                 ", status='" + status + '\'' +
-                ", description='" + description + '\'' + // Bảo đảm không bỏ sót description
+                ", description='" + description + '\'' +
                 ", createdAt=" + createdAt +
                 ", startAt=" + startAt +
                 ", endAt=" + endAt +
+                ", dayOfWeek='" + dayOfWeek + '\'' +
+                ", timeStart=" + timeStart +
+                ", isDeleted=" + isDeleted +
+                ", lastSyncTime=" + lastSyncTime +
                 '}';
+    }
+
+    public long getLastSyncTime() {
+        return lastSyncTime;
+    }
+
+    public void setLastSyncTime(long lastSyncTime) {
+        this.lastSyncTime = lastSyncTime;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

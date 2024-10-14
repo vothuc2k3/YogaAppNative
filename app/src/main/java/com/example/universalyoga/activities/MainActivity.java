@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private ActionBarDrawerToggle toggle;
@@ -52,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
+        toolbar = findViewById(R.id.toolbar);
+
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
@@ -59,12 +62,16 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, new HomeFragment())
                         .commit();
+                toolbar.setTitle("Home");
             } else if (itemId == R.id.nav_search) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, new SearchFragment())
                         .commit();
+                toolbar.setTitle("Search");
             } else if (itemId == R.id.nav_profile) {
+                toolbar.setTitle("Profile");
             }
+
             return true;
         });
 

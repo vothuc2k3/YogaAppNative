@@ -52,9 +52,8 @@ public class SearchFragment extends Fragment {
         setupAdapter(classModels);
         recyclerView.setAdapter(classAdapter);
 
-        performSearch("", "");
+        performSearch("", "Monday");
 
-        // Setup SearchView listener
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -75,7 +74,6 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        // Setup Spinner listener for filtering by day of the week
         spinnerFilterDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
@@ -91,7 +89,6 @@ public class SearchFragment extends Fragment {
         return view;
     }
 
-    // Perform search with name and day of the week
     private void performSearch(String name, String dayOfWeek) {
         List<ClassModel> result;
         if (!dayOfWeek.isEmpty() && !dayOfWeek.equals("All Days")) {
@@ -148,7 +145,7 @@ public class SearchFragment extends Fragment {
                         .setTitle("Delete Class")
                         .setMessage("Are you sure you want to delete this class?")
                         .setPositiveButton("Yes", (dialog, which) -> {
-                            classDAO.deleteClass(classModel.getId());
+                            classDAO.softDeleteClass(classModel.getId());
                             classModels = classDAO.getAllClasses();
                             classAdapter.updateData(classModels);
                             Toast.makeText(getContext(), "Class deleted", Toast.LENGTH_SHORT).show();

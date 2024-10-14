@@ -1,11 +1,11 @@
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/swipeRefreshLayout"
-    layout_height="match_parent"
-    layout_width="match_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
@@ -49,7 +49,6 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Tổng số lượt đặt lớp học -->
         <androidx.cardview.widget.CardView
             android:id="@+id/card_total_bookings"
             android:layout_width="match_parent"
@@ -105,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:backgroundTint="@color/colorPrimary"
-                android:text="Add New Class"
+                android:text="New Class"
                 android:textColor="@android:color/white"
                 app:cornerRadius="16dp" />
 
@@ -115,22 +114,37 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:backgroundTint="@color/colorPrimary"
-                android:text="Classes Management"
+                android:text="Classes"
                 android:textColor="@android:color/white"
                 app:cornerRadius="16dp" />
         </LinearLayout>
+
+        <!-- Nút User Management và Booking Management -->
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_user_management"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="12dp"
             android:backgroundTint="@color/colorPrimary"
             android:text="User Management"
             android:textColor="@android:color/white"
             app:cornerRadius="16dp"
+            app:layout_constraintEnd_toStartOf="@id/btn_booking_management"
+            app:layout_constraintTop_toBottomOf="@id/quick_actions" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_booking_management"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:text="Booking Management"
+            android:textColor="@android:color/white"
+            app:cornerRadius="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/quick_actions" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

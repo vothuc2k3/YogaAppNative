@@ -1,12 +1,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="0dp"
     tools:context=".activities.AddClassActivity">
 
-    <!-- ScrollView wraps the entire layout -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -14,10 +12,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <!-- Toolbar -->
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -26,50 +22,61 @@
                 android:title="Create new class"
                 android:titleTextColor="@color/white" />
 
-            <!-- Class Type -->
             <TextView
                 android:id="@+id/label_class_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="Class Type"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp" />
+                android:textStyle="bold" />
 
             <Spinner
                 android:id="@+id/spinner_class_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:entries="@array/class_type_array" />
+                android:entries="@array/class_type_array"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
             <!-- Instructor -->
             <TextView
                 android:id="@+id/label_instructor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="Instructor"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp" />
+                android:textStyle="bold" />
 
             <Spinner
                 android:id="@+id/spinner_instructor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:entries="@array/dummy_instructor_array" />
+                android:entries="@array/dummy_instructor_array"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
             <!-- Day of Week -->
             <TextView
                 android:id="@+id/label_day_of_week"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="Day of the Week"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp" />
+                android:textStyle="bold" />
 
             <Spinner
                 android:id="@+id/spinner_day_of_week"
                 android:layout_width="match_parent"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:entries="@array/days_of_week_array" />
@@ -79,109 +86,135 @@
                 android:id="@+id/label_class_start_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="Start Time"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp" />
+                android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/input_class_start_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Select Time"
+                android:layout_marginTop="8dp"
                 android:focusable="false"
-                android:layout_marginTop="8dp" />
+                android:hint="Select Time"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
             <!-- First Day (Start Date) -->
             <TextView
                 android:id="@+id/label_first_day"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="First Day (Start Date)"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp" />
+                android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/input_start_at"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Select Start Date"
+                android:layout_marginTop="8dp"
                 android:focusable="false"
-                android:layout_marginTop="8dp" />
+                android:hint="Select Start Date"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
             <!-- Number of Sessions -->
             <TextView
                 android:id="@+id/label_class_sessions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="Number of Sessions"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp" />
+                android:textStyle="bold" />
 
             <NumberPicker
                 android:id="@+id/number_picker_sessions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"/>
+                android:layout_gravity="center_horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
             <!-- Description -->
             <TextView
                 android:id="@+id/label_class_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="Description"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp" />
+                android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/input_class_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:hint="Optional"
-                android:minLines="3"
                 android:inputType="textMultiLine"
-                android:layout_marginTop="8dp" />
+                android:minLines="3"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
             <!-- Class Capacity -->
             <TextView
                 android:id="@+id/label_class_capacity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="Class Capacity"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp" />
+                android:textStyle="bold" />
 
             <NumberPicker
                 android:id="@+id/number_picker_capacity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal" />
+                android:layout_gravity="center_horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
             <!-- Class Duration -->
             <TextView
                 android:id="@+id/label_class_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="Class Duration (minutes)"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp" />
+                android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/input_class_duration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:hint="Enter Duration"
                 android:inputType="number"
-                android:layout_marginTop="8dp" />
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
             <!-- Submit Button -->
             <Button
                 android:id="@+id/btn_submit_class"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:backgroundTint="@color/colorPrimary"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="Create Class"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="16dp" />
+                android:textColor="@android:color/white" />
 
         </LinearLayout>
     </ScrollView>

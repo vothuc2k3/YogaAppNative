@@ -10,13 +10,17 @@ import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.sqlite.AppDatabaseHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+
 
 public class ClassSessionDAO {
 
     public static final String TABLE_CLASS_SESSION = "class_sessions";
     public static final String COLUMN_SESSION_ID = "id";
     public static final String COLUMN_CLASS_ID = "classId";
+    public static final String COLUMN_SESSION_NUMBER = "sessionNumber"; // Thêm cột sessionNumber
     public static final String COLUMN_INSTRUCTOR_ID = "instructorId";
     public static final String COLUMN_DATE = "date";
     public static final String COLUMN_PRICE = "price";
@@ -54,6 +58,7 @@ public class ClassSessionDAO {
         ContentValues values = new ContentValues();
         values.put(COLUMN_SESSION_ID, session.getId());
         values.put(COLUMN_CLASS_ID, session.getClassId());
+        values.put(COLUMN_SESSION_NUMBER, session.getSessionNumber()); // Thêm giá trị sessionNumber
         values.put(COLUMN_INSTRUCTOR_ID, session.getInstructorId());
         values.put(COLUMN_DATE, session.getDate());
         values.put(COLUMN_PRICE, session.getPrice());
@@ -72,13 +77,14 @@ public class ClassSessionDAO {
         ClassSessionModel session = null;
         if (cursor != null && cursor.moveToFirst()) {
             session = new ClassSessionModel(
-                    cursor.getString(cursor.getColumnIndex(COLUMN_SESSION_ID)), // Lấy id của session
-                    cursor.getString(cursor.getColumnIndex(COLUMN_CLASS_ID)),   // Lấy id của class
-                    cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_ID)), // Lấy id của instructor
-                    cursor.getLong(cursor.getColumnIndex(COLUMN_DATE)),  // Lấy giá trị date (epoch time)
-                    cursor.getInt(cursor.getColumnIndex(COLUMN_PRICE)),  // Lấy giá trị price
-                    cursor.getString(cursor.getColumnIndex(COLUMN_ROOM)), // Lấy giá trị room
-                    cursor.getString(cursor.getColumnIndex(COLUMN_NOTE))  // Lấy giá trị note
+                    cursor.getString(cursor.getColumnIndex(COLUMN_SESSION_ID)),
+                    cursor.getString(cursor.getColumnIndex(COLUMN_CLASS_ID)),
+                    cursor.getInt(cursor.getColumnIndex(COLUMN_SESSION_NUMBER)),  // Lấy giá trị sessionNumber
+                    cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_ID)),
+                    cursor.getLong(cursor.getColumnIndex(COLUMN_DATE)),
+                    cursor.getInt(cursor.getColumnIndex(COLUMN_PRICE)),
+                    cursor.getString(cursor.getColumnIndex(COLUMN_ROOM)),
+                    cursor.getString(cursor.getColumnIndex(COLUMN_NOTE))
             );
         }
         if (cursor != null) {
@@ -88,11 +94,11 @@ public class ClassSessionDAO {
         return session;
     }
 
-    // Cập nhật class session
     public int updateClassSession(ClassSessionModel session) {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_CLASS_ID, session.getClassId());
+        values.put(COLUMN_SESSION_NUMBER, session.getSessionNumber());
         values.put(COLUMN_INSTRUCTOR_ID, session.getInstructorId());
         values.put(COLUMN_DATE, session.getDate());
         values.put(COLUMN_PRICE, session.getPrice());
@@ -122,6 +128,7 @@ public class ClassSessionDAO {
                 ClassSessionModel session = new ClassSessionModel(
                         cursor.getString(cursor.getColumnIndex(COLUMN_SESSION_ID)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CLASS_ID)),
+                        cursor.getInt(cursor.getColumnIndex(COLUMN_SESSION_NUMBER)), // Lấy giá trị sessionNumber
                         cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_ID)),
                         cursor.getLong(cursor.getColumnIndex(COLUMN_DATE)),
                         cursor.getInt(cursor.getColumnIndex(COLUMN_PRICE)),
@@ -139,7 +146,6 @@ public class ClassSessionDAO {
         return sessionList;
     }
 
-    // Lấy tất cả các class session theo classId
     public List<ClassSessionModel> getClassSessionsByClassId(String classId) {
         List<ClassSessionModel> sessionList = new ArrayList<>();
         openReadableDb();
@@ -149,6 +155,7 @@ public class ClassSessionDAO {
                 ClassSessionModel session = new ClassSessionModel(
                         cursor.getString(cursor.getColumnIndex(COLUMN_SESSION_ID)),
                         cursor.getString(cursor.getColumnIndex(COLUMN_CLASS_ID)),
+                        cursor.getInt(cursor.getColumnIndex(COLUMN_SESSION_NUMBER)),  // Lấy giá trị sessionNumber
                         cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_ID)),
                         cursor.getLong(cursor.getColumnIndex(COLUMN_DATE)),
                         cursor.getInt(cursor.getColumnIndex(COLUMN_PRICE)),
@@ -162,6 +169,26 @@ public class ClassSessionDAO {
             cursor.close();
         }
         close();
+
+        Collections.sort(sessionList, Comparator.comparingLong(ClassSessionModel::getDate));
+
         return sessionList;
     }
+
+    public void updateClassSessionNumber(String classId) {
+        List<ClassSessionModel> sessionList = getClassSessionsByClassId(classId);
+
+        Collections.sort(sessionList, Comparator.comparingLong(ClassSessionModel::getDate));
+
+        openWritableDb();
+        for (int i = 0; i < sessionList.size(); i++) {
+            ClassSessionModel session = sessionList.get(i);
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_SESSION_NUMBER, i + 1);
+
+            db.update(TABLE_CLASS_SESSION, values, COLUMN_SESSION_ID + "=?", new String[]{session.getId()});
+        }
+        close();
+    }
+
 }

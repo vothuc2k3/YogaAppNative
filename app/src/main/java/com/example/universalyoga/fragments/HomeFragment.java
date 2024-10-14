@@ -14,6 +14,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.activities.AddClassActivity;
+import com.example.universalyoga.activities.BookingManagementActivity;
+import com.example.universalyoga.activities.ClassManagementActivity;
 import com.example.universalyoga.activities.UserManagementActivity;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 
@@ -55,6 +57,12 @@ public class HomeFragment extends Fragment {
             Intent intent = new Intent(getActivity(), UserManagementActivity.class);
             startActivity(intent);
         });
+
+        view.findViewById(R.id.btn_class_management).setOnClickListener(v -> {
+            startActivity(new Intent(getActivity(), ClassManagementActivity.class));
+        });
+
+        view.findViewById(R.id.btn_booking_management).setOnClickListener(v -> startActivity(new Intent(getActivity(), BookingManagementActivity.class)));
 
         return view;
     }

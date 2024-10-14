@@ -42,7 +42,7 @@ public class AddClassActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_class_activity);
+        setContentView(R.layout.activity_add_class);
 
         userDAO = new UserDAO(this);
         classDAO = new ClassDAO(this);

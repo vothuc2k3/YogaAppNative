@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.example.universalyoga.models.ClassModel;
+import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.sqlite.AppDatabaseHelper;
 
 import java.sql.Time;
@@ -33,12 +34,16 @@ public class ClassDAO {
     public static final String COLUMN_END_AT = "endAt";
     public static final String COLUMN_DAY_OF_WEEK = "dayOfWeek";
     public static final String COLUMN_TIME_START = "timeStart";
+    public static final String COLUMN_IS_DELETED = "isDeleted";
+    public static final String COLUMN_LAST_SYNC_TIME = "lastSyncTime";
 
+    private ClassSessionDAO classSessionDAO;
     private final SQLiteOpenHelper dbHelper;
     private SQLiteDatabase db;
 
     public ClassDAO(Context context) {
         dbHelper = new AppDatabaseHelper(context);
+        classSessionDAO = new ClassSessionDAO(context);
     }
 
     private void openWritableDb() {
@@ -65,11 +70,10 @@ public class ClassDAO {
         classModel.setInstructorUid(cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_UID)));
         classModel.setCapacity(cursor.getInt(cursor.getColumnIndex(COLUMN_CAPACITY)));
         classModel.setDuration(cursor.getInt(cursor.getColumnIndex(COLUMN_DURATION)));
-        classModel.setSessionCount(cursor.getInt(cursor.getColumnIndex(COLUMN_SESSION_COUNT)));  // xử lý sessionCount
+        classModel.setSessionCount(cursor.getInt(cursor.getColumnIndex(COLUMN_SESSION_COUNT)));
         classModel.setType(cursor.getString(cursor.getColumnIndex(COLUMN_TYPE)));
         classModel.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
         classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
-
         classModel.setDayOfWeek(cursor.getString(cursor.getColumnIndex(COLUMN_DAY_OF_WEEK)));
 
         // Xử lý timeStart
@@ -77,11 +81,13 @@ public class ClassDAO {
         if (timeStartMillis > 0) {
             classModel.setTimeStart(new Time(timeStartMillis));
         }
-
-        // Xử lý các trường thời gian (createdAt, startAt, endAt)
         classModel.setCreatedAt(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATED_AT)));
         classModel.setStartAt(cursor.getLong(cursor.getColumnIndex(COLUMN_START_AT)));
         classModel.setEndAt(cursor.getLong(cursor.getColumnIndex(COLUMN_END_AT)));
+
+        classModel.setDeleted(cursor.getInt(cursor.getColumnIndex(COLUMN_IS_DELETED)) == 1);
+
+        classModel.setLastSyncTime(cursor.getLong(cursor.getColumnIndex(COLUMN_LAST_SYNC_TIME)));
 
         return classModel;
     }
@@ -94,7 +100,7 @@ public class ClassDAO {
         values.put(COLUMN_INSTRUCTOR_UID, classModel.getInstructorUid());
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
-        values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());  // lưu sessionCount
+        values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());
         values.put(COLUMN_TYPE, classModel.getType());
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
@@ -109,15 +115,20 @@ public class ClassDAO {
             values.put(COLUMN_TIME_START, classModel.getTimeStart().getTime());
         }
 
+        // Đảm bảo isDeleted luôn khởi tạo là false
+        values.put(COLUMN_IS_DELETED, 0);
+
+        // Cập nhật lastSyncTime
+        values.put(COLUMN_LAST_SYNC_TIME, classModel.getLastSyncTime());
+
         long result = db.insert(TABLE_CLASS, null, values);
         close();
         return result;
     }
 
-    // Lấy lớp học theo ID
     public ClassModel getClassById(String classId) {
         openReadableDb();
-        Cursor cursor = db.query(TABLE_CLASS, null, COLUMN_CLASS_ID + "=?", new String[]{classId}, null, null, null);
+        Cursor cursor = db.query(TABLE_CLASS, null, COLUMN_CLASS_ID + "=? AND " + COLUMN_IS_DELETED + "=?", new String[]{classId, "0"}, null, null, null);
         ClassModel classModel = null;
         if (cursor != null && cursor.moveToFirst()) {
             classModel = populateClassModel(cursor);
@@ -129,20 +140,18 @@ public class ClassDAO {
         return classModel;
     }
 
-    // Cập nhật class
     public int updateClass(ClassModel classModel) {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_INSTRUCTOR_UID, classModel.getInstructorUid());
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
-        values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());  // cập nhật sessionCount
+        values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());
         values.put(COLUMN_TYPE, classModel.getType());
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
         values.put(COLUMN_DAY_OF_WEEK, classModel.getDayOfWeek());
 
-        // Cập nhật giá trị thời gian dạng long
         values.put(COLUMN_CREATED_AT, classModel.getCreatedAt());
         values.put(COLUMN_START_AT, classModel.getStartAt());
         values.put(COLUMN_END_AT, classModel.getEndAt());
@@ -151,16 +160,25 @@ public class ClassDAO {
             values.put(COLUMN_TIME_START, classModel.getTimeStart().getTime());
         }
 
+        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
+
         int rowsAffected = db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classModel.getId()});
         close();
         return rowsAffected;
     }
 
-    // Lấy tất cả các lớp học
+    public void softDeleteClass(String classId) {
+        openWritableDb();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_IS_DELETED, 1);
+        db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
+        close();
+    }
+
     public List<ClassModel> getAllClasses() {
         List<ClassModel> classList = new ArrayList<>();
         openReadableDb();
-        Cursor cursor = db.query(TABLE_CLASS, null, null, null, null, null, null);
+        Cursor cursor = db.query(TABLE_CLASS, null, COLUMN_IS_DELETED + "=?", new String[]{"0"}, null, null, null);
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
@@ -175,12 +193,11 @@ public class ClassDAO {
         return classList;
     }
 
-    // Tìm kiếm lớp học theo tên
     public List<ClassModel> searchClassesByName(String query) {
         List<ClassModel> classList = new ArrayList<>();
         openReadableDb();
-        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ?";
-        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%"});
+        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_IS_DELETED + "=?";
+        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", "0"});
 
         if (cursor.moveToFirst()) {
             do {
@@ -195,43 +212,55 @@ public class ClassDAO {
         return classList;
     }
 
-    public void deleteClass(String classId) {
+    public void updateLastSyncTime(String classId, long lastSyncTime) {
         openWritableDb();
-
-        String query = "SELECT * FROM " + TABLE_CLASS_SESSIONS + " WHERE " + COLUMN_CLASS_SESSION_CLASS_ID + "=?";
-        Cursor cursor = db.rawQuery(query, new String[]{classId});
-
-        if (cursor.getCount() > 0) {
-            db.delete(TABLE_CLASS_SESSIONS, COLUMN_CLASS_SESSION_CLASS_ID + "=?", new String[]{classId});
-            Log.d("deleteClass", "Class sessions deleted for classId: " + classId);
-        } else {
-            Log.d("deleteClass", "No class sessions found for classId: " + classId);
-        }
-
-        db.delete(TABLE_CLASS, COLUMN_CLASS_ID + "=?", new String[]{classId});
-        Log.d("deleteClass", "Class deleted with classId: " + classId);
-
-        cursor.close();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_LAST_SYNC_TIME, lastSyncTime);
+        db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
         close();
     }
 
     public List<ClassModel> searchClassesByNameAndDay(String query, String dayOfWeek) {
         List<ClassModel> classList = new ArrayList<>();
         openReadableDb();
-
-        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_DAY_OF_WEEK + "=?";
-        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", dayOfWeek});
+        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_DAY_OF_WEEK + "=? AND " + COLUMN_IS_DELETED + "=?";
+        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", dayOfWeek, "0"});
         if (cursor.moveToFirst()) {
             do {
                 classList.add(populateClassModel(cursor));
             } while (cursor.moveToNext());
         }
-
-        if (cursor != null) {
-            cursor.close();
-        }
+        cursor.close();
         close();
         return classList;
     }
 
+    public void updateClassStartAndEndDate(String classId) {
+        List<ClassSessionModel> sessionList = classSessionDAO.getClassSessionsByClassId(classId);
+
+        if (sessionList == null || sessionList.isEmpty()) {
+            return;
+        }
+
+        long minDate = Long.MAX_VALUE;
+        long maxDate = Long.MIN_VALUE;
+
+        for (ClassSessionModel session : sessionList) {
+            long sessionDate = session.getDate();
+            if (sessionDate < minDate) {
+                minDate = sessionDate;
+            }
+            if (sessionDate > maxDate) {
+                maxDate = sessionDate;
+            }
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_START_AT, minDate);
+        values.put(COLUMN_END_AT, maxDate);
+
+        openWritableDb();
+        db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
+        close();
+    }
 }

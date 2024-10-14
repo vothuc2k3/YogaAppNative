@@ -12,7 +12,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassSessionModel;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ClassSessionAdapter extends RecyclerView.Adapter<ClassSessionAdapter.ClassSessionViewHolder> {
 
@@ -35,9 +38,14 @@ public class ClassSessionAdapter extends RecyclerView.Adapter<ClassSessionAdapte
     public void onBindViewHolder(@NonNull ClassSessionViewHolder holder, int position) {
         ClassSessionModel session = classSessionList.get(position);
 
+        holder.tvSessionNumber.setText(String.valueOf(session.getSessionNumber()));
         holder.tvSessionNote.setText(session.getNote());
-        holder.tvSessionPrice.setText("$" + session.getPrice()); // Hiển thị giá tiền
-        holder.tvSessionRoom.setText(session.getRoom()); // Hiển thị phòng học
+        holder.tvSessionPrice.setText("$" + session.getPrice());
+        holder.tvSessionRoom.setText(session.getRoom());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        String sessionDate = dateFormat.format(new Date(session.getDate()));
+        holder.tvSessionDate.setText(sessionDate);
     }
 
     @Override
@@ -46,13 +54,15 @@ public class ClassSessionAdapter extends RecyclerView.Adapter<ClassSessionAdapte
     }
 
     public static class ClassSessionViewHolder extends RecyclerView.ViewHolder {
-        TextView tvSessionNote, tvSessionPrice, tvSessionRoom;
+        TextView tvSessionNote, tvSessionPrice, tvSessionRoom, tvSessionNumber, tvSessionDate;
 
         public ClassSessionViewHolder(@NonNull View itemView) {
             super(itemView);
+            tvSessionNumber = itemView.findViewById(R.id.tv_session_number);
             tvSessionNote = itemView.findViewById(R.id.tv_session_note);
             tvSessionPrice = itemView.findViewById(R.id.tv_session_price); // TextView cho giá tiền
             tvSessionRoom = itemView.findViewById(R.id.tv_session_room);   // TextView cho phòng học
+            tvSessionDate = itemView.findViewById(R.id.tv_session_date);
         }
     }
 }

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -13,6 +12,68 @@
         android:layout_height="match_parent"
         android:padding="16dp">
 
+        <!-- Session Number -->
+        <ImageView
+            android:id="@+id/icon_session_number"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_bullet_point"
+            app:layout_constraintBottom_toBottomOf="@id/tv_session_number_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_session_number_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Session:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/icon_session_number"
+            app:layout_constraintTop_toTopOf="@id/icon_session_number" />
+
+        <TextView
+            android:id="@+id/tv_session_number"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_session_number_label"
+            app:layout_constraintTop_toTopOf="@id/icon_session_number" />
+
+        <!-- New Field: Session Date -->
+        <ImageView
+            android:id="@+id/icon_session_date"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_sessions"
+            app:layout_constraintBottom_toBottomOf="@id/tv_session_date_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_session_number" />
+
+        <TextView
+            android:id="@+id/tv_session_date_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Date:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/icon_session_date"
+            app:layout_constraintTop_toTopOf="@id/icon_session_date" />
+
+        <TextView
+            android:id="@+id/tv_session_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_session_date_label"
+            app:layout_constraintTop_toTopOf="@id/icon_session_date" />
+
         <!-- Price -->
         <ImageView
             android:id="@+id/icon_price"
@@ -22,7 +83,7 @@
             android:src="@drawable/ic_price_tag"
             app:layout_constraintBottom_toBottomOf="@id/tv_session_price_label"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/tv_session_date" />
 
         <TextView
             android:id="@+id/tv_session_price_label"

@@ -125,22 +125,31 @@
             app:layout_constraintStart_toEndOf="@id/icon_duration"
             app:layout_constraintTop_toBottomOf="@id/start_time_value" />
 
+        <!-- Edit and Delete Buttons -->
+
         <ImageView
             android:id="@+id/icon_session_count"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:src="@drawable/ic_sessions"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/icon_duration" />
 
-        <!-- Edit and Delete Buttons -->
+        <ImageView
+            android:id="@+id/icon_day_of_week"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="20dp"
+            android:src="@drawable/ic_calendar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/icon_session_count" />
 
         <TextView
             android:id="@+id/session_count_value"
             android:layout_width="296dp"
             android:layout_height="24dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:text="Sessions: "
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -148,15 +157,51 @@
             app:layout_constraintStart_toEndOf="@id/icon_session_count"
             app:layout_constraintTop_toBottomOf="@id/duration_value" />
 
+        <TextView
+            android:id="@+id/day_of_week"
+            android:layout_width="296dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="20dp"
+            android:text=""
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.488"
+            app:layout_constraintStart_toEndOf="@id/icon_session_count"
+            app:layout_constraintTop_toBottomOf="@+id/session_count_value" />
+
+        <TextView
+            android:id="@+id/tv_session_warning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Not enough sessions!"
+            android:textColor="@android:color/holo_red_dark"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/day_of_week" />
+
         <Button
             android:id="@+id/btn_edit_class"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="68dp"
             android:text="Edit"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.541"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/session_count_value" />
+
+        <Button
+            android:id="@+id/btn_add_session"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="68dp"
+            android:text="Add sessions"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/session_count_value" />
 
@@ -164,11 +209,11 @@
             android:id="@+id/btn_delete_class"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="68dp"
             android:text="Delete"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.959"
+            app:layout_constraintHorizontal_bias="0.416"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/session_count_value" />
 
