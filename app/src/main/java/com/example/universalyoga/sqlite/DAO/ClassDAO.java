@@ -252,4 +252,12 @@ public class ClassDAO {
         db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
         close();
     }
+
+    public void updateLastSyncTime(String classId) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
+        openWritableDb();
+        db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
+        close();
+    }
 }

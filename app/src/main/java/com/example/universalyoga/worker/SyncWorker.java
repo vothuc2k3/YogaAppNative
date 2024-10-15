@@ -120,9 +120,15 @@ public class SyncWorker extends Worker {
                     }
                 }
 
-                if (classDAO.getClassById(classModel.getId()) == null) {
+                Long lastSyncTime = document.getLong("lastSyncTime");
+                if (lastSyncTime != null) {
+                    classModel.setLastSyncTime(lastSyncTime);
+                }
+
+                ClassModel localClass = classDAO.getClassById(classModel.getId());
+                if (localClass == null || classModel.getLastSyncTime() > localClass.getLastSyncTime()) {
                     classDAO.addClass(classModel);
-                    Log.d(TAG, "Class added to SQLite: " + classModel.getId());
+                    Log.d(TAG, "Class added/updated in SQLite: " + classModel.getId());
                 }
             }
         }).addOnFailureListener(e -> Log.e(TAG, "Failed to fetch classes from Firestore", e));
@@ -142,14 +148,35 @@ public class SyncWorker extends Worker {
         CollectionReference classSessionsRef = db.collection(CLASS_SESSIONS_COLLECTION);
         classSessionsRef.get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                Map<String, Object> sessionData = document.getData();
-                sessionData.put("id", document.getId());
+                ClassSessionModel classSessionModel = new ClassSessionModel();
 
-                ClassSessionModel classSessionModel = ClassSessionModel.fromMap(sessionData);  // Sử dụng hàm fromMap để chuyển đổi
+                classSessionModel.setId(document.getString("id"));
+                classSessionModel.setClassId(document.getString("classId"));
+                classSessionModel.setSessionNumber(document.getLong("sessionNumber").intValue());
+                classSessionModel.setInstructorId(document.getString("instructorId"));
 
-                if (classSessionDAO.getClassSessionById(classSessionModel.getId()) == null) {
+                Long dateEpoch = document.getLong("date");
+                if (dateEpoch != null) {
+                    classSessionModel.setDate(dateEpoch);
+                }
+
+                Long price = document.getLong("price");
+                if (price != null) {
+                    classSessionModel.setPrice(price.intValue());
+                }
+
+                classSessionModel.setRoom(document.getString("room"));
+                classSessionModel.setNote(document.getString("note"));
+
+                Long lastSyncTime = document.getLong("lastSyncTime");
+                if (lastSyncTime != null) {
+                    classSessionModel.setLastSyncTime(lastSyncTime);
+                }
+
+                ClassSessionModel localSession = classSessionDAO.getClassSessionById(classSessionModel.getId());
+                if (localSession == null || classSessionModel.getLastSyncTime() > localSession.getLastSyncTime()) {
                     classSessionDAO.addClassSession(classSessionModel);
-                    Log.d(TAG, "Class session added to SQLite: " + classSessionModel.getId());
+                    Log.d(TAG, "Class session added/updated in SQLite: " + classSessionModel.getId());
                 }
             }
         }).addOnFailureListener(e -> Log.e(TAG, "Failed to fetch class sessions from Firestore", e));
@@ -187,39 +214,45 @@ public class SyncWorker extends Worker {
     }
 
     private void syncFromSQLiteToFirestore() {
+        long currentTime = System.currentTimeMillis();
+
         List<ClassModel> localClasses = classDAO.getAllClasses();
         for (ClassModel localClass : localClasses) {
-            Map<String, Object> classData = localClass.toMap();
+            if (localClass.getLastSyncTime() > localClass.getLastSyncTime()) {
+                Map<String, Object> classData = localClass.toMap();
 
-            classData.put("timeStart", localClass.getTimeStart().getTime());
-            classData.put("createdAt", new Timestamp(new Date(localClass.getCreatedAt())));
-            classData.put("startAt", new Timestamp(new Date(localClass.getStartAt())));
-            classData.put("endAt", new Timestamp(new Date(localClass.getEndAt())));
+                classData.put("timeStart", localClass.getTimeStart().getTime());
+                classData.put("createdAt", new Timestamp(new Date(localClass.getCreatedAt())));
+                classData.put("startAt", new Timestamp(new Date(localClass.getStartAt())));
+                classData.put("endAt", new Timestamp(new Date(localClass.getEndAt())));
+                classData.put("lastSyncTime", currentTime);
 
-            db.collection(CLASSES_COLLECTION)
-                    .document(localClass.getId())
-                    .set(classData)
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Class uploaded to Firestore: " + localClass.getId()))
-                    .addOnFailureListener(e -> Log.e(TAG, "Failed to upload class to Firestore", e));
-        }
-
-        List<UserModel> localUsers = userDAO.getAllUsers();
-        for (UserModel localUser : localUsers) {
-            db.collection(USERS_COLLECTION)
-                    .document(localUser.getUid())
-                    .set(localUser)
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "User uploaded to Firestore: " + localUser.getUid()))
-                    .addOnFailureListener(e -> Log.e(TAG, "Failed to upload user to Firestore", e));
+                db.collection(CLASSES_COLLECTION)
+                        .document(localClass.getId())
+                        .set(classData)
+                        .addOnSuccessListener(aVoid -> {
+                            classDAO.updateLastSyncTime(localClass.getId());
+                            Log.d(TAG, "Class uploaded to Firestore: " + localClass.getId());
+                        })
+                        .addOnFailureListener(e -> Log.e(TAG, "Failed to upload class to Firestore", e));
+            }
         }
 
         List<ClassSessionModel> localClassSessions = classSessionDAO.getAllClassSessions();
         for (ClassSessionModel localClassSession : localClassSessions) {
-            Map<String, Object> sessionData = localClassSession.toMap();
-            db.collection(CLASS_SESSIONS_COLLECTION)
-                    .document(localClassSession.getId())
-                    .set(sessionData)
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Class session uploaded to Firestore: " + localClassSession.getId()))
-                    .addOnFailureListener(e -> Log.e(TAG, "Failed to upload class session to Firestore", e));
+            if (localClassSession.getLastSyncTime() > localClassSession.getLastSyncTime()) {
+                Map<String, Object> sessionData = localClassSession.toMap();
+                sessionData.put("lastSyncTime", currentTime);
+
+                db.collection(CLASS_SESSIONS_COLLECTION)
+                        .document(localClassSession.getId())
+                        .set(sessionData)
+                        .addOnSuccessListener(aVoid -> {
+                            classSessionDAO.updateLastSyncTime(localClassSession.getId());
+                            Log.d(TAG, "Class session uploaded to Firestore: " + localClassSession.getId());
+                        })
+                        .addOnFailureListener(e -> Log.e(TAG, "Failed to upload class session to Firestore", e));
+            }
         }
 
         List<BookingModel> localBookings = bookingDAO.getAllBookings();

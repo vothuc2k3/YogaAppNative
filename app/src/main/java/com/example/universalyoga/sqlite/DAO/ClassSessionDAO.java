@@ -111,9 +111,11 @@ public class ClassSessionDAO {
         return rowsAffected;
     }
 
-    public void deleteClassSession(String id) {
+    public void softDeleteClassSession(String id) {
         openWritableDb();
-        db.delete(TABLE_CLASS_SESSION, COLUMN_SESSION_ID + "=?", new String[]{id});
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_IS_DELETED, 1);
+        db.update(TABLE_CLASS_SESSION, values, COLUMN_SESSION_ID + "=?", new String[]{id});
         close();
     }
 
@@ -148,7 +150,10 @@ public class ClassSessionDAO {
     public List<ClassSessionModel> getClassSessionsByClassId(String classId) {
         List<ClassSessionModel> sessionList = new ArrayList<>();
         openReadableDb();
-        Cursor cursor = db.query(TABLE_CLASS_SESSION, null, COLUMN_CLASS_ID + "=?", new String[]{classId}, null, null, null);
+
+        Cursor cursor = db.query(TABLE_CLASS_SESSION, null, COLUMN_CLASS_ID + "=? AND isDeleted=?",
+                new String[]{classId, "0"}, null, null, null);
+
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 ClassSessionModel session = new ClassSessionModel(
@@ -174,6 +179,7 @@ public class ClassSessionDAO {
         return sessionList;
     }
 
+
     public void updateClassSessionNumber(String classId) {
         List<ClassSessionModel> sessionList = getClassSessionsByClassId(classId);
 
@@ -188,6 +194,14 @@ public class ClassSessionDAO {
 
             db.update(TABLE_CLASS_SESSION, values, COLUMN_SESSION_ID + "=?", new String[]{session.getId()});
         }
+        close();
+    }
+
+    public void updateLastSyncTime(String sessionId) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
+        openWritableDb();
+        db.update(TABLE_CLASS_SESSION, values, COLUMN_SESSION_ID + "=?", new String[]{sessionId});
         close();
     }
 }

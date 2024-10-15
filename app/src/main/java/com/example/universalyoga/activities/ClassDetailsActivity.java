@@ -216,7 +216,7 @@ public class ClassDetailsActivity extends AppCompatActivity {
     private void loadClassSessions(String classId) {
         List<ClassSessionModel> classSessions = classSessionDAO.getClassSessionsByClassId(classId);
 
-        editClassSessionAdapter = new EditClassSessionAdapter(classSessions, this, dayOfWeek, userDAO, updatedSession -> {
+        editClassSessionAdapter = new EditClassSessionAdapter(classSessionDAO,classSessions, this, dayOfWeek, userDAO, updatedSession -> {
             classSessionDAO.updateClassSession(updatedSession);
         });
         recyclerViewClassSessions.setAdapter(editClassSessionAdapter);

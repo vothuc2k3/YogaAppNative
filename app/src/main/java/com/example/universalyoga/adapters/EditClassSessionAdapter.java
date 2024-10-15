@@ -33,6 +33,7 @@ import java.util.Locale;
 
 public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessionAdapter.EditClassSessionViewHolder> {
 
+    private ClassSessionDAO classSessionDAO;
     private UserDAO userDAO;
     private List<ClassSessionModel> sessionList;
     private Context context;
@@ -40,7 +41,8 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private int dayOfWeek;
 
-    public EditClassSessionAdapter(List<ClassSessionModel> sessionList, Context context, int dayOfWeek, UserDAO userDAO,OnSaveSessionListener onSaveSessionListener) {
+    public EditClassSessionAdapter(ClassSessionDAO classSessionDAO, List<ClassSessionModel> sessionList, Context context, int dayOfWeek, UserDAO userDAO, OnSaveSessionListener onSaveSessionListener) {
+        this.classSessionDAO = classSessionDAO;
         this.userDAO = userDAO;
         this.sessionList = sessionList;
         this.context = context;
@@ -155,6 +157,26 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
                 Toast.makeText(context, "Invalid input!", Toast.LENGTH_SHORT).show();
             }
         });
+
+        holder.itemView.setOnLongClickListener(v -> {
+
+            new androidx.appcompat.app.AlertDialog.Builder(context)
+                    .setTitle("Delete Session")
+                    .setMessage("Are you sure you want to delete this session?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        sessionList.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, sessionList.size());
+                        classSessionDAO.softDeleteClassSession(sessionModel.getId());
+                        classSessionDAO.updateClassSessionNumber(sessionModel.getClassId());
+                        Toast.makeText(context, "Session deleted", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+
+            return true;
+        });
+
     }
 
     private void showInstructorSelectionDialog(ClassSessionModel sessionModel, EditClassSessionViewHolder holder) {
@@ -185,10 +207,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
         recyclerView.setAdapter(adapter);
         dialog.show();
     }
-
-
-
-
 
     private boolean isSameDay(long date1, long date2) {
         Calendar cal1 = Calendar.getInstance();

@@ -62,7 +62,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         holder.sessionCountTextView.setText("Sessions: " + classModel.getSessionCount());
         holder.dayOfWeekTextView.setText(classModel.getDayOfWeek());
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
         if (classModel.getStartAt() > 0) {
             holder.startTimeTextView.setText("Start: " + sdf.format(new Date(classModel.getStartAt())));

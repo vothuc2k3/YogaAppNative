@@ -60,5 +60,8 @@
             android:name=".activities.BookingManagementActivity"
             android:exported="true"/>
 
+        <activity android:name=".activities.AddAccountActivity" />
+
+
     </application>
 </manifest>
