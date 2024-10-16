@@ -114,6 +114,7 @@ public class SyncWorker extends Worker {
     private void syncFromSQLiteToFirestore(Runnable onComplete) {
         List<ClassModel> localClasses = classDAO.getAllClasses();
         List<ClassSessionModel> localClassSessions = classSessionDAO.getAllClassSessions();
+        List<UserModel> localUsers = userDAO.getAllUsers();
 
         int totalTasks = localClasses.size() + localClassSessions.size();
 
@@ -150,7 +151,7 @@ public class SyncWorker extends Worker {
                         }
                     });
         }
-        // Sync class sessions to Firestore
+
         for (ClassSessionModel localClassSession : localClassSessions) {
             Map<String, Object> sessionData = localClassSession.toMap();
             db.collection(CLASS_SESSIONS_COLLECTION)
@@ -164,6 +165,26 @@ public class SyncWorker extends Worker {
                         }
                     })
                     .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to upload class session to Firestore", e);
+                        completedTasks[0]++;
+                        if (completedTasks[0] == totalTasks) {
+                            onComplete.run();
+                        }
+                    });
+        }
+
+        for (UserModel localUser : localUsers) {
+            Map<String, Object> userData = localUser.toMap();
+            db.collection(USERS_COLLECTION)
+                    .document(localUser.getUid())
+                    .set(userData)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "Class session uploaded to Firestore: " + localUser.getUid());
+                        completedTasks[0]++;
+                        if (completedTasks[0] == totalTasks) {
+                            onComplete.run();
+                        }
+                    }).addOnFailureListener(e -> {
                         Log.e(TAG, "Failed to upload class session to Firestore", e);
                         completedTasks[0]++;
                         if (completedTasks[0] == totalTasks) {

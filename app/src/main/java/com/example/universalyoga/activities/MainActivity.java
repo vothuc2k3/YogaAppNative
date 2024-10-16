@@ -11,26 +11,31 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.example.universalyoga.R;
 import com.example.universalyoga.fragments.HomeFragment;
+import com.example.universalyoga.fragments.HomeInstructorFragment;
 import com.example.universalyoga.models.UserModel;
+import com.example.universalyoga.sqlite.AppDatabaseHelper;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.example.universalyoga.worker.SyncManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
-import com.example.universalyoga.fragments.SearchFragment;  // Import FragmentSearch
+import com.example.universalyoga.fragments.SearchFragment;
 import com.google.firebase.auth.FirebaseUser;
 
-public class MainActivity extends BaseActivity {
+import org.checkerframework.checker.units.qual.A;
+
+public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private ActionBarDrawerToggle toggle;
-    private UserModel currentUser;
     private UserDAO userDAO;
+    private UserModel currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,15 +44,19 @@ public class MainActivity extends BaseActivity {
 
         userDAO = new UserDAO(this);
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
-        UserModel currentUser = userDAO.getUserByUid(fbUser.getUid());
+        currentUser = userDAO.getUserByUid(fbUser.getUid());
 
-        if (currentUser != null) {
+        if (fbUser != null) {
             SyncManager.startSyncing(this);
         }
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && currentUser.getRole().equals("admin")) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new HomeFragment())
+                    .commit();
+        } else if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new HomeInstructorFragment())
                     .commit();
         }
 
@@ -57,18 +66,26 @@ public class MainActivity extends BaseActivity {
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
-
             if (itemId == R.id.nav_home) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new HomeFragment())
-                        .commit();
-                toolbar.setTitle("Home");
+                if (currentUser.getRole().equals("admin")) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new HomeFragment())
+                            .commit();
+                    toolbar.setTitle("Home");
+                } else {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new HomeInstructorFragment())
+                            .commit();
+                    toolbar.setTitle("Home");
+                }
             } else if (itemId == R.id.nav_search) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, new SearchFragment())
                         .commit();
                 toolbar.setTitle("Search");
             } else if (itemId == R.id.nav_profile) {
+                AppDatabaseHelper db = new AppDatabaseHelper(this);
+                db.getReadableDatabase();
                 toolbar.setTitle("Profile");
             }
 
@@ -118,16 +135,11 @@ public class MainActivity extends BaseActivity {
 
         toolbar.setNavigationOnClickListener(v -> {
             if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
-                drawerLayout.closeDrawer(GravityCompat.END); // Close end drawer if open
+                drawerLayout.closeDrawer(GravityCompat.END);
             } else {
-                drawerLayout.openDrawer(GravityCompat.END); // Open end drawer
+                drawerLayout.openDrawer(GravityCompat.END);
             }
         });
-    }
-
-    @Override
-    protected void onRoleReceived(String role) {
-
     }
 
     @Override

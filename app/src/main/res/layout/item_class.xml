@@ -24,20 +24,22 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Instructor Name -->
+
+
+        <!-- Start Time -->
         <TextView
             android:id="@+id/class_name"
-            android:layout_width="297dp"
-            android:layout_height="25dp"
+            android:layout_width="264dp"
+            android:layout_height="24dp"
             android:text="Class Name"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.293"
             app:layout_constraintStart_toEndOf="@id/icon_class_name"
             app:layout_constraintTop_toTopOf="parent" />
 
-
-        <!-- Start Time -->
         <ImageView
             android:id="@+id/icon_capacity"
             android:layout_width="24dp"

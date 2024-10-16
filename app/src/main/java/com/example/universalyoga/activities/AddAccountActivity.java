@@ -39,10 +39,8 @@ public class AddAccountActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // Khởi tạo FirebaseAuth
         mAuth = FirebaseAuth.getInstance();
 
-        // Ánh xạ các view
         etEmail = findViewById(R.id.et_email);
         etUsername = findViewById(R.id.et_username);
         etPhoneNumber = findViewById(R.id.et_phone_number);

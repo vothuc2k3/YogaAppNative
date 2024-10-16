@@ -18,9 +18,7 @@ import java.util.List;
 public class ClassDAO {
 
     public static final String TABLE_CLASS = "classes";
-    public static final String TABLE_CLASS_SESSIONS = "class_sessions";
 
-    public static final String COLUMN_CLASS_SESSION_CLASS_ID = "classId";
     public static final String COLUMN_CLASS_ID = "id";
     public static final String COLUMN_INSTRUCTOR_UID = "instructorUid";
     public static final String COLUMN_CAPACITY = "capacity";
@@ -62,6 +60,28 @@ public class ClassDAO {
             db.close();
         }
     }
+
+    public List<ClassModel> getInstructorClasses(String instructorUid) {
+        List<ClassModel> classList = new ArrayList<>();
+        openReadableDb();
+
+        Cursor cursor = db.query(TABLE_CLASS, null, COLUMN_INSTRUCTOR_UID + "=? AND " + COLUMN_IS_DELETED + "=?",
+                new String[]{instructorUid, "0"}, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                classList.add(populateClassModel(cursor));
+            } while (cursor.moveToNext());
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        close();
+        return classList;
+    }
+
 
     public List<ClassModel> searchClassesByNameAndDay(String query, String dayOfWeek) {
         List<ClassModel> classList = new ArrayList<>();

@@ -11,7 +11,6 @@
         android:background="@color/white"
         android:padding="16dp">
 
-        <!-- Tổng số lớp học -->
         <androidx.cardview.widget.CardView
             android:id="@+id/card_total_classes"
             android:layout_width="match_parent"
@@ -49,11 +48,11 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- Tổng số bookings -->
         <androidx.cardview.widget.CardView
             android:id="@+id/card_total_bookings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -86,66 +85,63 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Nút Add New Class và Search Classes -->
+        <!-- Nút hành động nhanh, tất cả trên cùng một đường thẳng vertical -->
         <LinearLayout
-            android:id="@+id/quick_actions"
+            android:id="@+id/quick_actions_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/card_total_bookings">
+            app:layout_constraintTop_toBottomOf="@+id/card_total_bookings">
 
+            <!-- Nút Add New Class -->
+
+            <!-- Nút Classes -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_class_management"
+                android:layout_width="188dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="Classes"
+                android:textColor="@android:color/white"
+                app:cornerRadius="16dp" />
+
+            <!-- Nút User Management -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_add_class"
-                android:layout_width="wrap_content"
+                android:layout_width="190dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
                 android:backgroundTint="@color/colorPrimary"
                 android:text="New Class"
                 android:textColor="@android:color/white"
                 app:cornerRadius="16dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_class_management"
+                android:id="@+id/btn_user_management"
+                android:layout_width="187dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="User Management"
+                android:textColor="@android:color/white"
+                app:cornerRadius="16dp" />
+
+            <!-- Nút Booking Management -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_booking_management"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
                 android:backgroundTint="@color/colorPrimary"
-                android:text="Classes"
+                android:text="Booking Management"
                 android:textColor="@android:color/white"
                 app:cornerRadius="16dp" />
         </LinearLayout>
-
-        <!-- Nút User Management và Booking Management -->
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_user_management"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="12dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="User Management"
-            android:textColor="@android:color/white"
-            app:cornerRadius="16dp"
-            app:layout_constraintEnd_toStartOf="@id/btn_booking_management"
-            app:layout_constraintTop_toBottomOf="@id/quick_actions" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_booking_management"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="Booking Management"
-            android:textColor="@android:color/white"
-            app:cornerRadius="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/quick_actions" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
