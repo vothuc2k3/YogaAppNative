@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.example.universalyoga.fragments.SearchFragment;  // Import FragmentSearch
 import com.google.firebase.auth.FirebaseUser;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
@@ -123,6 +123,11 @@ public class MainActivity extends AppCompatActivity {
                 drawerLayout.openDrawer(GravityCompat.END); // Open end drawer
             }
         });
+    }
+
+    @Override
+    protected void onRoleReceived(String role) {
+
     }
 
     @Override

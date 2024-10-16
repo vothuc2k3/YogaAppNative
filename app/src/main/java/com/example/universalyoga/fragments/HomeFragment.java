@@ -2,10 +2,12 @@ package com.example.universalyoga.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,11 +16,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.activities.AddClassActivity;
+import com.example.universalyoga.activities.BaseActivity;
 import com.example.universalyoga.activities.BookingManagementActivity;
 import com.example.universalyoga.activities.ClassManagementActivity;
 import com.example.universalyoga.activities.UserManagementActivity;
 import com.example.universalyoga.sqlite.DAO.BookingDAO;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
+
+import java.util.Objects;
 
 public class HomeFragment extends Fragment {
 
@@ -49,9 +54,16 @@ public class HomeFragment extends Fragment {
             swipeRefreshLayout.setRefreshing(false);
         });
 
+        String role = ((BaseActivity) requireActivity()).getUserRole();
+        Log.d("USER ROLE", role);
+
         view.findViewById(R.id.btn_add_class).setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), AddClassActivity.class);
-            startActivity(intent);
+            if (Objects.equals(role, "instructor")) {
+                Intent intent = new Intent(getActivity(), AddClassActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(getContext(), "Unauthorized!", Toast.LENGTH_SHORT).show();
+            }
         });
 
         view.findViewById(R.id.btn_user_management).setOnClickListener(v -> {
@@ -69,7 +81,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void updateDataFromSQLite() {
-        int classesCount = classDAO.getAllClasses().size();
+        int classesCount = classDAO.getAllUndeletedClasses().size();
         totalClassesTextView.setText(String.valueOf(classesCount));
         int bookingCount = bookingDAO.getAllBookings().size();
         totalBookingsTextView.setText(String.valueOf(bookingCount));

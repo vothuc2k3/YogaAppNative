@@ -17,11 +17,9 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
-import com.example.universalyoga.activities.AddSessionActivity;  // Import AddSessionActivity
+import com.example.universalyoga.activities.AddSessionActivity;
 import com.example.universalyoga.models.ClassModel;
-import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
-import com.example.universalyoga.sqlite.DAO.UserDAO;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,10 +28,10 @@ import java.util.Locale;
 
 public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHolder> {
 
-    private List<ClassModel> classList;
-    private Context context;
-    private OnItemClickListener onItemClickListener;
-    private ClassSessionDAO classSessionDAO;
+    private final List<ClassModel> classList;
+    private final Context context;
+    private final OnItemClickListener onItemClickListener;
+    private final ClassSessionDAO classSessionDAO;
 
     public ClassAdapter(List<ClassModel> classList, Context context, OnItemClickListener onItemClickListener) {
         this.classList = classList;
@@ -51,13 +49,10 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
     @Override
     public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
-        UserDAO userDAO = new UserDAO(this.context);
 
         ClassModel classModel = classList.get(position);
-        UserModel instructorModel = userDAO.getUserByUid(classModel.getInstructorUid());
 
         holder.classNameTextView.setText(classModel.getType());
-        holder.instructorTextView.setText("Instructor: " + instructorModel.getName());
         holder.capacityTextView.setText("Capacity: " + classModel.getCapacity());
         holder.sessionCountTextView.setText("Sessions: " + classModel.getSessionCount());
         holder.dayOfWeekTextView.setText(classModel.getDayOfWeek());
@@ -74,20 +69,19 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
         int currentSessionCount = classSessionDAO.getClassSessionsByClassId(classModel.getId()).size();
 
-        if (currentSessionCount < classModel.getSessionCount()) {
+        if (classModel.isDeleted()) {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.deleted_class));  // Set màu cho lớp đã xóa (VD: màu xám)
+        } else if (currentSessionCount < classModel.getSessionCount()) {
             holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.incomplete_class));  // Incomplete session color
             holder.sessionWarningTextView.setVisibility(View.VISIBLE);
         } else {
             holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.complete_class));    // Complete session color
             holder.sessionWarningTextView.setVisibility(View.GONE);
         }
-
         holder.btnAddSession.setOnClickListener(v -> {
             if (currentSessionCount >= classModel.getSessionCount()) {
-                // Show confirmation dialog if sessions are full
                 showAddSessionConfirmationDialog(classModel);
             } else {
-                // Directly add sessions if not full
                 Intent intent = new Intent(context, AddSessionActivity.class);
                 intent.putExtra("classId", classModel.getId());
                 intent.putExtra("instructorUid", classModel.getInstructorUid());
@@ -174,21 +168,20 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
 
 
     public static class ClassViewHolder extends RecyclerView.ViewHolder {
-        TextView classNameTextView, instructorTextView, capacityTextView, sessionCountTextView, startTimeTextView, durationTextView, sessionWarningTextView, dayOfWeekTextView;
+        TextView classNameTextView, capacityTextView, sessionCountTextView, startTimeTextView, durationTextView, sessionWarningTextView, dayOfWeekTextView;
         Button btnDelete, btnAddSession, btnEdit;
 
         public ClassViewHolder(@NonNull View itemView, OnItemClickListener onItemClickListener) {
             super(itemView);
             classNameTextView = itemView.findViewById(R.id.class_name);
-            instructorTextView = itemView.findViewById(R.id.instructor_name);
             capacityTextView = itemView.findViewById(R.id.capacity_value);
             startTimeTextView = itemView.findViewById(R.id.start_time_value);
             durationTextView = itemView.findViewById(R.id.duration_value);
             sessionCountTextView = itemView.findViewById(R.id.session_count_value);
-            sessionWarningTextView = itemView.findViewById(R.id.tv_session_warning);  // Initialize warning text
+            sessionWarningTextView = itemView.findViewById(R.id.tv_session_warning);
             dayOfWeekTextView = itemView.findViewById(R.id.day_of_week);
             btnDelete = itemView.findViewById(R.id.btn_delete_class);
-            btnAddSession = itemView.findViewById(R.id.btn_add_session);  // Initialize Add Session button
+            btnAddSession = itemView.findViewById(R.id.btn_add_session);
             btnEdit = itemView.findViewById(R.id.btn_edit_class);
         }
     }

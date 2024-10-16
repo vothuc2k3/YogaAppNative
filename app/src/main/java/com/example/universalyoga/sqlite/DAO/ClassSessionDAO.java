@@ -25,7 +25,6 @@ public class ClassSessionDAO {
     public static final String COLUMN_PRICE = "price";
     public static final String COLUMN_ROOM = "room";
     public static final String COLUMN_NOTE = "note";
-    public static final String COLUMN_LAST_SYNC_TIME = "lastSyncTime";
     public static final String COLUMN_IS_DELETED = "isDeleted";
 
     private final SQLiteOpenHelper dbHelper;
@@ -53,6 +52,13 @@ public class ClassSessionDAO {
         }
     }
 
+    public void deleteSessionsByClassId(String classId) {
+        openWritableDb();
+        db.delete(TABLE_CLASS_SESSION, COLUMN_SESSION_ID + "=?", new String[]{classId});
+        close();
+    }
+
+
     public long addClassSession(ClassSessionModel session) {
         openWritableDb();
         ContentValues values = new ContentValues();
@@ -64,7 +70,6 @@ public class ClassSessionDAO {
         values.put(COLUMN_PRICE, session.getPrice());
         values.put(COLUMN_ROOM, session.getRoom());
         values.put(COLUMN_NOTE, session.getNote());
-        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis()); // Cập nhật lastSyncTime
 
         long result = db.insert(TABLE_CLASS_SESSION, null, values);
         close();
@@ -104,7 +109,6 @@ public class ClassSessionDAO {
         values.put(COLUMN_PRICE, session.getPrice());
         values.put(COLUMN_ROOM, session.getRoom());
         values.put(COLUMN_NOTE, session.getNote());
-        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
 
         int rowsAffected = db.update(TABLE_CLASS_SESSION, values, COLUMN_SESSION_ID + "=?", new String[]{session.getId()});
         close();
@@ -190,18 +194,9 @@ public class ClassSessionDAO {
             ClassSessionModel session = sessionList.get(i);
             ContentValues values = new ContentValues();
             values.put(COLUMN_SESSION_NUMBER, i + 1);
-            values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
 
             db.update(TABLE_CLASS_SESSION, values, COLUMN_SESSION_ID + "=?", new String[]{session.getId()});
         }
-        close();
-    }
-
-    public void updateLastSyncTime(String sessionId) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
-        openWritableDb();
-        db.update(TABLE_CLASS_SESSION, values, COLUMN_SESSION_ID + "=?", new String[]{sessionId});
         close();
     }
 }

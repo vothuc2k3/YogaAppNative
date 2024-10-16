@@ -25,5 +25,6 @@
 
     <color name="incomplete_class">#FFCDD2</color>
     <color name="complete_class">#C8E6C9</color>
+    <color name="deleted_class">#CCCCCC</color>f
 
 </resources>

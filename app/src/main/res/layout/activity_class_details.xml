@@ -33,39 +33,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Class Info Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/card_view_class_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="8dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <!-- Instructor Name -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/input_layout_instructor"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Instructor">
-
-                        <Spinner
-                            android:id="@+id/spinner_instructor"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@android:color/transparent"
-                            android:paddingStart="16dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
             <!-- Class Details Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_view_class_details"

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ExpandableListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,26 +15,32 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.activities.ClassDetailsActivity;
-import com.example.universalyoga.adapters.ClassAdapter;
+import com.example.universalyoga.activities.SessionDetailsActivity;
+import com.example.universalyoga.adapters.ClassExpandableListAdapter;
 import com.example.universalyoga.models.ClassModel;
+import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
+import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
+import com.example.universalyoga.sqlite.DAO.UserDAO;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SearchFragment extends Fragment {
 
     private SearchView searchView;
-    private RecyclerView recyclerView;
-    private ClassAdapter classAdapter;
+    private ExpandableListView expandableListView;
     private TextView tvPrompt;
     private Spinner spinnerFilterDay;
     private ClassDAO classDAO;
+    private ClassSessionDAO classSessionDAO;
+    private ClassExpandableListAdapter expandableListAdapter;
     private List<ClassModel> classModels;
+    private Map<ClassModel, List<ClassSessionModel>> sessionMap;
 
     @Nullable
     @Override
@@ -41,16 +48,16 @@ public class SearchFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
         searchView = view.findViewById(R.id.search_view_classes);
-        recyclerView = view.findViewById(R.id.rv_search_results);
+        expandableListView = view.findViewById(R.id.expandable_list_view);
         spinnerFilterDay = view.findViewById(R.id.spinner_filter_day);
         tvPrompt = view.findViewById(R.id.tv_prompt);
 
         classDAO = new ClassDAO(getContext());
-        classModels = classDAO.getAllClasses();
+        classSessionDAO = new ClassSessionDAO(getContext());
+        classModels = classDAO.getAllUndeletedClasses();
+        sessionMap = loadSessionDataForClasses(classModels);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        setupAdapter(classModels);
-        recyclerView.setAdapter(classAdapter);
+        setupExpandableListAdapter();
 
         performSearch("", "Monday");
 
@@ -65,7 +72,7 @@ public class SearchFragment extends Fragment {
             public boolean onQueryTextChange(String newText) {
                 if (newText.isEmpty()) {
                     performSearch("", spinnerFilterDay.getSelectedItem().toString());
-                    showPrompt(false); // Show all when text is cleared
+                    showPrompt(false);
                 } else {
                     performSearch(newText, spinnerFilterDay.getSelectedItem().toString());
                     showPrompt(false);
@@ -89,6 +96,15 @@ public class SearchFragment extends Fragment {
         return view;
     }
 
+    private Map<ClassModel, List<ClassSessionModel>> loadSessionDataForClasses(List<ClassModel> classModels) {
+        Map<ClassModel, List<ClassSessionModel>> sessionMap = new HashMap<>();
+        for (ClassModel classModel : classModels) {
+            List<ClassSessionModel> sessions = classSessionDAO.getClassSessionsByClassId(classModel.getId());
+            sessionMap.put(classModel, sessions);
+        }
+        return sessionMap;
+    }
+
     private void performSearch(String name, String dayOfWeek) {
         List<ClassModel> result;
         if (!dayOfWeek.isEmpty() && !dayOfWeek.equals("All Days")) {
@@ -97,7 +113,9 @@ public class SearchFragment extends Fragment {
             result = classDAO.searchClassesByInstructorName(name);
         }
 
-        classAdapter.updateData(result);
+        sessionMap = loadSessionDataForClasses(result);
+        expandableListAdapter.updateData(result, sessionMap);
+
         if (result.isEmpty()) {
             showPrompt(true);
         } else {
@@ -108,18 +126,17 @@ public class SearchFragment extends Fragment {
     private void showPrompt(boolean show) {
         if (show) {
             tvPrompt.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.GONE);
+            expandableListView.setVisibility(View.GONE);
         } else {
             tvPrompt.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+            expandableListView.setVisibility(View.VISIBLE);
         }
     }
 
-    private void setupAdapter(List<ClassModel> classList) {
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        classAdapter = new ClassAdapter(classList, getContext(), new ClassAdapter.OnItemClickListener() {
+    private void setupExpandableListAdapter() {
+        expandableListAdapter = new ClassExpandableListAdapter(getContext(), classModels, sessionMap, new UserDAO(getContext()), new ClassExpandableListAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(ClassModel classModel) {
+            public void onEditClick(ClassModel classModel) {
                 Intent intent = new Intent(getActivity(), ClassDetailsActivity.class);
                 intent.putExtra("id", classModel.getId());
                 intent.putExtra("instructorUid", classModel.getInstructorUid());
@@ -146,14 +163,25 @@ public class SearchFragment extends Fragment {
                         .setMessage("Are you sure you want to delete this class?")
                         .setPositiveButton("Yes", (dialog, which) -> {
                             classDAO.softDeleteClass(classModel.getId());
-                            classModels = classDAO.getAllClasses();
-                            classAdapter.updateData(classModels);
+                            classModels = classDAO.getAllUndeletedClasses();
+                            expandableListAdapter.updateData(classModels, loadSessionDataForClasses(classModels));
                             Toast.makeText(getContext(), "Class deleted", Toast.LENGTH_SHORT).show();
                         })
                         .setNegativeButton("No", null)
                         .show();
             }
         });
-        recyclerView.setAdapter(classAdapter);
+
+        expandableListView.setAdapter(expandableListAdapter);
+
+        expandableListView.setOnGroupClickListener((parent, v, groupPosition, id) -> false);
+
+        expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+            ClassSessionModel sessionModel = (ClassSessionModel) expandableListAdapter.getChild(groupPosition, childPosition);
+            Intent intent = new Intent(getContext(), SessionDetailsActivity.class);
+            intent.putExtra("classSessionId", sessionModel.getId());
+            startActivity(intent);
+            return false;
+        });
     }
 }

@@ -36,28 +36,8 @@
             app:layout_constraintStart_toEndOf="@id/icon_class_name"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/icon_instructor"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="20dp"
-            android:src="@drawable/ic_instructor"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/icon_class_name" />
 
-        <!-- Capacity -->
-        <TextView
-            android:id="@+id/instructor_name"
-            android:layout_width="273dp"
-            android:layout_height="19dp"
-            android:layout_marginTop="24dp"
-            android:text="Instructor: "
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.318"
-            app:layout_constraintStart_toEndOf="@id/icon_instructor"
-            app:layout_constraintTop_toBottomOf="@+id/class_name" />
-
+        <!-- Start Time -->
         <ImageView
             android:id="@+id/icon_capacity"
             android:layout_width="24dp"
@@ -65,20 +45,19 @@
             android:layout_marginTop="16dp"
             android:src="@drawable/ic_capacity"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/icon_instructor" />
+            app:layout_constraintTop_toBottomOf="@+id/icon_class_name" />
 
-        <!-- Start Time -->
         <TextView
             android:id="@+id/capacity_value"
             android:layout_width="286dp"
             android:layout_height="18dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:text="Capacity: "
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.415"
             app:layout_constraintStart_toEndOf="@id/icon_capacity"
-            app:layout_constraintTop_toBottomOf="@id/instructor_name" />
+            app:layout_constraintTop_toBottomOf="@+id/class_name" />
 
         <ImageView
             android:id="@+id/icon_start_time"
@@ -113,6 +92,9 @@
             app:layout_constraintTop_toBottomOf="@+id/icon_start_time" />
 
         <!-- Session Count -->
+
+        <!-- Edit and Delete Buttons -->
+
         <TextView
             android:id="@+id/duration_value"
             android:layout_width="270dp"
@@ -121,11 +103,9 @@
             android:text="Duration: "
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.318"
+            app:layout_constraintHorizontal_bias="0.304"
             app:layout_constraintStart_toEndOf="@id/icon_duration"
             app:layout_constraintTop_toBottomOf="@id/start_time_value" />
-
-        <!-- Edit and Delete Buttons -->
 
         <ImageView
             android:id="@+id/icon_session_count"
@@ -186,6 +166,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="68dp"
+            android:focusable="false"
             android:text="Edit"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -198,6 +179,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="68dp"
+            android:focusable="false"
             android:text="Add sessions"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -210,6 +192,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="68dp"
+            android:focusable="false"
             android:text="Delete"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"

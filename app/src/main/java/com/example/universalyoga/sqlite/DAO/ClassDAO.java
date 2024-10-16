@@ -34,10 +34,9 @@ public class ClassDAO {
     public static final String COLUMN_END_AT = "endAt";
     public static final String COLUMN_DAY_OF_WEEK = "dayOfWeek";
     public static final String COLUMN_TIME_START = "timeStart";
-    public static final String COLUMN_IS_DELETED = "isDeleted";
-    public static final String COLUMN_LAST_SYNC_TIME = "lastSyncTime";
+    final public static String COLUMN_IS_DELETED = "isDeleted";
 
-    private ClassSessionDAO classSessionDAO;
+    private final ClassSessionDAO classSessionDAO;
     private final SQLiteOpenHelper dbHelper;
     private SQLiteDatabase db;
 
@@ -109,18 +108,11 @@ public class ClassDAO {
         classModel.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
         classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
         classModel.setDayOfWeek(cursor.getString(cursor.getColumnIndex(COLUMN_DAY_OF_WEEK)));
-
-        long timeStartMillis = cursor.getLong(cursor.getColumnIndex(COLUMN_TIME_START));
-        if (timeStartMillis > 0) {
-            classModel.setTimeStart(new Time(timeStartMillis));
-        }
-
+        classModel.setTimeStart(new Time(cursor.getLong(cursor.getColumnIndex(COLUMN_TIME_START))));
         classModel.setCreatedAt(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATED_AT)));
         classModel.setStartAt(cursor.getLong(cursor.getColumnIndex(COLUMN_START_AT)));
         classModel.setEndAt(cursor.getLong(cursor.getColumnIndex(COLUMN_END_AT)));
-
         classModel.setDeleted(cursor.getInt(cursor.getColumnIndex(COLUMN_IS_DELETED)) == 1);
-        classModel.setLastSyncTime(cursor.getLong(cursor.getColumnIndex(COLUMN_LAST_SYNC_TIME)));
 
         return classModel;
     }
@@ -128,6 +120,7 @@ public class ClassDAO {
     public long addClass(ClassModel classModel) {
         openWritableDb();
         ContentValues values = new ContentValues();
+
         values.put(COLUMN_CLASS_ID, classModel.getId());
         values.put(COLUMN_INSTRUCTOR_UID, classModel.getInstructorUid());
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
@@ -146,14 +139,14 @@ public class ClassDAO {
             values.put(COLUMN_TIME_START, classModel.getTimeStart().getTime());
         }
 
-        values.put(COLUMN_IS_DELETED, 0);
+        values.put(COLUMN_IS_DELETED, classModel.isDeleted());
 
-        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
+        long result = db.insertWithOnConflict(TABLE_CLASS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
 
-        long result = db.insert(TABLE_CLASS, null, values);
         close();
         return result;
     }
+
 
     public ClassModel getClassById(String classId) {
         openReadableDb();
@@ -188,7 +181,7 @@ public class ClassDAO {
             values.put(COLUMN_TIME_START, classModel.getTimeStart().getTime());
         }
 
-        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
+        values.put(COLUMN_IS_DELETED, classModel.isDeleted());
 
         int rowsAffected = db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classModel.getId()});
         close();
@@ -199,12 +192,32 @@ public class ClassDAO {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_IS_DELETED, 1);
-        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis()); // Cập nhật lastSyncTime khi soft delete
         db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
         close();
     }
 
     public List<ClassModel> getAllClasses() {
+        List<ClassModel> classList = new ArrayList<>();
+        openReadableDb();
+
+        Cursor cursor = db.query(TABLE_CLASS, null, null, null, null, null, null);  // Không lọc isDeleted
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                classList.add(populateClassModel(cursor));
+            } while (cursor.moveToNext());
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+        close();
+
+        return classList;
+    }
+
+
+    public List<ClassModel> getAllUndeletedClasses() {
         List<ClassModel> classList = new ArrayList<>();
         openReadableDb();
         Cursor cursor = db.query(TABLE_CLASS, null, COLUMN_IS_DELETED + "=?", new String[]{"0"}, null, null, null);
@@ -246,18 +259,18 @@ public class ClassDAO {
         values.put(COLUMN_START_AT, minDate);
         values.put(COLUMN_END_AT, maxDate);
 
-        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
 
         openWritableDb();
         db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
         close();
     }
 
-    public void updateLastSyncTime(String classId) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_LAST_SYNC_TIME, System.currentTimeMillis());
+    public void hardDelete(String classId) {
         openWritableDb();
-        db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
+
+        db.delete(TABLE_CLASS, COLUMN_CLASS_ID + "=?", new String[]{classId});
+
         close();
     }
+
 }

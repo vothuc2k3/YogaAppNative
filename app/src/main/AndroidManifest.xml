@@ -5,7 +5,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -14,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UniversalYoga"
         tools:targetApi="31">
-        <activity android:name=".activities.UserManagementActivity" />
+
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true">
@@ -24,44 +23,29 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".activities.SignInActivity"
-            android:exported="true" />
+        <activity android:name=".activities.UserManagementActivity" />
 
-        <activity
-            android:name=".activities.MainActivity"
-            android:exported="true" />
+        <activity android:name=".activities.SignInActivity" />
 
-        <activity
-            android:name=".activities.SignUpActivity"
-            android:exported="true" />
+        <activity android:name=".activities.MainActivity" />
 
-        <activity
-            android:name=".activities.AddClassActivity"
-            android:exported="true" />
+        <activity android:name=".activities.SignUpActivity" />
 
-        <activity
-            android:name=".activities.UserDetailActivity"
-            android:exported="true" />
+        <activity android:name=".activities.AddClassActivity" />
 
-        <activity
-            android:name=".activities.ClassDetailsActivity"
-            android:exported="true" />
+        <activity android:name=".activities.UserDetailActivity" />
 
-        <activity
-            android:name=".activities.AddSessionActivity"
-            android:exported="true" />
+        <activity android:name=".activities.ClassDetailsActivity" />
 
-        <activity
-            android:name=".activities.ClassManagementActivity"
-            android:exported="true"/>
+        <activity android:name=".activities.AddSessionActivity" />
 
-        <activity
-            android:name=".activities.BookingManagementActivity"
-            android:exported="true"/>
+        <activity android:name=".activities.ClassManagementActivity" />
+
+        <activity android:name=".activities.BookingManagementActivity" />
 
         <activity android:name=".activities.AddAccountActivity" />
 
+        <activity android:name=".activities.SessionDetailsActivity" />
 
     </application>
 </manifest>

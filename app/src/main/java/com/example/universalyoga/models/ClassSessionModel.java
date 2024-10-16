@@ -13,7 +13,6 @@ public class ClassSessionModel {
     private String room;
     private String note;
 
-    private long lastSyncTime;
     private boolean isDeleted;
 
     public ClassSessionModel() {}
@@ -103,7 +102,6 @@ public class ClassSessionModel {
         map.put("price", price);
         map.put("room", room);
         map.put("note", note);
-        map.put("lastSyncTime", lastSyncTime);
         map.put("isDeleted", isDeleted);
         return map;
     }
@@ -119,20 +117,15 @@ public class ClassSessionModel {
         sessionModel.setPrice(map.get("price") != null ? ((Number) map.get("price")).intValue() : 0);
         sessionModel.setRoom((String) map.get("room"));
         sessionModel.setNote((String) map.get("note"));
-        sessionModel.setLastSyncTime(map.get("lastSyncTime") != null ? ((Number) map.get("lastSyncTime")).longValue() : 0L);
         sessionModel.setDeleted(map.get("isDeleted") != null && (Boolean) map.get("isDeleted"));
 
         return sessionModel;
     }
 
 
-    public long getLastSyncTime() {
-        return lastSyncTime;
-    }
 
-    public void setLastSyncTime(long lastSyncTime) {
-        this.lastSyncTime = lastSyncTime;
-    }
+
+
 
     public boolean isDeleted() {
         return isDeleted;

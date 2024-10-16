@@ -19,30 +19,11 @@ public class ClassModel {
     private long startAt; // epoch time
     private long endAt; // epoch time
 
-    private long lastSyncTime;
     private boolean isDeleted;
 
     public ClassModel() {
         this.createdAt = System.currentTimeMillis();
     }
-
-    public ClassModel(String id, String instructorUid, String dayOfWeek, Time timeStart, int capacity, int duration, int sessions, String type, String status, String description, long startAt, long endAt) {
-        this.id = id;
-        this.instructorUid = instructorUid;         
-        this.dayOfWeek = dayOfWeek;
-        this.timeStart = timeStart;
-        this.capacity = capacity;
-        this.duration = duration;
-        this.sessionCount = sessions;
-        this.type = type;
-        this.status = status;
-        this.description = description; // Đảm bảo trường này không bị bỏ sót
-        this.createdAt = System.currentTimeMillis();
-        this.startAt = startAt;
-        this.endAt = endAt;
-    }
-
-    // Getters và Setters
 
     public String getId() {
         return id;
@@ -66,7 +47,7 @@ public class ClassModel {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
-            }
+    }
 
     public int getDuration() {
         return duration;
@@ -146,7 +127,17 @@ public class ClassModel {
 
     public void setSessionCount(int sessionCount) {
         this.sessionCount = sessionCount;
-    }   
+    }
+
+
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -157,50 +148,13 @@ public class ClassModel {
         map.put("sessionCount", sessionCount);
         map.put("type", type);
         map.put("status", status);
-        map.put("description", description); // Đảm bảo trường description có mặt trong map
+        map.put("description", description);
         map.put("createdAt", createdAt);
         map.put("startAt", startAt);
         map.put("endAt", endAt);
         map.put("dayOfWeek", dayOfWeek);
         map.put("timeStart", timeStart);
         map.put("isDeleted", isDeleted);
-        map.put("lastSyncTime", lastSyncTime);
         return map;
-    }
-
-    @Override
-    public String toString() {
-        return "ClassModel{" +
-                "id='" + id + '\'' +
-                ", capacity=" + capacity +
-                ", duration=" + duration +
-                ", sessionCount=" + sessionCount +
-                ", type='" + type + '\'' +
-                ", status='" + status + '\'' +
-                ", description='" + description + '\'' +
-                ", createdAt=" + createdAt +
-                ", startAt=" + startAt +
-                ", endAt=" + endAt +
-                ", dayOfWeek='" + dayOfWeek + '\'' +
-                ", timeStart=" + timeStart +
-                ", isDeleted=" + isDeleted +
-                ", lastSyncTime=" + lastSyncTime +
-                '}';
-    }
-
-    public long getLastSyncTime() {
-        return lastSyncTime;
-    }
-
-    public void setLastSyncTime(long lastSyncTime) {
-        this.lastSyncTime = lastSyncTime;
-    }
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
     }
 }

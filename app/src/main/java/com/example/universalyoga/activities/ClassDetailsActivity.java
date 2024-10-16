@@ -40,22 +40,17 @@ import java.util.Locale;
 
 public class ClassDetailsActivity extends AppCompatActivity {
 
-    private Spinner spinnerInstructor;
     private TextInputEditText etCapacity, etDuration, etSessionNumber, etType, etDescription, etStartAt, etEndAt, etDayOfWeek, etTimeStart;
     private Button btnSaveChanges;
     private RecyclerView recyclerViewClassSessions;
     private EditClassSessionAdapter editClassSessionAdapter;
-    private List<UserModel> instructorList;
-    private ArrayAdapter<String> instructorAdapter;
     private ClassSessionDAO classSessionDAO;
     private ClassDAO classDAO;
     private UserDAO userDAO;
 
     private String classId;
     private String selectedInstructorUid;
-    private int sessionCount;
-    private long classStartDate;
-    private int dayOfWeek; // Thứ trong tuần của lớp học
+    private int dayOfWeek;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +67,6 @@ public class ClassDetailsActivity extends AppCompatActivity {
         recyclerViewClassSessions.setLayoutManager(new LinearLayoutManager(this));
 
         // Initialize inputs
-        spinnerInstructor = findViewById(R.id.spinner_instructor);
         etCapacity = findViewById(R.id.et_capacity);
         etDuration = findViewById(R.id.et_duration);
         etType = findViewById(R.id.et_type);
@@ -88,10 +82,6 @@ public class ClassDetailsActivity extends AppCompatActivity {
         // Get data from Intent
         classId = getIntent().getStringExtra("id");
         selectedInstructorUid = getIntent().getStringExtra("instructorUid");
-        sessionCount = getIntent().getIntExtra("sessionCount", 0);
-
-        // Load instructors for the spinner
-        loadInstructors();
 
         // Load class details
         loadClassDetails();
@@ -107,60 +97,9 @@ public class ClassDetailsActivity extends AppCompatActivity {
 
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // TimePicker for timeStart
         etTimeStart.setOnClickListener(v -> showTimePickerDialog());
 
         btnSaveChanges.setOnClickListener(v -> saveChanges());
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.class_details_toolbar_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_add_session) {
-            navigateToAddSession();
-            return true;
-        } else if (id == R.id.btn_save_changes) {
-            saveChanges();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void loadInstructors() {
-        instructorList = userDAO.getAllInstructors();
-        List<String> instructorNames = new ArrayList<>();
-
-        int selectedPosition = 0;
-        for (int i = 0; i < instructorList.size(); i++) {
-            UserModel instructor = instructorList.get(i);
-            instructorNames.add(instructor.getName());
-
-            if (instructor.getUid().equals(selectedInstructorUid)) {
-                selectedPosition = i;
-            }
-        }
-
-        instructorAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, instructorNames);
-        instructorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerInstructor.setAdapter(instructorAdapter);
-        spinnerInstructor.setSelection(selectedPosition);
-
-        spinnerInstructor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedInstructorUid = instructorList.get(position).getUid();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
     }
 
     private void loadClassDetails() {
@@ -183,16 +122,12 @@ public class ClassDetailsActivity extends AppCompatActivity {
         etDayOfWeek.setText(classModel.getDayOfWeek());
         etTimeStart.setText(classModel.getTimeStart().toString());
 
-        // Lưu ngày bắt đầu của lớp học và thứ trong tuần
-        classStartDate = classModel.getStartAt();
         dayOfWeek = getDayOfWeekFromString(classModel.getDayOfWeek());
 
-        // Load sessions
         loadClassSessions(classModel.getId());
     }
 
     private int getDayOfWeekFromString(String dayOfWeekString) {
-        // Hàm chuyển đổi tên thứ (như "Monday") thành giá trị Calendar tương ứng
         switch (dayOfWeekString.toLowerCase()) {
             case "monday":
                 return Calendar.MONDAY;
@@ -220,14 +155,6 @@ public class ClassDetailsActivity extends AppCompatActivity {
             classSessionDAO.updateClassSession(updatedSession);
         });
         recyclerViewClassSessions.setAdapter(editClassSessionAdapter);
-    }
-
-    private void navigateToAddSession() {
-        Intent intent = new Intent(this, AddSessionActivity.class);
-        intent.putExtra("classId", classId);
-        intent.putExtra("instructorUid", selectedInstructorUid);
-        intent.putExtra("sessionCount", sessionCount);
-        startActivity(intent);
     }
 
     private void saveChanges() {

@@ -33,7 +33,6 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             + "createdAt INTEGER, "
             + "startAt INTEGER, "
             + "endAt INTEGER, "
-            + "lastSyncTime INTEGER, "
             + "isDeleted INTEGER DEFAULT 0)";
 
     // Table for Class Sessions
@@ -46,7 +45,6 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             + "price INTEGER, "
             + "room TEXT, "
             + "note TEXT, "
-            + "lastSyncTime INTEGER, "
             + "isDeleted INTEGER DEFAULT 0, "
             + "FOREIGN KEY (classId) REFERENCES classes(id))";
 

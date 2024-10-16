@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,7 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.universalyoga.R;
 import com.example.universalyoga.adapters.ClassAdapter;
 import com.example.universalyoga.models.ClassModel;
+import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
+import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -21,7 +25,9 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
     private RecyclerView recyclerViewClasses;
     private ClassAdapter classAdapter;
     private ClassDAO classDAO;
+    private ClassSessionDAO classSessionDAO;
     private List<ClassModel> classList;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +45,10 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
         toolbar.setNavigationOnClickListener(v -> finish());
 
         classDAO = new ClassDAO(this);
+        classSessionDAO = new ClassSessionDAO(this);
+
+        db = FirebaseFirestore.getInstance();
+
         recyclerViewClasses = findViewById(R.id.recycler_view_classes);
         recyclerViewClasses.setLayoutManager(new LinearLayoutManager(this));
 
@@ -83,16 +93,57 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
 
     @Override
     public void onDeleteClick(ClassModel classModel) {
-        new androidx.appcompat.app.AlertDialog.Builder(ClassManagementActivity.this)
-                .setTitle("Delete Class")
-                .setMessage("Are you sure you want to delete this class?")
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    classDAO.softDeleteClass(classModel.getId());
-                    classList = classDAO.getAllClasses();
-                    classAdapter.updateData(classList);
-                    Toast.makeText(ClassManagementActivity.this, "Class deleted", Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("No", null)
-                .show();
+        if (classModel.isDeleted()) {
+            new AlertDialog.Builder(ClassManagementActivity.this)
+                    .setTitle("Hard delete")
+                    .setMessage("Are you sure you want to (HARD) delete this class?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        List<ClassSessionModel> sessions = classSessionDAO.getClassSessionsByClassId(classModel.getId());
+                        if (!sessions.isEmpty()) {
+                            new AlertDialog.Builder(ClassManagementActivity.this)
+                                    .setTitle("Class has sessions")
+                                    .setMessage("This class has sessions. Do you want to hard delete the class and all its sessions?")
+                                    .setPositiveButton("Yes", (dialog2, which2) -> {
+                                        classDAO.hardDelete(classModel.getId());
+                                        classSessionDAO.deleteSessionsByClassId(classModel.getId());
+                                        db.collection("classes")
+                                                .document(classModel.getId())
+                                                .delete()
+                                                .addOnSuccessListener(aVoid -> Toast.makeText(ClassManagementActivity.this, "Class and its sessions deleted from Firestore", Toast.LENGTH_SHORT).show())
+                                                .addOnFailureListener(e -> Toast.makeText(ClassManagementActivity.this, "Failed to delete class from Firestore", Toast.LENGTH_SHORT).show());
+                                        classList = classDAO.getAllClasses();
+                                        classAdapter.updateData(classList);
+                                        Toast.makeText(ClassManagementActivity.this, "Class and its sessions deleted", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .setNegativeButton("No", null)
+                                    .show();
+                        } else {
+                            classDAO.hardDelete(classModel.getId());
+
+                            db.collection("classes")
+                                    .document(classModel.getId())
+                                    .delete()
+                                    .addOnSuccessListener(aVoid -> Toast.makeText(ClassManagementActivity.this, "Class deleted from Firestore", Toast.LENGTH_SHORT).show())
+                                    .addOnFailureListener(e -> Toast.makeText(ClassManagementActivity.this, "Failed to delete class from Firestore", Toast.LENGTH_SHORT).show());
+                            classList = classDAO.getAllClasses();
+                            classAdapter.updateData(classList);
+                            Toast.makeText(ClassManagementActivity.this, "Class deleted", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        } else {
+            new AlertDialog.Builder(ClassManagementActivity.this)
+                    .setTitle("Delete Class")
+                    .setMessage("Are you sure you want to (soft) delete this class?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        classDAO.softDeleteClass(classModel.getId());
+                        classList = classDAO.getAllClasses();
+                        classAdapter.updateData(classList);
+                        Toast.makeText(ClassManagementActivity.this, "Class deleted", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        }
     }
 }
