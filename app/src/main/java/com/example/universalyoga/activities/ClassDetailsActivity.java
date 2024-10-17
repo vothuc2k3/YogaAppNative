@@ -49,7 +49,6 @@ public class ClassDetailsActivity extends AppCompatActivity {
     private UserDAO userDAO;
 
     private String classId;
-    private String selectedInstructorUid;
     private int dayOfWeek;
 
     @Override
@@ -81,8 +80,6 @@ public class ClassDetailsActivity extends AppCompatActivity {
 
         // Get data from Intent
         classId = getIntent().getStringExtra("id");
-        selectedInstructorUid = getIntent().getStringExtra("instructorUid");
-
         // Load class details
         loadClassDetails();
 
@@ -168,7 +165,6 @@ public class ClassDetailsActivity extends AppCompatActivity {
             String timeStartStr = etTimeStart.getText().toString().trim();
             Time timeStart = convertToTime(timeStartStr);
 
-            classModel.setInstructorUid(selectedInstructorUid);
             classModel.setCapacity(capacity);
             classModel.setDuration(duration);
             classModel.setDescription(description);

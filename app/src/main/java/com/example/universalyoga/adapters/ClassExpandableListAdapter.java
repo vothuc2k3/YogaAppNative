@@ -22,9 +22,12 @@ import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
+import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +35,7 @@ import java.util.Map;
 
 public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
 
+    private final String role;
     private final Context context;
     private List<ClassModel> classList;
     private Map<ClassModel, List<ClassSessionModel>> sessionMap;
@@ -39,12 +43,14 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
     private final ClassSessionDAO classSessionDAO;
     private final OnItemClickListener onItemClickListener;
 
-    public ClassExpandableListAdapter(Context context, List<ClassModel> classList, Map<ClassModel, List<ClassSessionModel>> sessionMap, UserDAO userDAO, OnItemClickListener onItemClickListener) {
+    // Constructor nhận role và lưu trữ nó
+    public ClassExpandableListAdapter(Context context, List<ClassModel> classList, Map<ClassModel, List<ClassSessionModel>> sessionMap, UserDAO userDAO, String role, OnItemClickListener onItemClickListener) {
         this.context = context;
         this.classList = classList;
         this.sessionMap = sessionMap;
         this.userDAO = userDAO;
         this.classSessionDAO = new ClassSessionDAO(context);
+        this.role = role;  // Lưu role khi khởi tạo
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -86,28 +92,30 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         ClassModel classModel = (ClassModel) getGroup(groupPosition);
+
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.item_class, null);
+            // Inflate layout dựa trên vai trò của người dùng
+            if (role.equals("admin")) {
+                convertView = inflater.inflate(R.layout.item_class, null);  // Layout cho admin
+            } else {
+                convertView = inflater.inflate(R.layout.item_instructor_class, null);  // Layout cho instructor
+            }
         }
 
+        // Thiết lập các giá trị chung cho cả admin và instructor
         TextView classNameTextView = convertView.findViewById(R.id.class_name);
         TextView capacityTextView = convertView.findViewById(R.id.capacity_value);
         TextView startTimeTextView = convertView.findViewById(R.id.start_time_value);
         TextView durationTextView = convertView.findViewById(R.id.duration_value);
         TextView dayOfWeekTextView = convertView.findViewById(R.id.day_of_week);
-        TextView sessionCountTextView = convertView.findViewById(R.id.session_count_value);  // Thêm trường session count
+        TextView sessionCountTextView = convertView.findViewById(R.id.session_count_value);
         TextView sessionWarningTextView = convertView.findViewById(R.id.tv_session_warning);
-        Button btnAddSession = convertView.findViewById(R.id.btn_add_session);
-        Button btnEdit = convertView.findViewById(R.id.btn_edit_class);
-        Button btnDelete = convertView.findViewById(R.id.btn_delete_class);
 
         classNameTextView.setText(classModel.getType());
         capacityTextView.setText("Capacity: " + classModel.getCapacity());
         durationTextView.setText("Duration: " + classModel.getDuration() + " minutes");
-
         dayOfWeekTextView.setText("Day: " + classModel.getDayOfWeek());
-
         sessionCountTextView.setText("Sessions: " + classModel.getSessionCount());
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
@@ -128,20 +136,26 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
             convertView.setBackgroundColor(context.getResources().getColor(R.color.complete_class));
         }
 
-        btnAddSession.setOnClickListener(v -> {
-            if (currentSessionCount >= classModel.getSessionCount()) {
-                showAddSessionConfirmationDialog(classModel);
-            } else {
-                Intent intent = new Intent(context, AddSessionActivity.class);
-                intent.putExtra("classId", classModel.getId());
-                intent.putExtra("instructorUid", classModel.getInstructorUid());
-                intent.putExtra("sessionCount", classModel.getSessionCount());
-                context.startActivity(intent);
-            }
-        });
+        // Chỉ admin có quyền thêm, sửa, xóa lớp học
+        if (role.equals("admin")) {
+            Button btnAddSession = convertView.findViewById(R.id.btn_add_session);
+            Button btnEdit = convertView.findViewById(R.id.btn_edit_class);
+            Button btnDelete = convertView.findViewById(R.id.btn_delete_class);
 
-        btnEdit.setOnClickListener(v -> onItemClickListener.onEditClick(classModel));
-        btnDelete.setOnClickListener(v -> onItemClickListener.onDeleteClick(classModel));
+            btnAddSession.setOnClickListener(v -> {
+                if (currentSessionCount >= classModel.getSessionCount()) {
+                    showAddSessionConfirmationDialog(classModel);
+                } else {
+                    Intent intent = new Intent(context, AddSessionActivity.class);
+                    intent.putExtra("classId", classModel.getId());
+                    intent.putExtra("sessionCount", classModel.getSessionCount());
+                    context.startActivity(intent);
+                }
+            });
+
+            btnEdit.setOnClickListener(v -> onItemClickListener.onEditClick(classModel));
+            btnDelete.setOnClickListener(v -> onItemClickListener.onDeleteClick(classModel));
+        }
 
         return convertView;
     }
@@ -164,16 +178,29 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
         TextView sessionInstructorTextView = convertView.findViewById(R.id.tv_instructor_name);
         ImageView instructorImageView = convertView.findViewById(R.id.icon_instructor_image);
 
-        sessionNumberTextView.setText(String.valueOf(sessionModel.getSessionNumber()));
+        TextView sessionStartTimeTextView = convertView.findViewById(R.id.tv_start_time);
+        TextView sessionEndTimeTextView = convertView.findViewById(R.id.tv_end_time);
+
+        List<ClassSessionModel> allSessions = classSessionDAO.getClassSessionsByClassId(sessionModel.getClassId());
+        Collections.sort(allSessions, Comparator.comparingLong(ClassSessionModel::getDate));
+
+        int sessionIndex = 1;
+        for (ClassSessionModel session : allSessions) {
+            if (session.getId().equals(sessionModel.getId())) {
+                break;
+            }
+            sessionIndex++;
+        }
+
+        sessionNumberTextView.setText(" " + sessionIndex);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
         String formattedDate = dateFormat.format(new Date(sessionModel.getDate()));
-        sessionDateTextView.setText(formattedDate);
+        sessionDateTextView.setText(" " + formattedDate);
 
-        sessionPriceTextView.setText("$" + sessionModel.getPrice());
-
-        sessionRoomTextView.setText(sessionModel.getRoom() != null ? sessionModel.getRoom() : "N/A");
-        sessionNoteTextView.setText(sessionModel.getNote() != null ? sessionModel.getNote() : "No notes");
+        sessionPriceTextView.setText(" $ " + sessionModel.getPrice());
+        sessionRoomTextView.setText(sessionModel.getRoom() != null ? " " + sessionModel.getRoom() : "N/A");
+        sessionNoteTextView.setText(sessionModel.getNote() != null ? " " + sessionModel.getNote() : "No notes");
 
         sessionInstructorTextView.setText(instructor.getName());
 
@@ -184,6 +211,20 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
                     .into(instructorImageView);
         } else {
             instructorImageView.setImageResource(R.drawable.ic_default_profile_image);
+        }
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        String startTime = timeFormat.format(new Date(sessionModel.getStartTime()));
+        String endTime = timeFormat.format(new Date(sessionModel.getEndTime()));
+
+        sessionStartTimeTextView.setText(" " + startTime);
+        sessionEndTimeTextView.setText(" " + endTime);
+
+        String currentInstructorUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (sessionModel.getInstructorId().equals(currentInstructorUid)) {
+            convertView.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
+        } else {
+            convertView.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
         }
 
         return convertView;
@@ -225,7 +266,6 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
                 int numberOfSessions = Integer.parseInt(inputText);
                 Intent intent = new Intent(context, AddSessionActivity.class);
                 intent.putExtra("classId", classModel.getId());
-                intent.putExtra("instructorUid", classModel.getInstructorUid());
                 intent.putExtra("sessionCount", numberOfSessions);
                 context.startActivity(intent);
             } else {
@@ -244,6 +284,7 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
 
     public interface OnItemClickListener {
         void onEditClick(ClassModel classModel);
+
         void onDeleteClick(ClassModel classModel);
     }
 }

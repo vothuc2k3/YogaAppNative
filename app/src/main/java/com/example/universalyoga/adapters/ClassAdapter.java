@@ -84,7 +84,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             } else {
                 Intent intent = new Intent(context, AddSessionActivity.class);
                 intent.putExtra("classId", classModel.getId());
-                intent.putExtra("instructorUid", classModel.getInstructorUid());
                 intent.putExtra("sessionCount", classModel.getSessionCount());
                 context.startActivity(intent);
             }
@@ -144,7 +143,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
                 int numberOfSessions = Integer.parseInt(inputText);
                 Intent intent = new Intent(context, AddSessionActivity.class);
                 intent.putExtra("classId", classModel.getId());
-                intent.putExtra("instructorUid", classModel.getInstructorUid());
                 intent.putExtra("sessionCount", numberOfSessions);
                 context.startActivity(intent);
             } else {

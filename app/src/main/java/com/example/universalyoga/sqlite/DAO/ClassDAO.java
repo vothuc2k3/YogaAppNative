@@ -20,7 +20,6 @@ public class ClassDAO {
     public static final String TABLE_CLASS = "classes";
 
     public static final String COLUMN_CLASS_ID = "id";
-    public static final String COLUMN_INSTRUCTOR_UID = "instructorUid";
     public static final String COLUMN_CAPACITY = "capacity";
     public static final String COLUMN_DURATION = "duration";
     public static final String COLUMN_SESSION_COUNT = "sessionCount";
@@ -61,28 +60,6 @@ public class ClassDAO {
         }
     }
 
-    public List<ClassModel> getInstructorClasses(String instructorUid) {
-        List<ClassModel> classList = new ArrayList<>();
-        openReadableDb();
-
-        Cursor cursor = db.query(TABLE_CLASS, null, COLUMN_INSTRUCTOR_UID + "=? AND " + COLUMN_IS_DELETED + "=?",
-                new String[]{instructorUid, "0"}, null, null, null);
-
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                classList.add(populateClassModel(cursor));
-            } while (cursor.moveToNext());
-        }
-
-        if (cursor != null) {
-            cursor.close();
-        }
-
-        close();
-        return classList;
-    }
-
-
     public List<ClassModel> searchClassesByNameAndDay(String query, String dayOfWeek) {
         List<ClassModel> classList = new ArrayList<>();
         openReadableDb();
@@ -98,29 +75,9 @@ public class ClassDAO {
         return classList;
     }
 
-    public List<ClassModel> searchClassesByInstructorName(String query) {
-        List<ClassModel> classList = new ArrayList<>();
-        openReadableDb();
-        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_IS_DELETED + "=?";
-        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", "0"});
-
-        if (cursor.moveToFirst()) {
-            do {
-                classList.add(populateClassModel(cursor));
-            } while (cursor.moveToNext());
-        }
-
-        if (cursor != null) {
-            cursor.close();
-        }
-        close();
-        return classList;
-    }
-
     private ClassModel populateClassModel(Cursor cursor) {
         ClassModel classModel = new ClassModel();
         classModel.setId(cursor.getString(cursor.getColumnIndex(COLUMN_CLASS_ID)));
-        classModel.setInstructorUid(cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_UID)));
         classModel.setCapacity(cursor.getInt(cursor.getColumnIndex(COLUMN_CAPACITY)));
         classModel.setDuration(cursor.getInt(cursor.getColumnIndex(COLUMN_DURATION)));
         classModel.setSessionCount(cursor.getInt(cursor.getColumnIndex(COLUMN_SESSION_COUNT)));
@@ -142,7 +99,6 @@ public class ClassDAO {
         ContentValues values = new ContentValues();
 
         values.put(COLUMN_CLASS_ID, classModel.getId());
-        values.put(COLUMN_INSTRUCTOR_UID, classModel.getInstructorUid());
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
         values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());
@@ -185,7 +141,6 @@ public class ClassDAO {
     public int updateClass(ClassModel classModel) {
         openWritableDb();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_INSTRUCTOR_UID, classModel.getInstructorUid());
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
         values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());

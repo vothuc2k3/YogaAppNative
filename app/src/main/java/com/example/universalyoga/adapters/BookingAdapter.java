@@ -66,7 +66,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
             totalPrice += session.getPrice();
 
-            sessionsInfo.append("Session ").append(session.getSessionNumber()).append(" - ")
+            sessionsInfo.append("Session ").append("").append(" - ")
                     .append(classModel.getType()).append("\n")
                     .append("Date: ").append(dateFormat.format(new Date(session.getDate()))).append("\n")
                     .append("Price: £").append(session.getPrice()).append("\n\n");

@@ -74,7 +74,6 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
     public void onItemClick(ClassModel classModel) {
         Intent intent = new Intent(ClassManagementActivity.this, ClassDetailsActivity.class);
         intent.putExtra("id", classModel.getId());
-        intent.putExtra("instructorUid", classModel.getInstructorUid());
         intent.putExtra("capacity", classModel.getCapacity());
         intent.putExtra("duration", classModel.getDuration());
         intent.putExtra("sessionCount", classModel.getSessionCount());

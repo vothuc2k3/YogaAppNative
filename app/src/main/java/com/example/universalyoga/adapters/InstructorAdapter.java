@@ -40,11 +40,18 @@ public class InstructorAdapter extends RecyclerView.Adapter<InstructorAdapter.In
         UserModel instructor = instructors.get(position);
         holder.tvInstructorName.setText(instructor.getName());
 
-        Picasso.get()
-                .load(instructor.getProfileImage())
-                .placeholder(R.drawable.ic_default_profile_image)
-                .into(holder.ivInstructorAvatar);
+        // Load avatar, use default if null or empty
+        String profileImage = instructor.getProfileImage();
+        if (profileImage != null && !profileImage.isEmpty()) {
+            Picasso.get()
+                    .load(profileImage)
+                    .placeholder(R.drawable.ic_default_profile_image)
+                    .into(holder.ivInstructorAvatar);
+        } else {
+            holder.ivInstructorAvatar.setImageResource(R.drawable.ic_default_profile_image);
+        }
 
+        // Handle click event
         holder.itemView.setOnClickListener(v -> listener.onInstructorClick(instructor));
     }
 

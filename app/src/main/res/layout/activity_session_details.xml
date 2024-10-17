@@ -74,7 +74,7 @@
                 app:layout_constraintTop_toBottomOf="@id/iv_instructor_avatar">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_session_number"
+                    android:id="@+id/et_session_index"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clickable="false"

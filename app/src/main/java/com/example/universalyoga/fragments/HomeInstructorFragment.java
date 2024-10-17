@@ -22,6 +22,7 @@ import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.google.firebase.auth.FirebaseAuth;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ public class HomeInstructorFragment extends Fragment {
     private String uid;
     private TextView noClassesTextView;
     private ExpandableListView expandableListView;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private ClassExpandableListAdapter classExpandableListAdapter;
     private List<ClassModel> classList;
     private Map<ClassModel, List<ClassSessionModel>> sessionMap;
@@ -48,7 +48,6 @@ public class HomeInstructorFragment extends Fragment {
 
         noClassesTextView = view.findViewById(R.id.tv_no_classes);
         expandableListView = view.findViewById(R.id.expandableListView);
-        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
 
         classSessionDAO = new ClassSessionDAO(getContext());
         classDAO = new ClassDAO(getContext());
@@ -56,13 +55,11 @@ public class HomeInstructorFragment extends Fragment {
 
         loadData();
 
-        swipeRefreshLayout.setOnRefreshListener(this::loadData);
-
         return view;
     }
 
     private void loadData() {
-        classList = classDAO.getInstructorClasses(uid);
+        classList = new ArrayList<>();
         sessionMap = new HashMap<>();
 
         if (classList.isEmpty()) {
@@ -82,6 +79,7 @@ public class HomeInstructorFragment extends Fragment {
                     classList,
                     sessionMap,
                     userDAO,
+                    userDAO.getUserByUid(uid).getRole(),
                     new ClassExpandableListAdapter.OnItemClickListener() {
                         @Override
                         public void onEditClick(ClassModel classModel) {
@@ -93,8 +91,6 @@ public class HomeInstructorFragment extends Fragment {
                     });
             expandableListView.setAdapter(classExpandableListAdapter);
         }
-
-        swipeRefreshLayout.setRefreshing(false);
     }
 
 }

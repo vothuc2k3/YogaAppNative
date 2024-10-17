@@ -6,7 +6,6 @@ import java.util.Map;
 
 public class ClassModel {
     private String id; // id of the class
-    private String instructorUid; // uid of the instructor
     private String dayOfWeek; // monday, tuesday, etc.
     private Time timeStart; // 11h, 12h, etc.
     private int capacity; // 15, 20, 25, etc.
@@ -31,14 +30,6 @@ public class ClassModel {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getInstructorUid() {
-        return this.instructorUid;
-    }
-
-    public void setInstructorUid(String instructorUid) {
-        this.instructorUid = instructorUid;
     }
 
     public int getCapacity() {
@@ -129,8 +120,6 @@ public class ClassModel {
         this.sessionCount = sessionCount;
     }
 
-
-
     public boolean isDeleted() {
         return isDeleted;
     }
@@ -142,7 +131,6 @@ public class ClassModel {
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
-        map.put("instructorUid", instructorUid);
         map.put("capacity", capacity);
         map.put("duration", duration);
         map.put("sessionCount", sessionCount);

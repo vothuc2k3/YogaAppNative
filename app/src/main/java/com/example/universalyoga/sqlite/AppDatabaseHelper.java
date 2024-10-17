@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "yoga_app.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Table for Users
     private static final String CREATE_TABLE_USERS = "CREATE TABLE users ("
@@ -21,7 +21,6 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     // Table for Classes
     private static final String CREATE_TABLE_CLASS = "CREATE TABLE classes ("
             + "id TEXT PRIMARY KEY, "
-            + "instructorUid TEXT, "
             + "dayOfWeek TEXT, "
             + "timeStart TEXT, "
             + "capacity INTEGER, "
@@ -38,15 +37,17 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     // Table for Class Sessions
     private static final String CREATE_TABLE_CLASS_SESSION = "CREATE TABLE class_sessions ("
             + "id TEXT PRIMARY KEY, "
-            + "sessionNumber INTEGER, "
             + "classId TEXT, "
             + "instructorId TEXT, "
             + "date INTEGER, "
+            + "startTime INTEGER, "
+            + "endTime INTEGER, "
             + "price INTEGER, "
             + "room TEXT, "
             + "note TEXT, "
             + "isDeleted INTEGER DEFAULT 0, "
             + "FOREIGN KEY (classId) REFERENCES classes(id))";
+
 
 
     // Table for Bookings

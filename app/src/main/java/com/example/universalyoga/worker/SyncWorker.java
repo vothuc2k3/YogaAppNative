@@ -4,12 +4,9 @@ import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.work.ListenableWorker;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.example.universalyoga.models.BookingModel;
-import com.example.universalyoga.models.BookingSessionModel;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.models.UserModel;
@@ -24,7 +21,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.Timestamp;
 
 import java.sql.Time;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +68,6 @@ public class SyncWorker extends Worker {
                 ClassModel classModel = new ClassModel();
 
                 classModel.setId(document.getString("id"));
-                classModel.setInstructorUid(document.getString("instructorUid"));
                 classModel.setCapacity(document.getLong("capacity").intValue());
                 classModel.setDuration(document.getLong("duration").intValue());
                 classModel.setSessionCount(document.getLong("sessionCount").intValue());
@@ -95,12 +90,12 @@ public class SyncWorker extends Worker {
         classSessionsRef.get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                 ClassSessionModel classSessionModel = new ClassSessionModel();
-
                 classSessionModel.setId(document.getString("id"));
                 classSessionModel.setClassId(document.getString("classId"));
-                classSessionModel.setSessionNumber(document.getLong("sessionNumber").intValue());
                 classSessionModel.setInstructorId(document.getString("instructorId"));
                 classSessionModel.setDate(document.getLong("date"));
+                classSessionModel.setStartTime(document.getLong("startTime"));
+                classSessionModel.setEndTime(document.getLong("endTime"));
                 classSessionModel.setPrice(document.getLong("price").intValue());
                 classSessionModel.setRoom(document.getString("room"));
                 classSessionModel.setNote(document.getString("note"));
@@ -109,6 +104,15 @@ public class SyncWorker extends Worker {
                 Log.d(TAG, "Class session updated in SQLite: " + classSessionModel.getId());
             }
         }).addOnFailureListener(e -> Log.e(TAG, "Failed to fetch class sessions from Firestore", e));
+
+        CollectionReference usersRef = db.collection(USERS_COLLECTION);
+        usersRef.get().addOnSuccessListener(queryDocumentSnapshots->{
+            for(QueryDocumentSnapshot document : queryDocumentSnapshots){
+                Map<String, Object> userMap = document.getData();
+                UserModel userModel = new UserModel(userMap);
+                userDAO.addUser(userModel);
+            }
+        } );
     }
 
     private void syncFromSQLiteToFirestore(Runnable onComplete) {
@@ -116,7 +120,7 @@ public class SyncWorker extends Worker {
         List<ClassSessionModel> localClassSessions = classSessionDAO.getAllClassSessions();
         List<UserModel> localUsers = userDAO.getAllUsers();
 
-        int totalTasks = localClasses.size() + localClassSessions.size();
+        int totalTasks = localClasses.size() + localClassSessions.size() + localUsers.size();
 
         if (totalTasks == 0) {
             onComplete.run();
@@ -139,6 +143,7 @@ public class SyncWorker extends Worker {
                     .addOnSuccessListener(aVoid -> {
                         Log.d(TAG, "Class uploaded to Firestore: " + localClass.getId());
                         completedTasks[0]++;
+                        // Kiểm tra nếu tất cả tác vụ đã hoàn tất
                         if (completedTasks[0] == totalTasks) {
                             onComplete.run();
                         }
@@ -179,13 +184,14 @@ public class SyncWorker extends Worker {
                     .document(localUser.getUid())
                     .set(userData)
                     .addOnSuccessListener(aVoid -> {
-                        Log.d(TAG, "Class session uploaded to Firestore: " + localUser.getUid());
+                        Log.d(TAG, "User uploaded to Firestore: " + localUser.getUid());
                         completedTasks[0]++;
                         if (completedTasks[0] == totalTasks) {
                             onComplete.run();
                         }
-                    }).addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to upload class session to Firestore", e);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to upload user to Firestore", e);
                         completedTasks[0]++;
                         if (completedTasks[0] == totalTasks) {
                             onComplete.run();
@@ -193,4 +199,5 @@ public class SyncWorker extends Worker {
                     });
         }
     }
+
 }

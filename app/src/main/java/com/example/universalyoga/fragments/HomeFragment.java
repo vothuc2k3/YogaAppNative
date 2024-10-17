@@ -42,13 +42,6 @@ public class HomeFragment extends Fragment {
 
         updateDataFromSQLite();
 
-        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            swipeRefreshLayout.setRefreshing(true);
-            updateDataFromSQLite();
-            swipeRefreshLayout.setRefreshing(false);
-        });
-
         view.findViewById(R.id.btn_add_class).setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AddClassActivity.class);
             startActivity(intent);

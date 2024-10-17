@@ -5,14 +5,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.squareup.picasso.Picasso;
+
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class SessionDetailsActivity extends AppCompatActivity {
 
@@ -23,7 +30,7 @@ public class SessionDetailsActivity extends AppCompatActivity {
 
     private ImageView ivInstructorAvatar;
     private TextView tvInstructorName;
-    private EditText etSessionNumber, etSessionDate, etSessionPrice, etSessionRoom, etSessionNote;
+    private EditText etSessionIndex, etSessionDate, etSessionPrice, etSessionRoom, etSessionNote;
     private Button btnSaveSession;
 
     @Override
@@ -50,7 +57,7 @@ public class SessionDetailsActivity extends AppCompatActivity {
 
         ivInstructorAvatar = findViewById(R.id.iv_instructor_avatar);
         tvInstructorName = findViewById(R.id.tv_instructor_name);
-        etSessionNumber = findViewById(R.id.et_session_number);
+        etSessionIndex = findViewById(R.id.et_session_index);
         etSessionDate = findViewById(R.id.et_session_date);
         etSessionPrice = findViewById(R.id.et_session_price);
         etSessionRoom = findViewById(R.id.et_session_room);
@@ -65,11 +72,13 @@ public class SessionDetailsActivity extends AppCompatActivity {
                     .placeholder(R.drawable.ic_default_profile_image)
                     .into(ivInstructorAvatar);
 
-            etSessionNumber.setText(String.valueOf(classSessionModel.getSessionNumber()));
+            List<ClassSessionModel> allSessions = classSessionDAO.getClassSessionsByClassId(classSessionModel.getClassId());
+            Collections.sort(allSessions, Comparator.comparingLong(ClassSessionModel::getDate));
 
-            etSessionDate.setText(new java.text.SimpleDateFormat("dd MMM yyyy")
-                    .format(new java.util.Date(classSessionModel.getDate())));
+            int sessionIndex = allSessions.indexOf(classSessionModel) + 1; // Index từ 1
+            etSessionIndex.setText(String.valueOf(sessionIndex));
 
+            etSessionDate.setText(new SimpleDateFormat("dd MMM yyyy").format(new java.util.Date(classSessionModel.getDate())));
             etSessionPrice.setText(String.valueOf(classSessionModel.getPrice()));
             etSessionRoom.setText(classSessionModel.getRoom());
             etSessionNote.setText(classSessionModel.getNote());

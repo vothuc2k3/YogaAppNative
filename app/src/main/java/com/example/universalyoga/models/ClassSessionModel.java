@@ -6,34 +6,44 @@ import java.util.Map;
 public class ClassSessionModel {
     private String id;
     private String classId;
-    private int sessionNumber;
     private String instructorId;
     private long date;
+    private long startTime;  // Thêm trường startTime
+    private long endTime;    // Thêm trường endTime
     private int price;
     private String room;
     private String note;
-
     private boolean isDeleted;
 
-    public ClassSessionModel() {}
+    public ClassSessionModel() {
+    }
 
-    public ClassSessionModel(String id, String classId, int sessionNumber, String instructorId, long date, int price, String room, String note) {
+    public ClassSessionModel(String id, String classId, String instructorId, long date, long startTime, long endTime, int price, String room, String note) {
         this.id = id;
         this.classId = classId;
-        this.sessionNumber = sessionNumber;
         this.instructorId = instructorId;
         this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.price = price;
         this.room = room;
         this.note = note;
     }
 
-    public int getSessionNumber() {
-        return sessionNumber;
+    public long getStartTime() {
+        return startTime;
     }
 
-    public void setSessionNumber(int sessionNumber) {
-        this.sessionNumber = sessionNumber;
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
     }
 
     public String getNote() {
@@ -92,13 +102,22 @@ public class ClassSessionModel {
         this.id = id;
     }
 
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
         map.put("classId", classId);
-        map.put("sessionNumber", sessionNumber);
         map.put("instructorId", instructorId);
         map.put("date", date);
+        map.put("startTime", startTime);  // Thêm startTime
+        map.put("endTime", endTime);      // Thêm endTime
         map.put("price", price);
         map.put("room", room);
         map.put("note", note);
@@ -108,30 +127,16 @@ public class ClassSessionModel {
 
     public static ClassSessionModel fromMap(Map<String, Object> map) {
         ClassSessionModel sessionModel = new ClassSessionModel();
-
         sessionModel.setId((String) map.get("id"));
         sessionModel.setClassId((String) map.get("classId"));
-        sessionModel.setSessionNumber(map.get("sessionNumber") != null ? ((Number) map.get("sessionNumber")).intValue() : 0);
         sessionModel.setInstructorId((String) map.get("instructorId"));
         sessionModel.setDate(map.get("date") != null ? ((Number) map.get("date")).longValue() : 0L);
+        sessionModel.setStartTime(map.get("startTime") != null ? ((Number) map.get("startTime")).longValue() : 0L);  // Thêm startTime
+        sessionModel.setEndTime(map.get("endTime") != null ? ((Number) map.get("endTime")).longValue() : 0L);        // Thêm endTime
         sessionModel.setPrice(map.get("price") != null ? ((Number) map.get("price")).intValue() : 0);
         sessionModel.setRoom((String) map.get("room"));
         sessionModel.setNote((String) map.get("note"));
         sessionModel.setDeleted(map.get("isDeleted") != null && (Boolean) map.get("isDeleted"));
-
         return sessionModel;
-    }
-
-
-
-
-
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
     }
 }

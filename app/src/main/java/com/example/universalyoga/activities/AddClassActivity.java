@@ -5,7 +5,6 @@ import android.app.TimePickerDialog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
@@ -18,26 +17,22 @@ import androidx.core.content.ContextCompat;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassModel;
-import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
 
 import java.sql.Time;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.UUID;
 
 public class AddClassActivity extends AppCompatActivity {
 
-    private Spinner spinnerInstructor, spinnerClassType, spinnerDayOfWeek;
+    private Spinner spinnerClassType, spinnerDayOfWeek;
     private EditText inputClassDuration, inputClassStartTime, inputClassDescription, inputFirstDay;
     private NumberPicker numberPickerCapacity, numberPickerSessions;
     private Button btnSubmitClass;
     private int startHour = 0, startMinute = 0;
     private UserDAO userDAO;
     private ClassDAO classDAO;
-    private List<UserModel> instructorList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,11 +74,8 @@ public class AddClassActivity extends AppCompatActivity {
         inputClassDescription = findViewById(R.id.input_class_description);
         inputFirstDay = findViewById(R.id.input_start_at);
         btnSubmitClass = findViewById(R.id.btn_submit_class);
-        spinnerInstructor = findViewById(R.id.spinner_instructor);
         spinnerDayOfWeek = findViewById(R.id.spinner_day_of_week);
         spinnerClassType = findViewById(R.id.spinner_class_type);
-
-        loadInstructorsIntoSpinner();
 
         inputClassStartTime.setOnClickListener(v -> showTimePickerDialog());
 
@@ -134,19 +126,6 @@ public class AddClassActivity extends AppCompatActivity {
 
         datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis());
         datePickerDialog.show();
-    }
-
-    private void loadInstructorsIntoSpinner() {
-        instructorList = userDAO.getAllInstructors();
-        List<String> instructorNames = new ArrayList<>();
-
-        for (UserModel instructor : instructorList) {
-            instructorNames.add(instructor.getName());
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, instructorNames);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerInstructor.setAdapter(adapter);
     }
 
     private void createClass() {
@@ -206,12 +185,8 @@ public class AddClassActivity extends AppCompatActivity {
         long endAt = endCalendar.getTimeInMillis();
         Time timeStart = new Time(startAt);
 
-        int selectedInstructorPosition = spinnerInstructor.getSelectedItemPosition();
-        String instructorUid = instructorList.get(selectedInstructorPosition).getUid();
-
         ClassModel newClass = new ClassModel();
         newClass.setId(UUID.randomUUID().toString());
-        newClass.setInstructorUid(instructorUid);
         newClass.setDayOfWeek(dayOfWeek);
         newClass.setTimeStart(timeStart);
         newClass.setStartAt(startAt);

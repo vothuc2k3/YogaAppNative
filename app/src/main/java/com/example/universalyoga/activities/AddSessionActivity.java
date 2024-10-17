@@ -2,34 +2,45 @@ package com.example.universalyoga.activities;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
+import com.example.universalyoga.adapters.InstructorAdapter;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.ClassSessionModel;
+import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
+import com.example.universalyoga.sqlite.DAO.UserDAO;
 
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
 public class AddSessionActivity extends AppCompatActivity {
 
-    private EditText inputPrice, inputNotes;
+    private EditText inputPrice, inputNotes, inputInstructor;
     private AutoCompleteTextView inputRoom;
     private Button btnAddSession;
     private ClassSessionDAO classSessionDAO;
     private ClassDAO classDAO;
-    private String classId;
-    private String instructorUid;
+    private UserDAO userDAO;
+    private String classId, instructorUid = null;
     private int sessionCount;
 
     @Override
@@ -39,10 +50,12 @@ public class AddSessionActivity extends AppCompatActivity {
 
         classSessionDAO = new ClassSessionDAO(this);
         classDAO = new ClassDAO(this);
+        userDAO = new UserDAO(this);
 
         inputPrice = findViewById(R.id.input_price);
         inputRoom = findViewById(R.id.input_room);
         inputNotes = findViewById(R.id.input_notes);
+        inputInstructor = findViewById(R.id.input_instructor);
         btnAddSession = findViewById(R.id.btn_add_session);
 
         ArrayAdapter<CharSequence> roomAdapter = ArrayAdapter.createFromResource(
@@ -52,7 +65,6 @@ public class AddSessionActivity extends AppCompatActivity {
         inputRoom.setOnClickListener(v -> inputRoom.showDropDown());
 
         classId = getIntent().getStringExtra("classId");
-        instructorUid = getIntent().getStringExtra("instructorUid");
         sessionCount = getIntent().getIntExtra("sessionCount", 1);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -65,13 +77,39 @@ public class AddSessionActivity extends AppCompatActivity {
 
         btnAddSession.setOnClickListener(v -> addSession());
 
-        inputRoom.setOnClickListener(v -> inputRoom.showDropDown());
-        inputRoom.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                inputRoom.showDropDown();
-            }
-        });
+        inputInstructor.setOnClickListener(v -> showInstructorDialog());
     }
+
+    private void showInstructorDialog() {
+        List<UserModel> instructors = userDAO.getAllInstructors();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        TextView title = new TextView(this);
+        title.setText("Choose Instructor");
+        title.setPadding(20, 30, 20, 10);
+        title.setTextSize(20f);
+        title.setTextColor(getResources().getColor(android.R.color.black));
+
+        View dialogView = inflater.inflate(R.layout.dialog_instructor_selection, null);
+        builder.setView(dialogView);
+        builder.setCustomTitle(title);
+
+        final AlertDialog alertDialog = builder.create();
+
+        RecyclerView recyclerView = dialogView.findViewById(R.id.recycler_view_instructors);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        InstructorAdapter adapter = new InstructorAdapter(this, instructors, instructor -> {
+            inputInstructor.setText(instructor.getName());
+            instructorUid = instructor.getUid();
+            alertDialog.dismiss();
+        });
+        recyclerView.setAdapter(adapter);
+
+        alertDialog.show();
+    }
+
 
     private void addSession() {
         String priceStr = inputPrice.getText().toString().trim();
@@ -85,42 +123,73 @@ public class AddSessionActivity extends AppCompatActivity {
 
         int price = Integer.parseInt(priceStr);
 
-        List<ClassSessionModel> existingSessions = classSessionDAO.getClassSessionsByClassId(classId);
-        long date;
-
-        if (existingSessions.isEmpty()) {
-            Calendar calendar = Calendar.getInstance();
-            date = calendar.getTimeInMillis();
-        } else {
-            date = existingSessions.get(existingSessions.size() - 1).getDate() + (7 * 24 * 60 * 60 * 1000);
-        }
-
-        int maxSessionNumber = 0;
-        for (ClassSessionModel session : existingSessions) {
-            if (session.getSessionNumber() > maxSessionNumber) {
-                maxSessionNumber = session.getSessionNumber();
-            }
-        }
-
+        List<UserModel> allInstructors = userDAO.getAllInstructors();
         ClassModel classModel = classDAO.getClassById(classId);
+
         if (classModel != null) {
-            int currentSessionCount = existingSessions.size();
+            long startAtDate = classModel.getStartAt();
+            Time timeStart = classModel.getTimeStart();
+            int durationInMinutes = classModel.getDuration();
+            long durationInMillis = durationInMinutes * 60 * 1000;
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(startAtDate);
+            calendar.set(Calendar.HOUR_OF_DAY, timeStart.getHours());
+            calendar.set(Calendar.MINUTE, timeStart.getMinutes());
+
+            long startTimeInMillis = calendar.getTimeInMillis();
+            long endTimeInMillis = startTimeInMillis + durationInMillis;
+
+            UserModel selectedInstructor = null;
+
+            for (UserModel instructor : allInstructors) {
+                List<ClassSessionModel> instructorSessions = classSessionDAO.getSessionsByInstructorId(instructor.getUid());
+                boolean isConflict = false;
+
+                for (ClassSessionModel session : instructorSessions) {
+                    long sessionStartTime = session.getStartTime();
+                    long sessionEndTime = session.getEndTime();
+
+                    if ((startTimeInMillis >= sessionStartTime && startTimeInMillis < sessionEndTime) ||
+                            (endTimeInMillis > sessionStartTime && endTimeInMillis <= sessionEndTime)) {
+                        isConflict = true;
+                        break;
+                    }
+                }
+
+                if (!isConflict) {
+                    selectedInstructor = instructor;
+                    break;
+                }
+            }
+
+            if (selectedInstructor == null) {
+                Toast.makeText(this, "All instructors have schedule conflicts during this time.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (!selectedInstructor.getUid().equals(instructorUid)) {
+                Toast.makeText(this, "Instructor " + selectedInstructor.getName() + " was automatically selected due to schedule conflict.", Toast.LENGTH_LONG).show();
+            }
+
+            int currentSessionCount = classSessionDAO.getClassSessionsByClassId(classId).size();
             int remainingSessionsToAdd = classModel.getSessionCount() - currentSessionCount;
 
             if (sessionCount > remainingSessionsToAdd) {
-                sessionCount = remainingSessionsToAdd; // Chỉ thêm số session còn thiếu
+                sessionCount = remainingSessionsToAdd;
             }
 
-            long lastSessionDate = date;
+            long lastSessionDate = startAtDate;
 
             for (int i = 0; i < sessionCount; i++) {
                 ClassSessionModel newSession = new ClassSessionModel();
                 newSession.setId(UUID.randomUUID().toString());
-                newSession.setSessionNumber(maxSessionNumber + i + 1);
                 newSession.setClassId(classId);
                 newSession.setPrice(price);
-                newSession.setInstructorId(instructorUid);
-                newSession.setDate(date);
+                newSession.setInstructorId(selectedInstructor.getUid());
+                newSession.setStartTime(startTimeInMillis);
+                newSession.setEndTime(endTimeInMillis);
+                newSession.setDate(calendar.getTimeInMillis());
                 newSession.setRoom(room);
                 newSession.setNote(notes);
 
@@ -129,16 +198,19 @@ public class AddSessionActivity extends AppCompatActivity {
                     Toast.makeText(this, "Failed to add session", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                lastSessionDate = date;
-                date += 7 * 24 * 60 * 60 * 1000;
+
+                calendar.add(Calendar.DAY_OF_YEAR, 7);
+                startTimeInMillis = calendar.getTimeInMillis();
+                endTimeInMillis = startTimeInMillis + durationInMillis;
+                lastSessionDate = calendar.getTimeInMillis();
             }
 
             classModel.setEndAt(lastSessionDate);
-
-            classDAO.updateClass(classModel);  // Cập nhật class model trong cơ sở dữ liệu
+            classDAO.updateClass(classModel); // Cập nhật thông tin class
         }
 
         Toast.makeText(this, "Sessions added successfully!", Toast.LENGTH_SHORT).show();
         finish();
     }
+
 }

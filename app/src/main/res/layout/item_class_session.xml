@@ -2,7 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:padding="12dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="6dp">
 
@@ -11,7 +11,6 @@
         android:layout_height="match_parent"
         android:padding="16dp">
 
-        <!-- Instructor Profile Image -->
         <ImageView
             android:id="@+id/icon_instructor_image"
             android:layout_width="48dp"
@@ -98,6 +97,66 @@
             app:layout_constraintStart_toEndOf="@id/tv_session_date_label"
             app:layout_constraintTop_toTopOf="@id/icon_session_date" />
 
+        <!-- Start Time -->
+        <ImageView
+            android:id="@+id/icon_start_time"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_duration"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_session_date" />
+
+        <TextView
+            android:id="@+id/tv_start_time_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Start Time:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/icon_start_time"
+            app:layout_constraintTop_toTopOf="@id/icon_start_time" />
+
+        <TextView
+            android:id="@+id/tv_start_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_start_time_label"
+            app:layout_constraintTop_toTopOf="@id/icon_start_time" />
+
+        <!-- End Time -->
+        <ImageView
+            android:id="@+id/icon_end_time"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_start_time" />
+
+        <TextView
+            android:id="@+id/tv_end_time_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="End Time:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/icon_end_time"
+            app:layout_constraintTop_toTopOf="@id/icon_end_time" />
+
+        <TextView
+            android:id="@+id/tv_end_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tv_end_time_label"
+            app:layout_constraintTop_toTopOf="@id/icon_end_time" />
+
         <!-- Price -->
         <ImageView
             android:id="@+id/icon_price"
@@ -106,7 +165,7 @@
             android:layout_marginTop="16dp"
             android:src="@drawable/ic_price_tag"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_session_date" />
+            app:layout_constraintTop_toBottomOf="@id/tv_end_time" />
 
         <TextView
             android:id="@+id/tv_session_price_label"

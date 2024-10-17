@@ -119,7 +119,6 @@ public class UserDAO {
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                // Khởi tạo đối tượng UserModel và gán các giá trị từ cursor
                 UserModel user = new UserModel();
                 user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
                 user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
@@ -188,5 +187,4 @@ public class UserDAO {
         close();
         return instructorList;
     }
-
 }

@@ -42,24 +42,6 @@
                 android:paddingEnd="16dp" />
 
             <!-- Instructor -->
-            <TextView
-                android:id="@+id/label_instructor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:text="Instructor"
-                android:textStyle="bold" />
-
-            <Spinner
-                android:id="@+id/spinner_instructor"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:entries="@array/dummy_instructor_array"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp" />
 
             <!-- Day of Week -->
             <TextView

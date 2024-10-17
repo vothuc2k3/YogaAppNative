@@ -66,10 +66,7 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
         if (instructor != null) {
             holder.tvInstructorName.setText(instructor.getName());
 
-            Picasso.get()
-                    .load(instructor.getProfileImage())
-                    .placeholder(R.drawable.ic_default_profile_image)
-                    .into(holder.ivInstructorAvatar);
+            Picasso.get().load(instructor.getProfileImage()).placeholder(R.drawable.ic_default_profile_image).into(holder.ivInstructorAvatar);
         } else {
             holder.tvInstructorName.setText("Unknown Instructor");
             holder.ivInstructorAvatar.setImageResource(R.drawable.ic_default_profile_image);
@@ -80,7 +77,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
         holder.tvInstructorName.setOnClickListener(changeInstructorListener);
         holder.ivInstructorAvatar.setOnClickListener(changeInstructorListener);
 
-        holder.etSessionNumber.setText(String.valueOf(sessionModel.getSessionNumber()));
         holder.etSessionDate.setText(dateFormat.format(new Date(sessionModel.getDate())));
         holder.etSessionPrice.setText(String.valueOf(sessionModel.getPrice()));
         holder.etSessionRoom.setText(sessionModel.getRoom());
@@ -109,7 +105,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
 
         holder.btnSaveSession.setOnClickListener(v -> {
             try {
-                int sessionNumber = Integer.parseInt(holder.etSessionNumber.getText().toString().trim());
                 String sessionDate = holder.etSessionDate.getText().toString().trim();
                 double sessionPrice = Double.parseDouble(holder.etSessionPrice.getText().toString().trim());
                 String sessionRoom = holder.etSessionRoom.getText().toString().trim();
@@ -127,6 +122,14 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
                     return;
                 }
 
+                List<ClassSessionModel> instructorSessions = classSessionDAO.getSessionsByInstructorId(sessionModel.getInstructorId());
+                for (ClassSessionModel session : instructorSessions) {
+                    if (!session.getId().equals(sessionModel.getId()) && isSameDay(session.getDate(), dateMillis)) {
+                        Toast.makeText(context, "Instructor already has a session scheduled on this date.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+
                 for (ClassSessionModel session : sessionList) {
                     if (!session.getId().equals(sessionModel.getId()) && isSameDay(session.getDate(), dateMillis)) {
                         Toast.makeText(context, "Another session is already scheduled on this date.", Toast.LENGTH_SHORT).show();
@@ -134,7 +137,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
                     }
                 }
 
-                sessionModel.setSessionNumber(sessionNumber);
                 sessionModel.setDate(dateMillis);
                 sessionModel.setPrice((int) sessionPrice);
                 sessionModel.setRoom(sessionRoom);
@@ -147,7 +149,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
                     classDAO.updateClassStartAndEndDate(sessionModel.getClassId());
 
                     ClassSessionDAO classSessionDAO = new ClassSessionDAO(context);
-                    classSessionDAO.updateClassSessionNumber(sessionModel.getClassId());
                 }
 
                 Toast.makeText(context, "Session updated!", Toast.LENGTH_SHORT).show();
@@ -158,21 +159,16 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
             }
         });
 
+
         holder.itemView.setOnLongClickListener(v -> {
 
-            new androidx.appcompat.app.AlertDialog.Builder(context)
-                    .setTitle("Delete Session")
-                    .setMessage("Are you sure you want to delete this session?")
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        sessionList.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, sessionList.size());
-                        classSessionDAO.softDeleteClassSession(sessionModel.getId());
-                        classSessionDAO.updateClassSessionNumber(sessionModel.getClassId());
-                        Toast.makeText(context, "Session deleted", Toast.LENGTH_SHORT).show();
-                    })
-                    .setNegativeButton("No", null)
-                    .show();
+            new androidx.appcompat.app.AlertDialog.Builder(context).setTitle("Delete Session").setMessage("Are you sure you want to delete this session?").setPositiveButton("Yes", (dialog, which) -> {
+                sessionList.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, sessionList.size());
+                classSessionDAO.softDeleteClassSession(sessionModel.getId());
+                Toast.makeText(context, "Session deleted", Toast.LENGTH_SHORT).show();
+            }).setNegativeButton("No", null).show();
 
             return true;
         });
@@ -187,19 +183,14 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Select Instructor")
-                .setView(dialogView)
-                .setNegativeButton("Cancel", null);
+        builder.setTitle("Select Instructor").setView(dialogView).setNegativeButton("Cancel", null);
 
         AlertDialog dialog = builder.create();
 
         InstructorAdapter adapter = new InstructorAdapter(context, instructors, selectedInstructor -> {
             sessionModel.setInstructorId(selectedInstructor.getUid());
             holder.tvInstructorName.setText(selectedInstructor.getName());
-            Picasso.get()
-                    .load(selectedInstructor.getProfileImage())
-                    .placeholder(R.drawable.ic_default_profile_image)
-                    .into(holder.ivInstructorAvatar);
+            Picasso.get().load(selectedInstructor.getProfileImage()).placeholder(R.drawable.ic_default_profile_image).into(holder.ivInstructorAvatar);
 
             dialog.dismiss();
         });
@@ -213,8 +204,7 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
         Calendar cal2 = Calendar.getInstance();
         cal1.setTimeInMillis(date1);
         cal2.setTimeInMillis(date2);
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
     @Override
@@ -223,7 +213,7 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
     }
 
     public static class EditClassSessionViewHolder extends RecyclerView.ViewHolder {
-        TextInputEditText etSessionNumber, etSessionDate, etSessionPrice, etSessionRoom, etSessionNote;
+        TextInputEditText etSessionDate, etSessionPrice, etSessionRoom, etSessionNote;
         Button btnSaveSession;
         TextView tvInstructorName;
         ImageView ivInstructorAvatar;
@@ -231,7 +221,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
         public EditClassSessionViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            etSessionNumber = itemView.findViewById(R.id.et_session_number);
             etSessionDate = itemView.findViewById(R.id.et_session_date);
             etSessionPrice = itemView.findViewById(R.id.et_session_price);
             etSessionRoom = itemView.findViewById(R.id.et_session_room);

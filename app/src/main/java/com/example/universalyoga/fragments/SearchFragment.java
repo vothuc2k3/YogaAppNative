@@ -25,6 +25,7 @@ import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,7 @@ public class SearchFragment extends Fragment {
     private Spinner spinnerFilterDay;
     private ClassDAO classDAO;
     private ClassSessionDAO classSessionDAO;
+    private UserDAO userDAO;
     private ClassExpandableListAdapter expandableListAdapter;
     private List<ClassModel> classModels;
     private Map<ClassModel, List<ClassSessionModel>> sessionMap;
@@ -54,6 +56,7 @@ public class SearchFragment extends Fragment {
 
         classDAO = new ClassDAO(getContext());
         classSessionDAO = new ClassSessionDAO(getContext());
+        userDAO = new UserDAO(getContext());
         classModels = classDAO.getAllUndeletedClasses();
         sessionMap = loadSessionDataForClasses(classModels);
 
@@ -107,20 +110,12 @@ public class SearchFragment extends Fragment {
 
     private void performSearch(String name, String dayOfWeek) {
         List<ClassModel> result;
-        if (!dayOfWeek.isEmpty() && !dayOfWeek.equals("All Days")) {
-            result = classDAO.searchClassesByNameAndDay(name, dayOfWeek);
-        } else {
-            result = classDAO.searchClassesByInstructorName(name);
-        }
+        result = classDAO.searchClassesByNameAndDay(name, dayOfWeek);
 
         sessionMap = loadSessionDataForClasses(result);
         expandableListAdapter.updateData(result, sessionMap);
 
-        if (result.isEmpty()) {
-            showPrompt(true);
-        } else {
-            showPrompt(false);
-        }
+        showPrompt(result.isEmpty());
     }
 
     private void showPrompt(boolean show) {
@@ -134,22 +129,11 @@ public class SearchFragment extends Fragment {
     }
 
     private void setupExpandableListAdapter() {
-        expandableListAdapter = new ClassExpandableListAdapter(getContext(), classModels, sessionMap, new UserDAO(getContext()), new ClassExpandableListAdapter.OnItemClickListener() {
+        expandableListAdapter = new ClassExpandableListAdapter(getContext(), classModels, sessionMap, userDAO, userDAO.getUserByUid(FirebaseAuth.getInstance().getUid()).getRole(), new ClassExpandableListAdapter.OnItemClickListener() {
             @Override
             public void onEditClick(ClassModel classModel) {
                 Intent intent = new Intent(getActivity(), ClassDetailsActivity.class);
                 intent.putExtra("id", classModel.getId());
-                intent.putExtra("instructorUid", classModel.getInstructorUid());
-                intent.putExtra("capacity", classModel.getCapacity());
-                intent.putExtra("duration", classModel.getDuration());
-                intent.putExtra("sessionCount", classModel.getSessionCount());
-                intent.putExtra("type", classModel.getType());
-                intent.putExtra("status", classModel.getStatus());
-                intent.putExtra("description", classModel.getDescription());
-                intent.putExtra("createdAt", classModel.getCreatedAt());
-                intent.putExtra("startAt", classModel.getStartAt());
-                intent.putExtra("endAt", classModel.getEndAt());
-                intent.putExtra("dayOfWeek", classModel.getDayOfWeek());
                 if (classModel.getTimeStart() != null) {
                     intent.putExtra("timeStart", classModel.getTimeStart().toString());
                 }
