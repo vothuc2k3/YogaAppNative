@@ -1,7 +1,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="8dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
@@ -12,32 +12,30 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- User Info (Avatar + Name) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <!-- User Avatar -->
             <ImageView
                 android:id="@+id/user_avatar"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginEnd="12dp"
-                android:src="@drawable/ic_default_profile_image"
-                android:scaleType="centerCrop"
                 android:background="@drawable/circle_background"
-                android:contentDescription="User Avatar" />
+                android:contentDescription="User Avatar"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_default_profile_image" />
 
             <!-- User Name -->
             <TextView
                 android:id="@+id/tv_user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black" />
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -46,25 +44,47 @@
             android:id="@+id/tv_booking_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="12dp" />
+            android:textStyle="bold" />
+
+        <!-- Booking Status -->
+        <TextView
+            android:id="@+id/tv_booking_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <!-- Total Price -->
         <TextView
             android:id="@+id/tv_total_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:layout_marginTop="4dp"
             android:textColor="@color/colorAccent"
-            android:layout_marginTop="4dp" />
+            android:textSize="16sp" />
 
         <!-- Session Details -->
         <TextView
             android:id="@+id/tv_session_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:paddingTop="8dp" />
+            android:paddingTop="8dp"
+            android:textSize="14sp" />
+
+        <!-- Confirm Button -->
+        <Button
+            android:id="@+id/btn_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:text="Confirm"
+            android:textColor="@android:color/white" />
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

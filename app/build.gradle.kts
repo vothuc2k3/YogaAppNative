@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.picasso)
     implementation(libs.swipeRefresh)
     implementation(libs.car.ui.lib)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

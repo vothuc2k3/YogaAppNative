@@ -16,7 +16,7 @@ public class BookingDAO {
     private static final String TABLE_NAME = "bookings";
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_UID = "uid";  // User ID
-    private static final String COLUMN_TOTAL_PRICE = "totalPrice";
+    private static final String COLUMN_IS_CONFIRMED = "isConfirmed"; // Boolean column
     private static final String COLUMN_CREATED_AT = "createdAt";
 
     private AppDatabaseHelper dbHelper;
@@ -46,7 +46,7 @@ public class BookingDAO {
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, booking.getId());
         values.put(COLUMN_UID, booking.getUid());
-        values.put(COLUMN_TOTAL_PRICE, booking.getTotalPrice());
+        values.put(COLUMN_IS_CONFIRMED, booking.isConfirmed() ? 1 : 0); // Thêm isConfirmed
         values.put(COLUMN_CREATED_AT, booking.getCreatedAt());
 
         long result = db.insert(TABLE_NAME, null, values);
@@ -65,7 +65,7 @@ public class BookingDAO {
                 BookingModel booking = new BookingModel();
                 booking.setId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)));
                 booking.setUid(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_UID)));
-                booking.setTotalPrice(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_PRICE)));
+                booking.setConfirmed(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_CONFIRMED)) == 1); // Lấy isConfirmed
                 booking.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
 
                 bookings.add(booking);
@@ -90,7 +90,7 @@ public class BookingDAO {
             booking = new BookingModel();
             booking.setId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)));
             booking.setUid(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_UID)));
-            booking.setTotalPrice(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_PRICE)));
+            booking.setConfirmed(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_CONFIRMED)) == 1); // Lấy isConfirmed
             booking.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
         }
 
@@ -107,7 +107,7 @@ public class BookingDAO {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_UID, booking.getUid());
-        values.put(COLUMN_TOTAL_PRICE, booking.getTotalPrice());
+        values.put(COLUMN_IS_CONFIRMED, booking.isConfirmed() ? 1 : 0); // Cập nhật isConfirmed
         values.put(COLUMN_CREATED_AT, booking.getCreatedAt());
 
         int rowsAffected = db.update(TABLE_NAME, values, COLUMN_ID + "=?", new String[]{booking.getId()});

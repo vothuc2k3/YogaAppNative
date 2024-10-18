@@ -59,7 +59,8 @@ public class HomeInstructorFragment extends Fragment {
     }
 
     private void loadData() {
-        classList = new ArrayList<>();
+        classList = classDAO.getClassesWithSessionsByInstructor(uid);
+
         sessionMap = new HashMap<>();
 
         if (classList.isEmpty()) {
@@ -92,5 +93,4 @@ public class HomeInstructorFragment extends Fragment {
             expandableListView.setAdapter(classExpandableListAdapter);
         }
     }
-
 }

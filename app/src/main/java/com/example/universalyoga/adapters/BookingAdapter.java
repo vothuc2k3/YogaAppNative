@@ -4,10 +4,12 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
@@ -15,6 +17,7 @@ import com.example.universalyoga.models.BookingModel;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.models.UserModel;
+import com.example.universalyoga.sqlite.DAO.BookingDAO;
 import com.example.universalyoga.sqlite.DAO.BookingSessionDAO;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
@@ -26,28 +29,28 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import android.widget.Toast;
+
 public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingViewHolder> {
 
     private List<BookingModel> bookings;
+    private Context context;  // Thêm biến context
+    private BookingDAO bookingDAO;
+    private UserDAO userDAO;
+    private BookingSessionDAO bookingSessionDAO;
     private ClassSessionDAO classSessionDAO;
     private ClassDAO classDAO;
-    private BookingSessionDAO bookingSessionDAO;
-    private UserDAO userDAO;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+    private SimpleDateFormat dateFormat;  // Thêm biến dateFormat
 
-    public BookingAdapter(List<BookingModel> bookings, ClassSessionDAO classSessionDAO, ClassDAO classDAO, BookingSessionDAO bookingSessionDAO, UserDAO userDAO) {
+    public BookingAdapter(List<BookingModel> bookings, Context context, UserDAO userDAO, BookingDAO bookingDAO,BookingSessionDAO bookingSessionDAO, ClassSessionDAO classSessionDAO, ClassDAO classDAO) {
         this.bookings = bookings;
+        this.context = context;
+        this.userDAO = userDAO;
+        this.bookingDAO = bookingDAO;
+        this.bookingSessionDAO = bookingSessionDAO;
         this.classSessionDAO = classSessionDAO;
         this.classDAO = classDAO;
-        this.bookingSessionDAO = bookingSessionDAO;
-        this.userDAO = userDAO;
-    }
-
-    @NonNull
-    @Override
-    public BookingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_booking, parent, false);
-        return new BookingViewHolder(view);
+        this.dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
     }
 
     @Override
@@ -68,27 +71,78 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
             sessionsInfo.append("Session ").append("").append(" - ")
                     .append(classModel.getType()).append("\n")
-                    .append("Date: ").append(dateFormat.format(new Date(session.getDate()))).append("\n")
+                    .append("Date: ").append(dateFormat.format(new Date(session.getDate()))).append("\n")  // Sử dụng dateFormat
                     .append("Price: £").append(session.getPrice()).append("\n\n");
         }
 
-        // Cập nhật tổng giá và chi tiết session
         holder.tvTotalPrice.setText("Total Price: £" + totalPrice);
         holder.tvSessionDetails.setText(sessionsInfo.toString());
 
-        // Lấy thông tin người dùng từ UserDAO
         UserModel user = userDAO.getUserByUid(booking.getUid());
         if (user != null) {
             holder.tvUserName.setText(user.getName());
 
             Picasso.get()
-                    .load(user.getProfileImage())  // Profile image URL từ UserModel
-                    .placeholder(R.drawable.ic_default_profile_image)  // Icon mặc định khi chưa có avatar
+                    .load(user.getProfileImage())
+                    .placeholder(R.drawable.ic_default_profile_image)
                     .into(holder.ivAvatar);
         } else {
             holder.tvUserName.setText("Unknown User");
             holder.ivAvatar.setImageResource(R.drawable.ic_default_profile_image);
         }
+
+        holder.tvBookingStatus = holder.itemView.findViewById(R.id.tv_booking_status);
+        if (booking.isConfirmed()) {
+            holder.tvBookingStatus.setText("Confirmed");
+            holder.tvBookingStatus.setTextColor(context.getResources().getColor(R.color.colorAccent));
+        } else {
+            holder.tvBookingStatus.setText("Pending");
+            holder.tvBookingStatus.setTextColor(context.getResources().getColor(R.color.yellow));
+        }
+
+        if (booking.isConfirmed()) {
+            holder.tvBookingStatus.setText("Confirmed");
+            holder.tvBookingStatus.setTextColor(context.getResources().getColor(R.color.colorAccent));
+
+            holder.btnConfirm.setText("Confirmed");
+            holder.btnConfirm.setEnabled(false);
+            holder.btnConfirm.setAlpha(0.5f);
+        } else {
+            holder.tvBookingStatus.setText("Pending");
+            holder.tvBookingStatus.setTextColor(context.getResources().getColor(R.color.yellow));
+
+            holder.btnConfirm.setText("Confirm");
+            holder.btnConfirm.setEnabled(true);
+            holder.btnConfirm.setAlpha(1.0f);
+            // Set up the confirmation dialog
+            holder.btnConfirm.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Confirm Booking")
+                        .setMessage("Are you sure you want to confirm this booking?")
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            confirmBooking(booking, position);
+                        })
+                        .setNegativeButton("No", (dialog, which) -> {
+                            dialog.dismiss();
+                        })
+                        .show();
+            });
+        }
+    }
+
+    private void confirmBooking(BookingModel booking, int position) {
+        booking.setConfirmed(true);
+        bookingDAO.updateBooking(booking);
+        notifyItemChanged(position);
+        Toast.makeText(context, "Booking confirmed!", Toast.LENGTH_SHORT).show();
+    }
+
+
+    @NonNull
+    @Override
+    public BookingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_booking, parent, false);
+        return new BookingViewHolder(view);
     }
 
     @Override
@@ -97,8 +151,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
     }
 
     public static class BookingViewHolder extends RecyclerView.ViewHolder {
-        TextView tvBookingTitle, tvTotalPrice, tvSessionDetails, tvUserName;
+        TextView tvBookingTitle, tvTotalPrice, tvSessionDetails, tvUserName, tvBookingStatus;
         ImageView ivAvatar;
+        Button btnConfirm;
 
         public BookingViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -106,7 +161,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
             tvTotalPrice = itemView.findViewById(R.id.tv_total_price);
             tvSessionDetails = itemView.findViewById(R.id.tv_session_details);
             tvUserName = itemView.findViewById(R.id.tv_user_name);
+            tvBookingStatus = itemView.findViewById(R.id.tv_booking_status);
             ivAvatar = itemView.findViewById(R.id.user_avatar);
+            btnConfirm = itemView.findViewById(R.id.btn_confirm);
         }
     }
 }

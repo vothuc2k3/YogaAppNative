@@ -8,8 +8,8 @@ public class ClassSessionModel {
     private String classId;
     private String instructorId;
     private long date;
-    private long startTime;  // Thêm trường startTime
-    private long endTime;    // Thêm trường endTime
+    private long startTime;
+    private long endTime;
     private int price;
     private String room;
     private String note;

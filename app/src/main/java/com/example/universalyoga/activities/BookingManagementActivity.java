@@ -83,7 +83,7 @@ public class BookingManagementActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
             tvEmptyState.setVisibility(View.GONE);
 
-            bookingAdapter = new BookingAdapter(bookings, classSessionDAO, classDAO, bookingSessionDAO, userDAO);
+            bookingAdapter = new BookingAdapter(bookings, this, userDAO, bookingDAO,bookingSessionDAO, classSessionDAO, classDAO);
             recyclerViewBookings.setLayoutManager(new LinearLayoutManager(this));
             recyclerViewBookings.setAdapter(bookingAdapter);
         }

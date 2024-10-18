@@ -1,20 +1,24 @@
 package com.example.universalyoga.models;
 
+import com.google.firebase.Timestamp;
+
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BookingModel {
     private String id;
     private String uid;
-    private int totalPrice;
+    private boolean isConfirmed;
     private long createdAt;
 
     public BookingModel(){}
 
-    public BookingModel(String id, String uid, int totalPrice, long createdAt) {
+    public BookingModel(String id, String uid, boolean isConfirmed, long createdAt) {
         this.id = id;
         this.uid = uid;
-        this.totalPrice = totalPrice;
+        this.isConfirmed = isConfirmed;
         this.createdAt = createdAt;
     }
 
@@ -34,14 +38,6 @@ public class BookingModel {
         this.uid = uid;
     }
 
-    public int getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(int totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
     public long getCreatedAt() {
         return createdAt;
     }
@@ -54,8 +50,16 @@ public class BookingModel {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
         map.put("uid", uid);
-        map.put("totalPrice", totalPrice);
-        map.put("createdAt", createdAt);
+        map.put("isConfirmed", isConfirmed);
+        map.put("createdAt", new Timestamp(new Date(createdAt)));
         return map;
+    }
+
+    public boolean isConfirmed() {
+        return isConfirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        isConfirmed = confirmed;
     }
 }

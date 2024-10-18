@@ -13,7 +13,9 @@ import com.example.universalyoga.sqlite.AppDatabaseHelper;
 
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ClassDAO {
 
@@ -59,6 +61,27 @@ public class ClassDAO {
             db.close();
         }
     }
+
+    public List<ClassModel> getClassesWithSessionsByInstructor(String instructorId) {
+        List<ClassModel> classList = new ArrayList<>();
+
+        List<ClassSessionModel> instructorSessions = classSessionDAO.getSessionsByInstructorId(instructorId);
+
+        Set<String> classIds = new HashSet<>();
+        for (ClassSessionModel session : instructorSessions) {
+            classIds.add(session.getClassId());
+        }
+
+        for (String classId : classIds) {
+            ClassModel classModel = getClassById(classId);
+            if (classModel != null) {
+                classList.add(classModel);
+            }
+        }
+
+        return classList;
+    }
+
 
     public List<ClassModel> searchClassesByNameAndDay(String query, String dayOfWeek) {
         List<ClassModel> classList = new ArrayList<>();
@@ -191,7 +214,6 @@ public class ClassDAO {
         return classList;
     }
 
-
     public List<ClassModel> getAllUndeletedClasses() {
         List<ClassModel> classList = new ArrayList<>();
         openReadableDb();
@@ -247,5 +269,4 @@ public class ClassDAO {
 
         close();
     }
-
 }

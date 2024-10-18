@@ -6,6 +6,11 @@ public class BookingSessionModel {
 
     public BookingSessionModel(){}
 
+    public BookingSessionModel(String bookingId, String sessionId){
+        this.bookingId = bookingId;
+        this.sessionId = sessionId;
+    }
+
 
     public String getBookingId() {
         return bookingId;

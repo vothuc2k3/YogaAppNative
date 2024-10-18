@@ -53,10 +53,11 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     // Table for Bookings
     private static final String CREATE_TABLE_BOOKINGS = "CREATE TABLE bookings ("
             + "id TEXT PRIMARY KEY, "
-            + "createdAt INTEGER, "  // Long for createdAt
-            + "totalPrice INTEGER, "
+            + "createdAt INTEGER, "
+            + "isConfirmed INTEGER, "
             + "uid TEXT, "
             + "FOREIGN KEY (uid) REFERENCES users(uid))";
+
 
     // Table for Booking Sessions (for storing sessionIds related to a booking)
     private static final String CREATE_TABLE_BOOKING_SESSIONS = "CREATE TABLE booking_sessions ("

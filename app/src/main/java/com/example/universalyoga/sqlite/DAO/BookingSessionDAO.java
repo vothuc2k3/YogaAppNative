@@ -38,6 +38,30 @@ public class BookingSessionDAO {
         }
     }
 
+    public List<BookingSessionModel> getAllBookingSessions() {
+        List<BookingSessionModel> bookingSessions = new ArrayList<>();
+        openReadableDb();
+        Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                String bookingId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID));
+                String sessionId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SESSION_ID));
+
+                BookingSessionModel bookingSession = new BookingSessionModel(bookingId, sessionId);
+                bookingSessions.add(bookingSession);
+            } while (cursor.moveToNext());
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        closeDb();
+        return bookingSessions;
+    }
+
+
     public long addBookingSession(String bookingId, String sessionId) {
         openWritableDb();
         ContentValues values = new ContentValues();
@@ -54,7 +78,11 @@ public class BookingSessionDAO {
 
         cursor.close();
 
-        long result = db.insert("booking_sessions", null, values);
+        long result = db.insertWithOnConflict(
+                "booking_sessions",
+                null,
+                values,
+                SQLiteDatabase.CONFLICT_REPLACE);
         closeDb();
 
         return result;

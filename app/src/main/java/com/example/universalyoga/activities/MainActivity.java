@@ -3,6 +3,7 @@ package com.example.universalyoga.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +16,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.example.universalyoga.R;
 import com.example.universalyoga.fragments.HomeFragment;
 import com.example.universalyoga.fragments.HomeInstructorFragment;
+import com.example.universalyoga.fragments.ProfileFragment;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.AppDatabaseHelper;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
@@ -25,8 +27,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import com.example.universalyoga.fragments.SearchFragment;
 import com.google.firebase.auth.FirebaseUser;
-
-import org.checkerframework.checker.units.qual.A;
+import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,36 +70,52 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.nav_home) {
                 if (currentUser.getRole().equals("admin")) {
                     getSupportFragmentManager().beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                             .replace(R.id.fragment_container, new HomeFragment())
                             .commit();
                     toolbar.setTitle("Home");
                 } else {
                     getSupportFragmentManager().beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                             .replace(R.id.fragment_container, new HomeInstructorFragment())
                             .commit();
                     toolbar.setTitle("Home");
                 }
             } else if (itemId == R.id.nav_search) {
                 getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
                         .replace(R.id.fragment_container, new SearchFragment())
                         .commit();
                 toolbar.setTitle("Search");
             } else if (itemId == R.id.nav_profile) {
                 AppDatabaseHelper db = new AppDatabaseHelper(this);
                 db.getReadableDatabase();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("user", currentUser);
+                ProfileFragment profileFragment = new ProfileFragment();
+                profileFragment.setArguments(bundle);
+                getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                        .replace(R.id.fragment_container, profileFragment)
+                        .commit();
                 toolbar.setTitle("Profile");
             }
-
             return true;
         });
 
+
         navigationView = findViewById(R.id.end_drawer);
         View headerView = navigationView.getHeaderView(0);
+        ImageView profileImage = headerView.findViewById(R.id.profile_image);
         TextView nameTextView = headerView.findViewById(R.id.profile_name);
         TextView emailTextView = headerView.findViewById(R.id.profile_email);
 
         nameTextView.setText(currentUser.getName());
         emailTextView.setText(currentUser.getEmail());
+        Picasso.get()
+                .load(currentUser.getProfileImage())
+                .placeholder(R.drawable.ic_default_profile_image)
+                .into(profileImage);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

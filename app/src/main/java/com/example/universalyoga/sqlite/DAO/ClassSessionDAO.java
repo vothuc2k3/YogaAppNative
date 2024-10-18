@@ -17,12 +17,13 @@ import java.util.List;
 public class ClassSessionDAO {
 
     public static final String TABLE_CLASS_SESSION = "class_sessions";
+
     public static final String COLUMN_SESSION_ID = "id";
     public static final String COLUMN_CLASS_ID = "classId";
     public static final String COLUMN_INSTRUCTOR_ID = "instructorId";
     public static final String COLUMN_DATE = "date";
-    public static final String COLUMN_START_TIME = "startTime";  // Thêm trường startTime
-    public static final String COLUMN_END_TIME = "endTime";      // Thêm trường endTime
+    public static final String COLUMN_START_TIME = "startTime";
+    public static final String COLUMN_END_TIME = "endTime";
     public static final String COLUMN_PRICE = "price";
     public static final String COLUMN_ROOM = "room";
     public static final String COLUMN_NOTE = "note";
@@ -53,7 +54,6 @@ public class ClassSessionDAO {
         }
     }
 
-    // Hàm lấy các sessions theo Instructor Id
     public List<ClassSessionModel> getSessionsByInstructorId(String instructorId) {
         List<ClassSessionModel> sessionList = new ArrayList<>();
         openReadableDb();
@@ -87,7 +87,6 @@ public class ClassSessionDAO {
         return sessionList;
     }
 
-    // Hàm thêm một ClassSession mới
     public long addClassSession(ClassSessionModel session) {
         openWritableDb();
         ContentValues values = new ContentValues();
@@ -106,7 +105,6 @@ public class ClassSessionDAO {
         return result;
     }
 
-    // Hàm lấy ClassSession theo Id
     public ClassSessionModel getClassSessionById(String id) {
         openReadableDb();
         Cursor cursor = db.query(TABLE_CLASS_SESSION, null, COLUMN_SESSION_ID + "=?", new String[]{id}, null, null, null);
@@ -131,7 +129,6 @@ public class ClassSessionDAO {
         return session;
     }
 
-    // Hàm cập nhật một ClassSession
     public int updateClassSession(ClassSessionModel session) {
         openWritableDb();
         ContentValues values = new ContentValues();
@@ -149,7 +146,6 @@ public class ClassSessionDAO {
         return rowsAffected;
     }
 
-    // Hàm xóa mềm một ClassSession
     public void softDeleteClassSession(String id) {
         openWritableDb();
         ContentValues values = new ContentValues();
