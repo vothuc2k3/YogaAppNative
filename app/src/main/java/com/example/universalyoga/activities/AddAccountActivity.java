@@ -35,9 +35,10 @@ public class AddAccountActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Add Account");
         }
+        toolbar.setNavigationOnClickListener(v -> finish());
+
 
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
-        toolbar.setNavigationOnClickListener(v -> finish());
 
         mAuth = FirebaseAuth.getInstance();
 

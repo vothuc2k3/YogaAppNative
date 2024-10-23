@@ -22,8 +22,8 @@
                 android:title="Create new class"
                 android:titleTextColor="@color/white" />
 
+            <!-- Class Type -->
             <TextView
-                android:id="@+id/label_class_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -32,20 +32,26 @@
                 android:text="Class Type"
                 android:textStyle="bold" />
 
-            <Spinner
-                android:id="@+id/spinner_class_type"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:entries="@array/class_type_array"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp" />
+                android:paddingEnd="16dp">
 
-            <!-- Instructor -->
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_class_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:hint="Class Type"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Day of Week -->
             <TextView
-                android:id="@+id/label_day_of_week"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -54,18 +60,26 @@
                 android:text="Day of the Week"
                 android:textStyle="bold" />
 
-            <Spinner
-                android:id="@+id/spinner_day_of_week"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:entries="@array/days_of_week_array" />
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_day_of_week"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:hint="Day of the Week"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Start Time -->
             <TextView
-                android:id="@+id/label_class_start_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -74,15 +88,23 @@
                 android:text="Start Time"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/input_class_start_time"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:focusable="false"
-                android:hint="Select Time"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp" />
+                android:paddingEnd="16dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_class_start_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:hint="Start Time"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- First Day (Start Date) -->
             <TextView
@@ -95,15 +117,23 @@
                 android:text="First Day (Start Date)"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/input_start_at"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:focusable="false"
-                android:hint="Select Start Date"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp" />
+                android:paddingEnd="16dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_start_at"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:hint="Choose Start Date"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Number of Sessions -->
             <TextView
@@ -116,13 +146,22 @@
                 android:text="Number of Sessions"
                 android:textStyle="bold" />
 
-            <NumberPicker
-                android:id="@+id/number_picker_sessions"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp" />
+                android:paddingEnd="16dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_number_of_sessions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter Number of Sessions"
+                    android:inputType="number"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Description -->
             <TextView
@@ -135,16 +174,23 @@
                 android:text="Description"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/input_class_description"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Optional"
-                android:inputType="textMultiLine"
-                android:minLines="3"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp" />
+                android:paddingEnd="16dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_class_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Optional"
+                    android:inputType="textMultiLine"
+                    android:minLines="3"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Class Capacity -->
             <TextView
@@ -157,13 +203,22 @@
                 android:text="Class Capacity"
                 android:textStyle="bold" />
 
-            <NumberPicker
-                android:id="@+id/number_picker_capacity"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp" />
+                android:paddingEnd="16dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_class_capacity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter Class Capacity"
+                    android:inputType="number"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Class Duration -->
             <TextView
@@ -176,15 +231,22 @@
                 android:text="Class Duration (minutes)"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/input_class_duration"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Enter Duration"
-                android:inputType="number"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp" />
+                android:paddingEnd="16dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_class_duration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter Duration"
+                    android:inputType="number"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Submit Button -->
             <Button

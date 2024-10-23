@@ -1,6 +1,5 @@
 package com.example.universalyoga.worker;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
 
@@ -24,7 +23,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.Timestamp;
 
 import java.sql.Time;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -182,10 +180,10 @@ public class SyncWorker extends Worker {
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Failed to upload class to Firestore", e);
-                        completedTasks[0]++;
-                        if (completedTasks[0] == totalTasks) {
-                            onComplete.run();
-                        }
+                            completedTasks[0]++;
+                            if (completedTasks[0] == totalTasks) {
+                                onComplete.run();
+                            }
                     });
         }
 

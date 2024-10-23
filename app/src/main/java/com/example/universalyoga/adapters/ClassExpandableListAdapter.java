@@ -43,14 +43,13 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
     private final ClassSessionDAO classSessionDAO;
     private final OnItemClickListener onItemClickListener;
 
-    // Constructor nhận role và lưu trữ nó
     public ClassExpandableListAdapter(Context context, List<ClassModel> classList, Map<ClassModel, List<ClassSessionModel>> sessionMap, UserDAO userDAO, String role, OnItemClickListener onItemClickListener) {
         this.context = context;
         this.classList = classList;
         this.sessionMap = sessionMap;
         this.userDAO = userDAO;
         this.classSessionDAO = new ClassSessionDAO(context);
-        this.role = role;  // Lưu role khi khởi tạo
+        this.role = role;
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -95,15 +94,13 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            // Inflate layout dựa trên vai trò của người dùng
             if (role.equals("admin")) {
-                convertView = inflater.inflate(R.layout.item_class, null);  // Layout cho admin
+                convertView = inflater.inflate(R.layout.item_class, null);
             } else {
-                convertView = inflater.inflate(R.layout.item_instructor_class, null);  // Layout cho instructor
+                convertView = inflater.inflate(R.layout.item_instructor_class, null);
             }
         }
 
-        // Thiết lập các giá trị chung cho cả admin và instructor
         TextView classNameTextView = convertView.findViewById(R.id.class_name);
         TextView capacityTextView = convertView.findViewById(R.id.capacity_value);
         TextView startTimeTextView = convertView.findViewById(R.id.start_time_value);
@@ -136,7 +133,6 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
             convertView.setBackgroundColor(context.getResources().getColor(R.color.complete_class));
         }
 
-        // Chỉ admin có quyền thêm, sửa, xóa lớp học
         if (role.equals("admin")) {
             Button btnAddSession = convertView.findViewById(R.id.btn_add_session);
             Button btnEdit = convertView.findViewById(R.id.btn_edit_class);

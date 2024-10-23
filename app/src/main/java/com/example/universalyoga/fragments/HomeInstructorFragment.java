@@ -10,7 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.adapters.ClassExpandableListAdapter;
@@ -22,7 +21,6 @@ import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.google.firebase.auth.FirebaseAuth;
 
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,12 +81,9 @@ public class HomeInstructorFragment extends Fragment {
                     userDAO.getUserByUid(uid).getRole(),
                     new ClassExpandableListAdapter.OnItemClickListener() {
                         @Override
-                        public void onEditClick(ClassModel classModel) {
-                        }
-
+                        public void onEditClick(ClassModel classModel) {}
                         @Override
-                        public void onDeleteClick(ClassModel classModel) {
-                        }
+                        public void onDeleteClick(ClassModel classModel) {}
                     });
             expandableListView.setAdapter(classExpandableListAdapter);
         }

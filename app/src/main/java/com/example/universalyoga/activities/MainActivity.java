@@ -70,32 +70,32 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.nav_home) {
                 if (currentUser.getRole().equals("admin")) {
                     getSupportFragmentManager().beginTransaction()
-                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
                             .replace(R.id.fragment_container, new HomeFragment())
                             .commit();
                     toolbar.setTitle("Home");
                 } else {
                     getSupportFragmentManager().beginTransaction()
-                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
                             .replace(R.id.fragment_container, new HomeInstructorFragment())
                             .commit();
                     toolbar.setTitle("Home");
                 }
             } else if (itemId == R.id.nav_search) {
                 getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                         .replace(R.id.fragment_container, new SearchFragment())
                         .commit();
                 toolbar.setTitle("Search");
             } else if (itemId == R.id.nav_profile) {
                 AppDatabaseHelper db = new AppDatabaseHelper(this);
-                db.getReadableDatabase();
+                db.getWritableDatabase();
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("user", currentUser);
                 ProfileFragment profileFragment = new ProfileFragment();
                 profileFragment.setArguments(bundle);
                 getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                         .replace(R.id.fragment_container, profileFragment)
                         .commit();
                 toolbar.setTitle("Profile");

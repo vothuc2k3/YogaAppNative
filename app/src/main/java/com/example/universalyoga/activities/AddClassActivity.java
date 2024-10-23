@@ -7,8 +7,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.NumberPicker;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,7 +16,6 @@ import androidx.core.content.ContextCompat;
 import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
-import com.example.universalyoga.sqlite.DAO.UserDAO;
 
 import java.sql.Time;
 import java.util.Calendar;
@@ -26,12 +23,8 @@ import java.util.UUID;
 
 public class AddClassActivity extends AppCompatActivity {
 
-    private Spinner spinnerClassType, spinnerDayOfWeek;
-    private EditText inputClassDuration, inputClassStartTime, inputClassDescription, inputFirstDay;
-    private NumberPicker numberPickerCapacity, numberPickerSessions;
-    private Button btnSubmitClass;
+    private EditText inputDayOfWeek, inputClassDuration, inputClassStartTime, inputClassDescription, inputFirstDay, inputClassType, inputNumberOfSessions, inputClassCapacity;
     private int startHour = 0, startMinute = 0;
-    private UserDAO userDAO;
     private ClassDAO classDAO;
 
     @Override
@@ -39,9 +32,9 @@ public class AddClassActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_class);
 
-        userDAO = new UserDAO(this);
         classDAO = new ClassDAO(this);
 
+        // Setup Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -59,29 +52,42 @@ public class AddClassActivity extends AppCompatActivity {
 
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        numberPickerCapacity = findViewById(R.id.number_picker_capacity);
-        numberPickerCapacity.setMinValue(10);
-        numberPickerCapacity.setMaxValue(20);
-        numberPickerCapacity.setWrapSelectorWheel(true);
-
-        numberPickerSessions = findViewById(R.id.number_picker_sessions);
-        numberPickerSessions.setMinValue(1);
-        numberPickerSessions.setMaxValue(10);
-        numberPickerSessions.setWrapSelectorWheel(true);
-
+        // Initialize input fields
         inputClassDuration = findViewById(R.id.input_class_duration);
         inputClassStartTime = findViewById(R.id.input_class_start_time);
         inputClassDescription = findViewById(R.id.input_class_description);
         inputFirstDay = findViewById(R.id.input_start_at);
-        btnSubmitClass = findViewById(R.id.btn_submit_class);
-        spinnerDayOfWeek = findViewById(R.id.spinner_day_of_week);
-        spinnerClassType = findViewById(R.id.spinner_class_type);
+        inputDayOfWeek = findViewById(R.id.input_day_of_week);
+        inputClassType = findViewById(R.id.input_class_type);
+        inputNumberOfSessions = findViewById(R.id.input_number_of_sessions);
+        inputClassCapacity = findViewById(R.id.input_class_capacity);
+        Button btnSubmitClass = findViewById(R.id.btn_submit_class);
 
+        inputClassType.setOnClickListener(v -> showClassTypeDialog());
+        inputDayOfWeek.setOnClickListener(v -> showDayOfWeekDialog());
         inputClassStartTime.setOnClickListener(v -> showTimePickerDialog());
-
         inputFirstDay.setOnClickListener(v -> showDatePickerDialog(inputFirstDay));
-
         btnSubmitClass.setOnClickListener(v -> createClass());
+    }
+
+    private void showDayOfWeekDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Select Day of the Week")
+                .setItems(R.array.days_of_week_array, (dialog, which) -> {
+                    String[] daysOfWeek = getResources().getStringArray(R.array.days_of_week_array);
+                    inputDayOfWeek.setText(daysOfWeek[which]);
+                })
+                .show();
+    }
+
+    private void showClassTypeDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Select Class Type")
+                .setItems(R.array.class_type_array, (dialog, which) -> {
+                    String[] classTypes = getResources().getStringArray(R.array.class_type_array);
+                    inputClassType.setText(classTypes[which]);
+                })
+                .show();
     }
 
     private void showTimePickerDialog() {
@@ -112,7 +118,7 @@ public class AddClassActivity extends AppCompatActivity {
             selectedCalendar.set(Calendar.MONTH, selectedMonth);
             selectedCalendar.set(Calendar.DAY_OF_MONTH, selectedDay);
 
-            String dayOfWeek = spinnerDayOfWeek.getSelectedItem().toString();
+            String dayOfWeek = inputDayOfWeek.getText().toString();
             int selectedDayOfWeek = getDayOfWeekInt(dayOfWeek);
 
             if (selectedCalendar.get(Calendar.DAY_OF_WEEK) != selectedDayOfWeek) {
@@ -129,11 +135,17 @@ public class AddClassActivity extends AppCompatActivity {
     }
 
     private void createClass() {
-        String classType = spinnerClassType.getSelectedItem().toString();
-        int classCapacity = numberPickerCapacity.getValue();
+        String classType = inputClassType.getText().toString();
+        String classCapacityStr = inputClassCapacity.getText().toString();
         String classDurationStr = inputClassDuration.getText().toString();
         String classDescription = inputClassDescription.getText().toString();
-        String dayOfWeek = spinnerDayOfWeek.getSelectedItem().toString();
+        String dayOfWeek = inputDayOfWeek.getText().toString();
+        String numberOfSessionsStr = inputNumberOfSessions.getText().toString();
+
+        if (TextUtils.isEmpty(classType)) {
+            inputClassDuration.setError("Class type is required");
+            return;
+        }
 
         if (TextUtils.isEmpty(classDurationStr)) {
             inputClassDuration.setError("Duration is required");
@@ -147,6 +159,16 @@ public class AddClassActivity extends AppCompatActivity {
 
         if (TextUtils.isEmpty(inputFirstDay.getText())) {
             inputFirstDay.setError("Start date is required");
+            return;
+        }
+
+        if (TextUtils.isEmpty(classCapacityStr)) {
+            inputClassCapacity.setError("Capacity is required");
+            return;
+        }
+
+        if (TextUtils.isEmpty(numberOfSessionsStr)) {
+            inputNumberOfSessions.setError("Number of sessions is required");
             return;
         }
 
@@ -174,7 +196,8 @@ public class AddClassActivity extends AppCompatActivity {
             return;
         }
 
-        int numberOfSessions = numberPickerSessions.getValue();
+        int classCapacity = Integer.parseInt(classCapacityStr);
+        int numberOfSessions = Integer.parseInt(numberOfSessionsStr);
         Calendar endCalendar = (Calendar) startCalendar.clone();
         endCalendar.add(Calendar.DAY_OF_YEAR, (numberOfSessions - 1) * 7);
         endCalendar.set(Calendar.HOUR_OF_DAY, 23);
@@ -193,7 +216,7 @@ public class AddClassActivity extends AppCompatActivity {
         newClass.setSessionCount(numberOfSessions);
         newClass.setEndAt(endAt);
         newClass.setType(classType);
-        newClass.setStatus("open");
+        newClass.setStatus("on_going");
         newClass.setCapacity(classCapacity);
         newClass.setDuration(Integer.parseInt(classDurationStr));
         newClass.setDescription(classDescription);
