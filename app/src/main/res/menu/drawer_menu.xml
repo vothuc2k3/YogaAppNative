@@ -11,9 +11,9 @@
             android:icon="@android:drawable/ic_dialog_email"
             android:title="Messages" />
         <item
-            android:id="@+id/nav_settings"
+            android:id="@+id/nav_reset_database"
             android:icon="@android:drawable/ic_menu_manage"
-            android:title="Settings" />
+            android:title="Reset Database" />
     </group>
 
     <item

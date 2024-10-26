@@ -13,144 +13,175 @@
         android:src="@drawable/auth_background"
         android:alpha="0.4" />
 
-    <!-- Sign Up Form -->
-    <LinearLayout
-        android:id="@+id/sign_up_form"
+    <!-- Scrollable Container -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true">
 
-        <!-- Sign Up Title -->
-        <TextView
-            android:id="@+id/sign_up_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sign Up"
-            android:textSize="48sp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif" />
-
-        <!-- Spacer -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="32dp" />
-
-        <!-- Username TextField -->
-        <EditText
-            android:id="@+id/username"
+        <LinearLayout
+            android:id="@+id/sign_up_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Name"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
-            android:drawableLeft="@android:drawable/ic_menu_edit"
-            android:drawablePadding="10dp"
-            android:padding="16dp"
-            android:background="?android:attr/editTextBackground" />
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp">
 
-        <!-- Spacer -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="16dp" />
+            <!-- Sign Up Title -->
+            <TextView
+                android:id="@+id/sign_up_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign Up"
+                android:textSize="48sp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif" />
 
-        <!-- Email TextField -->
-        <EditText
-            android:id="@+id/email"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
-            android:drawableLeft="@android:drawable/ic_menu_send"
-            android:drawablePadding="10dp"
-            android:padding="16dp"
-            android:background="?android:attr/editTextBackground" />
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
 
-        <!-- Spacer -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="16dp" />
+            <!-- Username TextField -->
+            <EditText
+                android:id="@+id/username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Name"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/darker_gray"
+                android:drawableLeft="@android:drawable/ic_menu_edit"
+                android:drawablePadding="10dp"
+                android:padding="16dp"
+                android:background="?android:attr/editTextBackground" />
 
-        <!-- Phone Number TextField -->
-        <EditText
-            android:id="@+id/phone_number"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Phone Number"
-            android:inputType="phone"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
-            android:drawableLeft="@android:drawable/ic_menu_call"
-            android:drawablePadding="10dp"
-            android:padding="16dp"
-            android:background="?android:attr/editTextBackground" />
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
 
-        <!-- Spacer -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="16dp" />
+            <!-- Email TextField -->
+            <EditText
+                android:id="@+id/email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/darker_gray"
+                android:drawableLeft="@android:drawable/ic_menu_send"
+                android:drawablePadding="10dp"
+                android:padding="16dp"
+                android:background="?android:attr/editTextBackground" />
 
-        <!-- Password TextField -->
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
-            android:drawableLeft="@android:drawable/ic_lock_lock"
-            android:drawablePadding="10dp"
-            android:padding="16dp"
-            android:background="?android:attr/editTextBackground" />
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
 
-        <!-- Spacer -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="16dp" />
+            <!-- Phone Number TextField -->
+            <EditText
+                android:id="@+id/phone_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone Number"
+                android:inputType="phone"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/darker_gray"
+                android:drawableLeft="@android:drawable/ic_menu_call"
+                android:drawablePadding="10dp"
+                android:padding="16dp"
+                android:background="?android:attr/editTextBackground" />
 
-        <!-- Confirm Password TextField -->
-        <EditText
-            android:id="@+id/confirm_password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Confirm Password"
-            android:inputType="textPassword"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
-            android:drawableLeft="@android:drawable/ic_lock_lock"
-            android:drawablePadding="10dp"
-            android:padding="16dp"
-            android:background="?android:attr/editTextBackground" />
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
 
-        <!-- Spacer -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="32dp" />
+            <!-- Password TextField -->
+            <EditText
+                android:id="@+id/password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/darker_gray"
+                android:drawableLeft="@android:drawable/ic_lock_lock"
+                android:drawablePadding="10dp"
+                android:padding="16dp"
+                android:background="?android:attr/editTextBackground" />
 
-        <!-- Sign Up Button -->
-        <Button
-            android:id="@+id/sign_up_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Sign Up"
-            android:backgroundTint="@android:color/white"
-            android:textColor="@android:color/black"
-            android:textStyle="bold"
-            android:padding="16dp"
-            android:layout_gravity="center" />
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
 
-        <!-- Spacer -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="32dp" />
+            <!-- Confirm Password TextField -->
+            <EditText
+                android:id="@+id/confirm_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Confirm Password"
+                android:inputType="textPassword"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/darker_gray"
+                android:drawableLeft="@android:drawable/ic_lock_lock"
+                android:drawablePadding="10dp"
+                android:padding="16dp"
+                android:background="?android:attr/editTextBackground" />
 
-    </LinearLayout>
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+            <!-- Sign Up Button -->
+            <Button
+                android:id="@+id/sign_up_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sign Up"
+                android:backgroundTint="@android:color/white"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:padding="16dp"
+                android:layout_gravity="center" />
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+            <!-- Login Prompt Text -->
+            <TextView
+                android:id="@+id/login_prompt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Already have an account?"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp" />
+
+            <!-- Login Button as TextButton -->
+            <Button
+                android:id="@+id/login_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Login"
+                android:background="?android:attr/selectableItemBackground"
+                android:textColor="@android:color/holo_blue_light"
+                android:padding="0dp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:layout_gravity="center" />
+        </LinearLayout>
+    </ScrollView>
 
     <!-- Progress Bar -->
     <ProgressBar
@@ -159,34 +190,4 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:visibility="gone" />
-
-    <!-- Login Prompt Text -->
-    <TextView
-        android:id="@+id/login_prompt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Already have an account?"
-        android:textColor="@android:color/white"
-        android:gravity="center"
-        android:textSize="16sp"
-        android:fontFamily="sans-serif"
-        android:textStyle="bold"
-        android:layout_below="@id/sign_up_form"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp" />
-
-    <!-- Login Button as TextButton -->
-    <Button
-        android:id="@+id/login_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Login"
-        android:background="?android:attr/selectableItemBackground"
-        android:textColor="@android:color/holo_blue_light"
-        android:layout_below="@id/login_prompt"
-        android:layout_centerHorizontal="true"
-        android:padding="0dp"
-        android:textStyle="bold"
-        android:textAllCaps="false" />
-
 </RelativeLayout>

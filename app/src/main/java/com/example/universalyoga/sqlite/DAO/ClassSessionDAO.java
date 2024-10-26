@@ -54,6 +54,45 @@ public class ClassSessionDAO {
         }
     }
 
+    public List<ClassSessionModel> getSessionsByInstructorName(String instructorName) {
+        List<ClassSessionModel> sessionList = new ArrayList<>();
+        openReadableDb();
+
+        Cursor instructorCursor = db.query("users", new String[]{"uid"}, "name LIKE ?", new String[]{"%" + instructorName + "%"}, null, null, null);
+        if (instructorCursor.moveToFirst()) {
+            String instructorId = instructorCursor.getString(instructorCursor.getColumnIndex("uid"));
+
+            Cursor cursor = db.query(TABLE_CLASS_SESSION, null, COLUMN_INSTRUCTOR_ID + "=? AND " + COLUMN_IS_DELETED + "=?",
+                    new String[]{instructorId, "0"}, null, null, null);
+
+            if (cursor.moveToFirst()) {
+                do {
+                    ClassSessionModel session = new ClassSessionModel();
+                    session.setId(cursor.getString(cursor.getColumnIndex(COLUMN_SESSION_ID)));
+                    session.setClassId(cursor.getString(cursor.getColumnIndex(COLUMN_CLASS_ID)));
+                    session.setInstructorId(cursor.getString(cursor.getColumnIndex(COLUMN_INSTRUCTOR_ID)));
+                    session.setDate(cursor.getLong(cursor.getColumnIndex(COLUMN_DATE)));
+                    session.setStartTime(cursor.getLong(cursor.getColumnIndex(COLUMN_START_TIME)));
+                    session.setEndTime(cursor.getLong(cursor.getColumnIndex(COLUMN_END_TIME)));
+                    session.setPrice(cursor.getInt(cursor.getColumnIndex(COLUMN_PRICE)));
+                    session.setRoom(cursor.getString(cursor.getColumnIndex(COLUMN_ROOM)));
+                    session.setNote(cursor.getString(cursor.getColumnIndex(COLUMN_NOTE)));
+                    session.setDeleted(cursor.getInt(cursor.getColumnIndex(COLUMN_IS_DELETED)) == 1);
+
+                    sessionList.add(session);
+                } while (cursor.moveToNext());
+            }
+
+            cursor.close();
+        }
+
+        instructorCursor.close();
+        close();
+        return sessionList;
+    }
+
+
+
     public List<ClassSessionModel> getSessionsByInstructorId(String instructorId) {
         List<ClassSessionModel> sessionList = new ArrayList<>();
         openReadableDb();

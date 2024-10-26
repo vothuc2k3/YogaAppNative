@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    android:id="@+id/expandable_list_view_bookings">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,7 +37,6 @@
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
         <!-- Booking Title -->
@@ -67,24 +67,31 @@
             android:textColor="@color/colorAccent"
             android:textSize="16sp" />
 
-        <!-- Session Details -->
-        <TextView
-            android:id="@+id/tv_session_details"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:textSize="14sp" />
-
-        <!-- Confirm Button -->
-        <Button
-            android:id="@+id/btn_confirm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
             android:layout_marginTop="8dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="Confirm"
-            android:textColor="@android:color/white" />
+            android:gravity="end"
+            android:orientation="horizontal">
 
+            <Button
+                android:id="@+id/btn_decline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:text="Decline"
+                android:focusable="false"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/btn_confirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="Confirm"
+                android:textColor="@android:color/white"
+                android:focusable="false" />
+        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

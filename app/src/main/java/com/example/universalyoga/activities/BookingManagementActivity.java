@@ -2,40 +2,32 @@ package com.example.universalyoga.activities;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
-import com.example.universalyoga.adapters.BookingAdapter;
+import com.example.universalyoga.adapters.BookingExpandableAdapter;
 import com.example.universalyoga.models.BookingModel;
-import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.sqlite.DAO.BookingDAO;
 import com.example.universalyoga.sqlite.DAO.BookingSessionDAO;
-import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class BookingManagementActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerViewBookings;
-    private ProgressBar progressBar;
+    private ExpandableListView expandableListViewBookings;
     private TextView tvEmptyState;
-    private BookingAdapter bookingAdapter;
-
     private BookingDAO bookingDAO;
     private ClassSessionDAO classSessionDAO;
-    private ClassDAO classDAO;
     private BookingSessionDAO bookingSessionDAO;
     private UserDAO userDAO;
 
@@ -44,13 +36,11 @@ public class BookingManagementActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking_management);
 
-        recyclerViewBookings = findViewById(R.id.recycler_view_bookings);
-        progressBar = findViewById(R.id.progress_bar);
+        expandableListViewBookings = findViewById(R.id.expandable_list_view_bookings);
         tvEmptyState = findViewById(R.id.tv_empty_state);
 
         bookingDAO = new BookingDAO(this);
         classSessionDAO = new ClassSessionDAO(this);
-        classDAO = new ClassDAO(this);
         bookingSessionDAO = new BookingSessionDAO(this);
         userDAO = new UserDAO(this);
 
@@ -75,17 +65,28 @@ public class BookingManagementActivity extends AppCompatActivity {
 
     private void loadBookings() {
         List<BookingModel> bookings = bookingDAO.getAllBookings();
-
         if (bookings.isEmpty()) {
-            progressBar.setVisibility(View.GONE);
             tvEmptyState.setVisibility(View.VISIBLE);
+            expandableListViewBookings.setVisibility(View.GONE);
         } else {
-            progressBar.setVisibility(View.GONE);
             tvEmptyState.setVisibility(View.GONE);
+            expandableListViewBookings.setVisibility(View.VISIBLE);
 
-            bookingAdapter = new BookingAdapter(bookings, this, userDAO, bookingDAO,bookingSessionDAO, classSessionDAO, classDAO);
-            recyclerViewBookings.setLayoutManager(new LinearLayoutManager(this));
-            recyclerViewBookings.setAdapter(bookingAdapter);
+            HashMap<BookingModel, List<ClassSessionModel>> sessionMap = new HashMap<>();
+            for (BookingModel booking : bookings) {
+                List<String> sessionIds = bookingSessionDAO.getSessionIdsByBookingId(booking.getId());
+                for (String sessionId : sessionIds) {
+                    ClassSessionModel session = classSessionDAO.getClassSessionById(sessionId);
+                    sessionMap.computeIfAbsent(booking, k -> new java.util.ArrayList<>()).add(session);
+                }
+            }
+
+            BookingExpandableAdapter bookingExpandableAdapter
+                    = new BookingExpandableAdapter(this, bookings, sessionMap);
+
+            expandableListViewBookings.setAdapter(bookingExpandableAdapter);
+
+            expandableListViewBookings.setOnGroupClickListener((parent, v, groupPosition, id) -> false);
         }
     }
 }

@@ -16,9 +16,12 @@ import androidx.core.content.ContextCompat;
 import com.example.universalyoga.R;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
+import com.example.universalyoga.sqlite.DAO.CategoryDAO;
+import com.example.universalyoga.models.ClassCategoryModel;
 
 import java.sql.Time;
 import java.util.Calendar;
+import java.util.List;
 import java.util.UUID;
 
 public class AddClassActivity extends AppCompatActivity {
@@ -26,6 +29,8 @@ public class AddClassActivity extends AppCompatActivity {
     private EditText inputDayOfWeek, inputClassDuration, inputClassStartTime, inputClassDescription, inputFirstDay, inputClassType, inputNumberOfSessions, inputClassCapacity;
     private int startHour = 0, startMinute = 0;
     private ClassDAO classDAO;
+    private CategoryDAO categoryDAO;
+    private List<ClassCategoryModel> categoryList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +38,8 @@ public class AddClassActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_class);
 
         classDAO = new ClassDAO(this);
+        categoryDAO = new CategoryDAO(this);
+        categoryList = categoryDAO.getAllCategories();
 
         // Setup Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -83,9 +90,9 @@ public class AddClassActivity extends AppCompatActivity {
     private void showClassTypeDialog() {
         new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle("Select Class Type")
-                .setItems(R.array.class_type_array, (dialog, which) -> {
-                    String[] classTypes = getResources().getStringArray(R.array.class_type_array);
-                    inputClassType.setText(classTypes[which]);
+                .setItems(categoryList.stream().map(ClassCategoryModel::getName).toArray(String[]::new), (dialog, which) -> {
+                    inputClassType.setText(categoryList.get(which).getName());
+                    inputClassType.setTag(categoryList.get(which).getId()); // Lưu ID vào tag
                 })
                 .show();
     }
@@ -135,15 +142,15 @@ public class AddClassActivity extends AppCompatActivity {
     }
 
     private void createClass() {
-        String classType = inputClassType.getText().toString();
+        String classTypeId = (String) inputClassType.getTag();
         String classCapacityStr = inputClassCapacity.getText().toString();
         String classDurationStr = inputClassDuration.getText().toString();
         String classDescription = inputClassDescription.getText().toString();
         String dayOfWeek = inputDayOfWeek.getText().toString();
         String numberOfSessionsStr = inputNumberOfSessions.getText().toString();
 
-        if (TextUtils.isEmpty(classType)) {
-            inputClassDuration.setError("Class type is required");
+        if (TextUtils.isEmpty(classTypeId)) {
+            inputClassType.setError("Class type is required");
             return;
         }
 
@@ -215,8 +222,8 @@ public class AddClassActivity extends AppCompatActivity {
         newClass.setStartAt(startAt);
         newClass.setSessionCount(numberOfSessions);
         newClass.setEndAt(endAt);
-        newClass.setType(classType);
-        newClass.setStatus("on_going");
+        newClass.setTypeId(classTypeId);
+        newClass.setStatus("pending");
         newClass.setCapacity(classCapacity);
         newClass.setDuration(Integer.parseInt(classDurationStr));
         newClass.setDescription(classDescription);

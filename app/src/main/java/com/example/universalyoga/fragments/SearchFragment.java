@@ -27,6 +27,7 @@ import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,14 +109,32 @@ public class SearchFragment extends Fragment {
         return sessionMap;
     }
 
-    private void performSearch(String name, String dayOfWeek) {
-        List<ClassModel> result;
-        result = classDAO.searchClassesByNameAndDay(name, dayOfWeek);
+    private void performSearch(String query, String dayOfWeek) {
+        List<ClassSessionModel> sessionResults = classSessionDAO.getSessionsByInstructorName(query);
 
-        sessionMap = loadSessionDataForClasses(result);
-        expandableListAdapter.updateData(result, sessionMap);
+        List<ClassModel> classResults = classDAO.searchClassesByDay(dayOfWeek);
 
-        showPrompt(result.isEmpty());
+        List<ClassModel> filteredClasses = new ArrayList<>();
+        Map<ClassModel, List<ClassSessionModel>> filteredSessionMap = new HashMap<>();
+
+        for (ClassModel classModel : classResults) {
+            List<ClassSessionModel> relevantSessions = new ArrayList<>();
+
+            for (ClassSessionModel session : sessionResults) {
+                if (session.getClassId().equals(classModel.getId())) {
+                    relevantSessions.add(session);
+                }
+            }
+
+            if (!relevantSessions.isEmpty()) {
+                filteredClasses.add(classModel);
+                filteredSessionMap.put(classModel, relevantSessions);
+            }
+        }
+
+        expandableListAdapter.updateData(filteredClasses, filteredSessionMap);
+
+        showPrompt(filteredClasses.isEmpty());
     }
 
     private void showPrompt(boolean show) {

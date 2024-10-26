@@ -17,11 +17,13 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.activities.AddSessionActivity;
+import com.example.universalyoga.models.ClassCategoryModel;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
+import com.example.universalyoga.sqlite.DAO.CategoryDAO;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
@@ -41,6 +43,7 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
     private Map<ClassModel, List<ClassSessionModel>> sessionMap;
     private final UserDAO userDAO;
     private final ClassSessionDAO classSessionDAO;
+    private final CategoryDAO categoryDAO;
     private final OnItemClickListener onItemClickListener;
 
     public ClassExpandableListAdapter(Context context, List<ClassModel> classList, Map<ClassModel, List<ClassSessionModel>> sessionMap, UserDAO userDAO, String role, OnItemClickListener onItemClickListener) {
@@ -49,6 +52,7 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
         this.sessionMap = sessionMap;
         this.userDAO = userDAO;
         this.classSessionDAO = new ClassSessionDAO(context);
+        this.categoryDAO = new CategoryDAO(context);
         this.role = role;
         this.onItemClickListener = onItemClickListener;
     }
@@ -91,6 +95,7 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         ClassModel classModel = (ClassModel) getGroup(groupPosition);
+        final ClassCategoryModel category = categoryDAO.getCategoryById(classModel.getTypeId());
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -109,7 +114,7 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
         TextView sessionCountTextView = convertView.findViewById(R.id.session_count_value);
         TextView sessionWarningTextView = convertView.findViewById(R.id.tv_session_warning);
 
-        classNameTextView.setText(classModel.getType());
+        classNameTextView.setText(category.getName());
         capacityTextView.setText("Capacity: " + classModel.getCapacity());
         durationTextView.setText("Duration: " + classModel.getDuration() + " minutes");
         dayOfWeekTextView.setText("Day: " + classModel.getDayOfWeek());

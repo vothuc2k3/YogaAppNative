@@ -18,7 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.activities.AddSessionActivity;
+import com.example.universalyoga.models.ClassCategoryModel;
 import com.example.universalyoga.models.ClassModel;
+import com.example.universalyoga.sqlite.DAO.CategoryDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 
 import java.text.SimpleDateFormat;
@@ -32,12 +34,14 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     private final Context context;
     private final OnItemClickListener onItemClickListener;
     private final ClassSessionDAO classSessionDAO;
+    private final CategoryDAO categoryDAO;
 
     public ClassAdapter(List<ClassModel> classList, Context context, OnItemClickListener onItemClickListener) {
         this.classList = classList;
         this.context = context;
         this.onItemClickListener = onItemClickListener;
         this.classSessionDAO = new ClassSessionDAO(context);
+        this.categoryDAO = new CategoryDAO(context);
     }
 
     @NonNull
@@ -51,8 +55,9 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
 
         ClassModel classModel = classList.get(position);
+        ClassCategoryModel categoryModel = categoryDAO.getCategoryById(classModel.getTypeId());
 
-        holder.classNameTextView.setText(classModel.getType());
+        holder.classNameTextView.setText(categoryModel.getName());
         holder.capacityTextView.setText("Capacity: " + classModel.getCapacity());
         holder.sessionCountTextView.setText("Sessions: " + classModel.getSessionCount());
         holder.dayOfWeekTextView.setText(classModel.getDayOfWeek());

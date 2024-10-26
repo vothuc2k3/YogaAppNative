@@ -4,21 +4,20 @@ import com.google.firebase.Timestamp;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BookingModel {
     private String id;
     private String uid;
-    private boolean isConfirmed;
+    private String status;
     private long createdAt;
 
     public BookingModel(){}
 
-    public BookingModel(String id, String uid, boolean isConfirmed, long createdAt) {
+    public BookingModel(String id, String uid, String status, long createdAt) {
         this.id = id;
         this.uid = uid;
-        this.isConfirmed = isConfirmed;
+        this.status = status;
         this.createdAt = createdAt;
     }
 
@@ -46,20 +45,20 @@ public class BookingModel {
         this.createdAt = createdAt;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public Map<String, Object> toMap(){
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
         map.put("uid", uid);
-        map.put("isConfirmed", isConfirmed);
+        map.put("status", status);
         map.put("createdAt", new Timestamp(new Date(createdAt)));
         return map;
-    }
-
-    public boolean isConfirmed() {
-        return isConfirmed;
-    }
-
-    public void setConfirmed(boolean confirmed) {
-        isConfirmed = confirmed;
     }
 }

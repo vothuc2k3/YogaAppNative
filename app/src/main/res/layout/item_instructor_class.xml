@@ -24,19 +24,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Start Time -->
+        <!-- Capacity -->
+
         <TextView
             android:id="@+id/class_name"
-            android:layout_width="264dp"
-            android:layout_height="24dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:text="Class Name"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/icon_class_name"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.293"
-            app:layout_constraintStart_toEndOf="@id/icon_class_name"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintHorizontal_bias="0.38"
+            app:layout_constraintStart_toEndOf="@+id/icon_class_name"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
         <ImageView
             android:id="@+id/icon_capacity"
@@ -45,20 +49,21 @@
             android:layout_marginTop="16dp"
             android:src="@drawable/ic_capacity"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/icon_class_name" />
+            app:layout_constraintTop_toBottomOf="@id/icon_class_name" />
 
         <TextView
             android:id="@+id/capacity_value"
-            android:layout_width="286dp"
-            android:layout_height="18dp"
-            android:layout_marginTop="20dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:text="Capacity: "
             android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/icon_capacity"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.415"
             app:layout_constraintStart_toEndOf="@id/icon_capacity"
-            app:layout_constraintTop_toBottomOf="@+id/class_name" />
+            app:layout_constraintTop_toTopOf="@id/icon_capacity" />
 
+        <!-- Start Time -->
         <ImageView
             android:id="@+id/icon_start_time"
             android:layout_width="24dp"
@@ -66,22 +71,21 @@
             android:layout_marginTop="16dp"
             android:src="@drawable/ic_time"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/icon_capacity" />
-
-        <!-- Duration -->
+            app:layout_constraintTop_toBottomOf="@id/icon_capacity" />
 
         <TextView
             android:id="@+id/start_time_value"
-            android:layout_width="288dp"
-            android:layout_height="21dp"
-            android:layout_marginTop="20dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:text="Start: "
             android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/icon_start_time"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.431"
             app:layout_constraintStart_toEndOf="@id/icon_start_time"
-            app:layout_constraintTop_toBottomOf="@id/capacity_value" />
+            app:layout_constraintTop_toTopOf="@id/icon_start_time" />
 
+        <!-- Duration -->
         <ImageView
             android:id="@+id/icon_duration"
             android:layout_width="24dp"
@@ -89,66 +93,65 @@
             android:layout_marginTop="16dp"
             android:src="@drawable/ic_duration"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/icon_start_time" />
-
-        <!-- Session Count -->
-
-        <!-- Edit and Delete Buttons -->
+            app:layout_constraintTop_toBottomOf="@id/icon_start_time" />
 
         <TextView
             android:id="@+id/duration_value"
-            android:layout_width="270dp"
-            android:layout_height="19dp"
-            android:layout_marginTop="24dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:text="Duration: "
             android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/icon_duration"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.304"
             app:layout_constraintStart_toEndOf="@id/icon_duration"
-            app:layout_constraintTop_toBottomOf="@id/start_time_value" />
+            app:layout_constraintTop_toTopOf="@id/icon_duration" />
 
+        <!-- Session Count -->
         <ImageView
             android:id="@+id/icon_session_count"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:src="@drawable/ic_sessions"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/icon_duration" />
+            app:layout_constraintTop_toBottomOf="@id/icon_duration" />
 
+        <TextView
+            android:id="@+id/session_count_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Sessions: "
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/icon_session_count"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/icon_session_count"
+            app:layout_constraintTop_toTopOf="@id/icon_session_count" />
+
+        <!-- Day of Week -->
         <ImageView
             android:id="@+id/icon_day_of_week"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             android:src="@drawable/ic_calendar"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/icon_session_count" />
-
-        <TextView
-            android:id="@+id/session_count_value"
-            android:layout_width="296dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="20dp"
-            android:text="Sessions: "
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.511"
-            app:layout_constraintStart_toEndOf="@id/icon_session_count"
-            app:layout_constraintTop_toBottomOf="@id/duration_value" />
+            app:layout_constraintTop_toBottomOf="@id/icon_session_count" />
 
         <TextView
             android:id="@+id/day_of_week"
-            android:layout_width="296dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="20dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:text=""
             android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/icon_day_of_week"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.488"
-            app:layout_constraintStart_toEndOf="@id/icon_session_count"
-            app:layout_constraintTop_toBottomOf="@+id/session_count_value" />
+            app:layout_constraintStart_toEndOf="@id/icon_day_of_week"
+            app:layout_constraintTop_toTopOf="@id/icon_day_of_week" />
 
+        <!-- Session Warning -->
         <TextView
             android:id="@+id/tv_session_warning"
             android:layout_width="wrap_content"

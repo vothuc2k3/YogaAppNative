@@ -6,136 +6,229 @@
     android:background="@color/white"
     android:padding="16dp">
 
-    <!-- Thẻ hiển thị tổng số lớp học -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/card_total_classes"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/total_classes_label"
-                android:layout_width="wrap_content"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_total_classes"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Total Classes"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
 
-            <TextView
-                android:id="@+id/total_classes_value"
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/total_classes_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Classes"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/total_classes_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Thẻ hiển thị tổng số người dùng -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_total_users"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="0"
-                android:textColor="@color/colorAccent"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/total_users_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Users"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/total_users_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Thẻ hiển thị tổng số sessions -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_total_sessions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/total_sessions_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Sessions"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/total_sessions_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Thẻ hiển thị tổng số bookings -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_total_bookings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/total_bookings_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Bookings"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+    
+                    <TextView
+                        android:id="@+id/total_bookings_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_quick_actions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Nút Add New Class -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_add_class"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:text="New Class"
+                        android:textColor="@android:color/white"
+                        app:cornerRadius="16dp" />
+
+                    <!-- Nút Classes -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_class_management"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:text="Classes Management"
+                        android:textColor="@android:color/white"
+                        app:cornerRadius="16dp" />
+
+                    <!-- Nút Class Categories -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_class_categories"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:text="Class Categories Management"
+                        android:textColor="@android:color/white"
+                        app:cornerRadius="16dp" />
+
+                    <!-- Nút User Management -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_user_management"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:text="User Management"
+                        android:textColor="@android:color/white"
+                        app:cornerRadius="16dp" />
+
+                    <!-- Nút Booking Management -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_booking_management"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:text="Booking Management"
+                        android:textColor="@android:color/white"
+                        app:cornerRadius="16dp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <!-- Thẻ hiển thị tổng số bookings -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/card_total_bookings"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_total_classes">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:id="@+id/total_bookings_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Total Bookings"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/total_bookings_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textColor="@color/colorAccent"
-                android:textSize="28sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <!-- Nút hành động nhanh trên cùng một đường thẳng vertical -->
-    <LinearLayout
-        android:id="@+id/quick_actions_vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/card_total_bookings">
-
-        <!-- Nút Classes -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_class_management"
-            android:layout_width="188dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="Classes"
-            android:textColor="@android:color/white"
-            app:cornerRadius="16dp" />
-
-        <!-- Nút Add New Class -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add_class"
-            android:layout_width="190dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="New Class"
-            android:textColor="@android:color/white"
-            app:cornerRadius="16dp" />
-
-        <!-- Nút User Management -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_user_management"
-            android:layout_width="187dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="User Management"
-            android:textColor="@android:color/white"
-            app:cornerRadius="16dp" />
-
-        <!-- Nút Booking Management -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_booking_management"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="Booking Management"
-            android:textColor="@android:color/white"
-            app:cornerRadius="16dp" />
-    </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

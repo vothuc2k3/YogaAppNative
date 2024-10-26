@@ -22,9 +22,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
 import com.example.universalyoga.adapters.EditClassSessionAdapter;
+import com.example.universalyoga.models.ClassCategoryModel;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.models.UserModel;
+import com.example.universalyoga.sqlite.DAO.CategoryDAO;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
@@ -47,6 +49,7 @@ public class ClassDetailsActivity extends AppCompatActivity {
     private ClassSessionDAO classSessionDAO;
     private ClassDAO classDAO;
     private UserDAO userDAO;
+    private CategoryDAO categoryDAO;
 
     private String classId;
     private int dayOfWeek;
@@ -101,10 +104,12 @@ public class ClassDetailsActivity extends AppCompatActivity {
 
     private void loadClassDetails() {
         ClassModel classModel = classDAO.getClassById(classId);
+        categoryDAO = new CategoryDAO(this);
+        ClassCategoryModel category = categoryDAO.getCategoryById(classModel.getTypeId());
 
         etCapacity.setText(String.valueOf(classModel.getCapacity()));
         etDuration.setText(String.valueOf(classModel.getDuration()));
-        etType.setText(classModel.getType());
+        etType.setText(category.getName());
         etDescription.setText(classModel.getDescription());
         etSessionNumber.setText(String.valueOf(classModel.getSessionCount()));
 

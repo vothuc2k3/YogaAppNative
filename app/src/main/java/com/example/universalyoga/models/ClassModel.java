@@ -11,7 +11,7 @@ public class ClassModel {
     private int capacity; // 15, 20, 25, etc.
     private int duration; // 1h, 2h, etc.
     private int sessionCount; // number of sessions of the class    
-    private String type; // yoga, pilates, etc.
+    private String typeId; // id of the type of the class
     private String status; // active, inactive, etc.
     private String description; // description of the class
     private long createdAt; // epoch time
@@ -48,12 +48,12 @@ public class ClassModel {
         this.duration = duration;
     }
 
-    public String getType() {
-        return type;
+    public String getTypeId() {
+        return typeId;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTypeId(String typeId) {
+        this.typeId = typeId;
     }
 
     public String getDescription() {
@@ -134,7 +134,7 @@ public class ClassModel {
         map.put("capacity", capacity);
         map.put("duration", duration);
         map.put("sessionCount", sessionCount);
-        map.put("type", type);
+        map.put("typeId", typeId);
         map.put("status", status);
         map.put("description", description);
         map.put("createdAt", createdAt);

@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -47,9 +48,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
         currentUser = userDAO.getUserByUid(fbUser.getUid());
 
-        if (fbUser != null) {
-            SyncManager.startSyncing(this);
-        }
+        SyncManager.startSyncing(this);
 
         if (savedInstanceState == null && currentUser.getRole().equals("admin")) {
             getSupportFragmentManager().beginTransaction()
@@ -118,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 .into(profileImage);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setBackgroundColor(getResources().getColor(R.color.navBarColor));
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -125,10 +125,13 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_logout) {
                 handleLogout();
+            } else if(item.getItemId() == R.id.nav_reset_database){
+                handleResetDatabase();
             }
             drawerLayout.closeDrawer(GravityCompat.END);
             return true;
         });
+
 
         toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer) {
             @Override
@@ -168,6 +171,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private boolean showDialogResetDatabase() {
+        final boolean[] result = {false};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to reset the database?")
+                .setPositiveButton("Yes", (dialog, which) -> result[0] = true)
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss());
+        builder.create().show();
+        return result[0];
+    }
+
+    private boolean showDialogResetDatabase2() {
+        final boolean[] result = {false};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("This action cannot be undone. Are you sure you want to reset the database?")
+                .setPositiveButton("Yes", (dialog, which) -> result[0] = true)
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss());
+        builder.create().show();
+        return result[0];
+    }
+
     private void handleLogout() {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         mAuth.signOut();
@@ -176,5 +199,15 @@ public class MainActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    private void handleResetDatabase() {
+        boolean result1 = showDialogResetDatabase();
+        if(result1){
+            boolean result2 = showDialogResetDatabase2();
+            if(result2){
+
+            }
+        }
     }
 }

@@ -206,7 +206,8 @@ public class AddSessionActivity extends AppCompatActivity {
             }
 
             classModel.setEndAt(lastSessionDate);
-            classDAO.updateClass(classModel); // Cập nhật thông tin class
+            classModel.setStatus("open");
+            classDAO.updateClass(classModel);
         }
 
         Toast.makeText(this, "Sessions added successfully!", Toast.LENGTH_SHORT).show();

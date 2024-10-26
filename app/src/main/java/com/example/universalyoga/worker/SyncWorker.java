@@ -9,11 +9,13 @@ import androidx.work.WorkerParameters;
 
 import com.example.universalyoga.models.BookingModel;
 import com.example.universalyoga.models.BookingSessionModel;
+import com.example.universalyoga.models.ClassCategoryModel;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.ClassSessionModel;
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.BookingDAO;
 import com.example.universalyoga.sqlite.DAO.BookingSessionDAO;
+import com.example.universalyoga.sqlite.DAO.CategoryDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
@@ -33,6 +35,7 @@ public class SyncWorker extends Worker {
     private final String CLASSES_COLLECTION = "classes";
     private final String CLASS_SESSIONS_COLLECTION = "class_sessions";
     private final String BOOKINGS_COLLECTION = "bookings";
+    private final String CATEGORIES_COLLECTION = "categories";
     private static String TAG = "SyncWorker";
 
     private FirebaseFirestore db;
@@ -41,7 +44,7 @@ public class SyncWorker extends Worker {
     private ClassSessionDAO classSessionDAO;
     private BookingDAO bookingDAO;
     private BookingSessionDAO bookingSessionDAO;
-
+    private CategoryDAO categoryDAO;
     public SyncWorker(@NonNull Context context, @NonNull WorkerParameters workerParameters) {
         super(context, workerParameters);
         db = FirebaseFirestore.getInstance();
@@ -50,6 +53,7 @@ public class SyncWorker extends Worker {
         classSessionDAO = new ClassSessionDAO(context);
         bookingDAO = new BookingDAO(context);
         bookingSessionDAO = new BookingSessionDAO(context);
+        categoryDAO = new CategoryDAO(context);
     }
 
     @NonNull
@@ -74,7 +78,7 @@ public class SyncWorker extends Worker {
                 classModel.setCapacity(document.getLong("capacity").intValue());
                 classModel.setDuration(document.getLong("duration").intValue());
                 classModel.setSessionCount(document.getLong("sessionCount").intValue());
-                classModel.setType(document.getString("type"));
+                classModel.setTypeId(document.getString("typeId"));
                 classModel.setDescription(document.getString("description"));
                 classModel.setStatus(document.getString("status"));
                 classModel.setDayOfWeek(document.getString("dayOfWeek"));
@@ -121,24 +125,20 @@ public class SyncWorker extends Worker {
         bookingsRef.get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                 Map<String, Object> bookingMap = document.getData();
-
                 BookingModel bookingModel = new BookingModel(
                         document.getString("id"),
                         document.getString("uid"),
-                        document.getBoolean("isConfirmed"),
+                        document.getString("status"),
                         document.getTimestamp("createdAt").toDate().getTime());
-
                 bookingDAO.addBooking(bookingModel);
-
-                List<String> sessionIds = (List<String>) bookingMap.get("sessionIds");
-
-                for (String sessionId : sessionIds) {
-                    bookingSessionDAO.addBookingSession(bookingModel.getId(), sessionId);
+                List<String> sessionIds = (List<String>) document.get("sessionIds");
+                if (sessionIds != null) {
+                    for (String sessionId : sessionIds) {
+                        bookingSessionDAO.addBookingSession(bookingModel.getId(), sessionId);
+                    }
                 }
             }
         });
-
-
     }
 
     private void syncFromSQLiteToFirestore(Runnable onComplete) {
@@ -147,11 +147,9 @@ public class SyncWorker extends Worker {
         List<UserModel> localUsers = userDAO.getAllUsers();
         List<BookingModel> localBookings = bookingDAO.getAllBookings();
         List<BookingSessionModel> localBookingSessions = bookingSessionDAO.getAllBookingSessions();
-        List<String> sessionIds = localBookingSessions.stream()
-                .map(BookingSessionModel::getSessionId)
-                .collect(Collectors.toList());
+        List<ClassCategoryModel> localCategories = categoryDAO.getAllCategories();
 
-        int totalTasks = localClasses.size() + localClassSessions.size() + localUsers.size() + localBookings.size();
+        int totalTasks = localClasses.size() + localClassSessions.size() + localUsers.size() + localBookings.size() + localCategories.size();
 
         if (totalTasks == 0) {
             onComplete.run();
@@ -180,10 +178,10 @@ public class SyncWorker extends Worker {
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Failed to upload class to Firestore", e);
-                            completedTasks[0]++;
-                            if (completedTasks[0] == totalTasks) {
-                                onComplete.run();
-                            }
+                        completedTasks[0]++;
+                        if (completedTasks[0] == totalTasks) {
+                            onComplete.run();
+                        }
                     });
         }
 
@@ -231,8 +229,13 @@ public class SyncWorker extends Worker {
 
         for (BookingModel localBooking : localBookings) {
             Map<String, Object> bookingData = localBooking.toMap();
+            List<String> sessionIds = localBookingSessions.stream()
+                    .filter(bookingSession -> bookingSession.getBookingId().equals(localBooking.getId()))
+                    .map(BookingSessionModel::getSessionId)
+                    .collect(Collectors.toList());
             bookingData.put("sessionIds", sessionIds);
             db.collection(BOOKINGS_COLLECTION).document(localBooking.getId()).set(bookingData).addOnSuccessListener(aVoid -> {
+
                         Log.d(TAG, "Booking uploaded to Firestore: " + localBooking.getId());
                         completedTasks[0]++;
                         if (completedTasks[0] == totalTasks) {
@@ -241,6 +244,26 @@ public class SyncWorker extends Worker {
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Failed to upload booking to Firestore", e);
+                        completedTasks[0]++;
+                        if (completedTasks[0] == totalTasks) {
+                            onComplete.run();
+                        }
+                    });
+        }
+
+        for (ClassCategoryModel localCategory : localCategories) {
+            Map<String, Object> categoryData = localCategory.toMap();
+            db.collection(CATEGORIES_COLLECTION)
+                    .document(localCategory.getId())
+                    .set(categoryData)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "Category uploaded to Firestore: " + localCategory.getId());
+                        completedTasks[0]++;
+                        if (completedTasks[0] == totalTasks) {
+                            onComplete.run();
+                        }
+                    }).addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to upload category to Firestore", e);
                         completedTasks[0]++;
                         if (completedTasks[0] == totalTasks) {
                             onComplete.run();

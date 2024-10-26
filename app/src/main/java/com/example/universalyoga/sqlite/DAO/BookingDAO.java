@@ -16,7 +16,7 @@ public class BookingDAO {
     private static final String TABLE_NAME = "bookings";
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_UID = "uid";  // User ID
-    private static final String COLUMN_IS_CONFIRMED = "isConfirmed"; // Boolean column
+    private static final String COLUMN_STATUS = "status";  // Change to status column (pending, confirmed, rejected)
     private static final String COLUMN_CREATED_AT = "createdAt";
 
     private AppDatabaseHelper dbHelper;
@@ -40,21 +40,21 @@ public class BookingDAO {
         }
     }
 
-    // Thêm một booking vào SQLite
+    // Add a booking with status
     public long addBooking(BookingModel booking) {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, booking.getId());
         values.put(COLUMN_UID, booking.getUid());
-        values.put(COLUMN_IS_CONFIRMED, booking.isConfirmed() ? 1 : 0); // Thêm isConfirmed
+        values.put(COLUMN_STATUS, booking.getStatus());  // Save status (pending, confirmed, rejected)
         values.put(COLUMN_CREATED_AT, booking.getCreatedAt());
 
-        long result = db.insert(TABLE_NAME, null, values);
+        long result = db.insertWithOnConflict(TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         closeDb();
         return result;
     }
 
-    // Lấy tất cả bookings từ SQLite
+    // Get all bookings with status
     public List<BookingModel> getAllBookings() {
         List<BookingModel> bookings = new ArrayList<>();
         openReadableDb();
@@ -65,7 +65,7 @@ public class BookingDAO {
                 BookingModel booking = new BookingModel();
                 booking.setId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)));
                 booking.setUid(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_UID)));
-                booking.setConfirmed(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_CONFIRMED)) == 1); // Lấy isConfirmed
+                booking.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS)));  // Get status
                 booking.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
 
                 bookings.add(booking);
@@ -80,46 +80,16 @@ public class BookingDAO {
         return bookings;
     }
 
-    // Lấy một booking theo ID
-    public BookingModel getBookingById(String id) {
-        openReadableDb();
-        BookingModel booking = null;
-        Cursor cursor = db.query(TABLE_NAME, null, COLUMN_ID + "=?", new String[]{id}, null, null, null);
-
-        if (cursor != null && cursor.moveToFirst()) {
-            booking = new BookingModel();
-            booking.setId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)));
-            booking.setUid(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_UID)));
-            booking.setConfirmed(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_CONFIRMED)) == 1); // Lấy isConfirmed
-            booking.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
-        }
-
-        if (cursor != null) {
-            cursor.close();
-        }
-
-        closeDb();
-        return booking;
-    }
-
-    // Cập nhật booking
+    // Update booking status
     public int updateBooking(BookingModel booking) {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_UID, booking.getUid());
-        values.put(COLUMN_IS_CONFIRMED, booking.isConfirmed() ? 1 : 0); // Cập nhật isConfirmed
+        values.put(COLUMN_STATUS, booking.getStatus());  // Update status
         values.put(COLUMN_CREATED_AT, booking.getCreatedAt());
 
         int rowsAffected = db.update(TABLE_NAME, values, COLUMN_ID + "=?", new String[]{booking.getId()});
         closeDb();
         return rowsAffected;
-    }
-
-    // Xóa một booking theo ID
-    public int deleteBooking(String id) {
-        openWritableDb();
-        int rowsDeleted = db.delete(TABLE_NAME, COLUMN_ID + "=?", new String[]{id});
-        closeDb();
-        return rowsDeleted;
     }
 }

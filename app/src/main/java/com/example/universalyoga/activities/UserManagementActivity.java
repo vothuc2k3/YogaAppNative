@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AdapterView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -23,8 +21,6 @@ import java.util.List;
 
 public class UserManagementActivity extends AppCompatActivity {
 
-    private SearchView searchView;
-    private RecyclerView recyclerView;
     private UserAdapter userAdapter;
     private UserDAO userDAO;
 
@@ -33,8 +29,8 @@ public class UserManagementActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_management);
 
-        searchView = findViewById(R.id.search_view_users);
-        recyclerView = findViewById(R.id.rv_user_list);
+        SearchView searchView = findViewById(R.id.search_view_users);
+        RecyclerView recyclerView = findViewById(R.id.rv_user_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -54,7 +50,6 @@ public class UserManagementActivity extends AppCompatActivity {
         userDAO = new UserDAO(this);
 
         List<UserModel> userList = userDAO.getAllUsers();
-
 
 
         userAdapter = new UserAdapter(userList, userModel -> {

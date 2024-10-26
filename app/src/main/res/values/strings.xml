@@ -2,16 +2,6 @@
     <string name="app_name">Yoga Admin Portal</string>
     <string name="open_drawer">Open Drawer</string>
     <string name="close_drawer">Close Drawer</string>
-    <string-array name="class_type_array">
-        <item>Flow Yoga</item>
-        <item>Aerial Yoga</item>
-        <item>Family Yoga</item>
-    </string-array>
-    <string-array name="dummy_instructor_array">
-        <item>Instructor 1</item>
-        <item>Instructor 2</item>
-        <item>Instructor 3</item>
-    </string-array>
     <string-array name="days_of_week_array">
         <item>Monday</item>
         <item>Tuesday</item>

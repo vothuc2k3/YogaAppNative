@@ -25,7 +25,7 @@ public class ClassDAO {
     public static final String COLUMN_CAPACITY = "capacity";
     public static final String COLUMN_DURATION = "duration";
     public static final String COLUMN_SESSION_COUNT = "sessionCount";
-    public static final String COLUMN_TYPE = "type";
+    public static final String COLUMN_TYPE_ID = "typeId";
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_STATUS = "status";
     public static final String COLUMN_CREATED_AT = "createdAt";
@@ -83,20 +83,24 @@ public class ClassDAO {
     }
 
 
-    public List<ClassModel> searchClassesByNameAndDay(String query, String dayOfWeek) {
+    public List<ClassModel> searchClassesByDay(String dayOfWeek) {
         List<ClassModel> classList = new ArrayList<>();
         openReadableDb();
-        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_TYPE + " LIKE ? AND " + COLUMN_DAY_OF_WEEK + "=? AND " + COLUMN_IS_DELETED + "=?";
-        Cursor cursor = db.rawQuery(sqlQuery, new String[]{"%" + query + "%", dayOfWeek, "0"});
+
+        String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_DAY_OF_WEEK + "=? AND " + COLUMN_IS_DELETED + "=?";
+        Cursor cursor = db.rawQuery(sqlQuery, new String[]{dayOfWeek, "0"});
+
         if (cursor.moveToFirst()) {
             do {
                 classList.add(populateClassModel(cursor));
             } while (cursor.moveToNext());
         }
+
         cursor.close();
         close();
         return classList;
     }
+
 
     private ClassModel populateClassModel(Cursor cursor) {
         ClassModel classModel = new ClassModel();
@@ -104,7 +108,7 @@ public class ClassDAO {
         classModel.setCapacity(cursor.getInt(cursor.getColumnIndex(COLUMN_CAPACITY)));
         classModel.setDuration(cursor.getInt(cursor.getColumnIndex(COLUMN_DURATION)));
         classModel.setSessionCount(cursor.getInt(cursor.getColumnIndex(COLUMN_SESSION_COUNT)));
-        classModel.setType(cursor.getString(cursor.getColumnIndex(COLUMN_TYPE)));
+        classModel.setTypeId(cursor.getString(cursor.getColumnIndex(COLUMN_TYPE_ID)));
         classModel.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION)));
         classModel.setStatus(cursor.getString(cursor.getColumnIndex(COLUMN_STATUS)));
         classModel.setDayOfWeek(cursor.getString(cursor.getColumnIndex(COLUMN_DAY_OF_WEEK)));
@@ -125,7 +129,7 @@ public class ClassDAO {
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
         values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());
-        values.put(COLUMN_TYPE, classModel.getType());
+        values.put(COLUMN_TYPE_ID, classModel.getTypeId());
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
         values.put(COLUMN_DAY_OF_WEEK, classModel.getDayOfWeek());
@@ -167,7 +171,7 @@ public class ClassDAO {
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
         values.put(COLUMN_SESSION_COUNT, classModel.getSessionCount());
-        values.put(COLUMN_TYPE, classModel.getType());
+        values.put(COLUMN_TYPE_ID, classModel.getTypeId());
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
         values.put(COLUMN_DAY_OF_WEEK, classModel.getDayOfWeek());

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "yoga_app.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
 
     // Table for Users
     private static final String CREATE_TABLE_USERS = "CREATE TABLE users ("
@@ -26,7 +26,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             + "capacity INTEGER, "
             + "duration INTEGER, "
             + "sessionCount INTEGER, "
-            + "type TEXT, "
+            + "typeId TEXT, "
             + "status TEXT, "
             + "description TEXT, "
             + "createdAt INTEGER, "
@@ -54,7 +54,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_BOOKINGS = "CREATE TABLE bookings ("
             + "id TEXT PRIMARY KEY, "
             + "createdAt INTEGER, "
-            + "isConfirmed INTEGER, "
+            + "status TEXT, "
             + "uid TEXT, "
             + "FOREIGN KEY (uid) REFERENCES users(uid))";
 
@@ -67,6 +67,12 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             + "FOREIGN KEY (bookingId) REFERENCES bookings(id), "
             + "FOREIGN KEY (sessionId) REFERENCES class_sessions(id))";
 
+    // Table for Categories
+    private static final String CREATE_TABLE_CATEGORIES = "CREATE TABLE categories ("
+            + "id TEXT PRIMARY KEY, "
+            + "name TEXT, "
+            + "description TEXT)";
+
     public AppDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -78,6 +84,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_CLASS_SESSION);
         db.execSQL(CREATE_TABLE_BOOKINGS);
         db.execSQL(CREATE_TABLE_BOOKING_SESSIONS);
+        db.execSQL(CREATE_TABLE_CATEGORIES);
     }
 
     @Override
@@ -87,6 +94,22 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS class_sessions");
         db.execSQL("DROP TABLE IF EXISTS bookings");
         db.execSQL("DROP TABLE IF EXISTS booking_sessions");
+        db.execSQL("DROP TABLE IF EXISTS categories");
+        onCreate(db);
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
+    }
+
+    public void resetDatabase(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS users");
+        db.execSQL("DROP TABLE IF EXISTS classes");
+        db.execSQL("DROP TABLE IF EXISTS class_sessions");
+        db.execSQL("DROP TABLE IF EXISTS bookings");
+        db.execSQL("DROP TABLE IF EXISTS booking_sessions");
+        db.execSQL("DROP TABLE IF EXISTS categories");
         onCreate(db);
     }
 }

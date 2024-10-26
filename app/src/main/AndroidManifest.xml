@@ -54,5 +54,7 @@
 
         <activity android:name=".activities.SessionDetailsActivity" />
 
+        <activity android:name=".activities.CategoryManagementActivity" />
+
     </application>
 </manifest>

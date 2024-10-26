@@ -1,0 +1,109 @@
+package com.example.universalyoga.adapters;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.universalyoga.R;
+import com.example.universalyoga.activities.CategoryManagementActivity;
+import com.example.universalyoga.models.ClassCategoryModel;
+import com.example.universalyoga.sqlite.DAO.CategoryDAO;
+
+import java.util.List;
+
+public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
+    private final List<ClassCategoryModel> categoryList;
+    private final Context context;
+    private final CategoryDAO categoryDAO;
+
+    public CategoryAdapter(List<ClassCategoryModel> categoryList, Context context) {
+        this.categoryList = categoryList;
+        this.context = context;
+        this.categoryDAO = new CategoryDAO(context);
+    }
+
+    @NonNull
+    @Override
+    public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_category, parent, false);
+        return new CategoryViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
+        ClassCategoryModel category = categoryList.get(position);
+        holder.tvCategoryName.setText(category.getName());
+        holder.tvCategoryDescription.setText(category.getDescription());
+
+        holder.btnEditCategory.setOnClickListener(v->showDialogEditCategory(category, position));
+        holder.btnDeleteCategory.setOnClickListener(v->showDialogDeleteCategory(category, position));
+    }
+
+    @Override
+    public int getItemCount() {
+        return categoryList.size();
+    }
+
+    private void showDialogEditCategory(ClassCategoryModel category, int position) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.dialog_edit_category, null);
+
+        EditText nameInput = dialogView.findViewById(R.id.edit_text_category_name);
+        EditText descriptionInput = dialogView.findViewById(R.id.edit_text_category_description);
+
+        nameInput.setText(category.getName());
+        descriptionInput.setText(category.getDescription());
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setView(dialogView);
+
+        builder.setPositiveButton("Edit", (dialog, which) -> {
+            String name = nameInput.getText().toString();
+            String description = descriptionInput.getText().toString();
+            categoryDAO.updateCategory(new ClassCategoryModel(category.getId(), name, description));
+            categoryList.set(position, new ClassCategoryModel(category.getId(), name, description));
+            notifyItemChanged(position);
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        builder.show();
+    }
+
+    private void showDialogDeleteCategory(ClassCategoryModel category, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Delete Category");
+
+        builder.setMessage("Are you sure want to delete this category?");
+
+        builder.setPositiveButton("Delete", (dialog, which) -> {
+            categoryDAO.deleteCategory(category.getId());
+            notifyItemRemoved(position);
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        builder.show();
+    }
+
+    public static class CategoryViewHolder extends RecyclerView.ViewHolder {
+        public TextView tvCategoryName, tvCategoryDescription;
+        public ImageButton btnEditCategory, btnDeleteCategory;
+    
+        public CategoryViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvCategoryName = itemView.findViewById(R.id.tv_category_name);
+            tvCategoryDescription = itemView.findViewById(R.id.tv_category_description);
+            btnEditCategory = itemView.findViewById(R.id.btn_edit_category);
+            btnDeleteCategory = itemView.findViewById(R.id.btn_delete_category);
+        }
+    }
+}

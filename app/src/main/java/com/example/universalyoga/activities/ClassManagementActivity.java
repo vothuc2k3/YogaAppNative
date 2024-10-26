@@ -58,7 +58,6 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
     private void loadClassData() {
         classList = classDAO.getAllClasses();
         if (classList != null && !classList.isEmpty()) {
-            // Setup adapter after data is loaded
             setupAdapter(classList);
         } else {
             Toast.makeText(this, "No classes found", Toast.LENGTH_SHORT).show();
@@ -74,19 +73,6 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
     public void onItemClick(ClassModel classModel) {
         Intent intent = new Intent(ClassManagementActivity.this, ClassDetailsActivity.class);
         intent.putExtra("id", classModel.getId());
-        intent.putExtra("capacity", classModel.getCapacity());
-        intent.putExtra("duration", classModel.getDuration());
-        intent.putExtra("sessionCount", classModel.getSessionCount());
-        intent.putExtra("type", classModel.getType());
-        intent.putExtra("status", classModel.getStatus());
-        intent.putExtra("description", classModel.getDescription());
-        intent.putExtra("createdAt", classModel.getCreatedAt());
-        intent.putExtra("startAt", classModel.getStartAt());
-        intent.putExtra("endAt", classModel.getEndAt());
-        intent.putExtra("dayOfWeek", classModel.getDayOfWeek());
-        if (classModel.getTimeStart() != null) {
-            intent.putExtra("timeStart", classModel.getTimeStart().toString());
-        }
         startActivity(intent);
     }
 

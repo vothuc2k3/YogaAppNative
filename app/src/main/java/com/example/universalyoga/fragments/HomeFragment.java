@@ -15,17 +15,24 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.universalyoga.R;
 import com.example.universalyoga.activities.AddClassActivity;
 import com.example.universalyoga.activities.BookingManagementActivity;
+import com.example.universalyoga.activities.CategoryManagementActivity;
 import com.example.universalyoga.activities.ClassManagementActivity;
 import com.example.universalyoga.activities.UserManagementActivity;
 import com.example.universalyoga.sqlite.DAO.BookingDAO;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
+import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
+import com.example.universalyoga.sqlite.DAO.UserDAO;
 
 public class HomeFragment extends Fragment {
 
     private TextView totalClassesTextView;
     private TextView totalBookingsTextView;
+    private TextView totalUsersTextView;
+    private TextView totalSessionsTextView;
     private ClassDAO classDAO;
     private BookingDAO bookingDAO;
+    private UserDAO userDAO;
+    private ClassSessionDAO sessionDAO;
     private SwipeRefreshLayout swipeRefreshLayout;
 
     @Nullable
@@ -36,9 +43,13 @@ public class HomeFragment extends Fragment {
 
         classDAO = new ClassDAO(view.getContext());
         bookingDAO = new BookingDAO(view.getContext());
+        userDAO = new UserDAO(view.getContext());
+        sessionDAO = new ClassSessionDAO(view.getContext());
 
         totalClassesTextView = view.findViewById(R.id.total_classes_value);
         totalBookingsTextView = view.findViewById(R.id.total_bookings_value);
+        totalUsersTextView = view.findViewById(R.id.total_users_value);
+        totalSessionsTextView = view.findViewById(R.id.total_sessions_value);
 
         updateDataFromSQLite();
 
@@ -56,7 +67,12 @@ public class HomeFragment extends Fragment {
             startActivity(new Intent(getActivity(), ClassManagementActivity.class));
         });
 
-        view.findViewById(R.id.btn_booking_management).setOnClickListener(v -> startActivity(new Intent(getActivity(), BookingManagementActivity.class)));
+        view.findViewById(R.id.btn_class_categories).setOnClickListener(v->{
+            startActivity(new Intent(getActivity(), CategoryManagementActivity.class));
+        });
+
+        view.findViewById(R.id.btn_booking_management).setOnClickListener(v -> 
+        startActivity(new Intent(getActivity(), BookingManagementActivity.class)));
 
         return view;
     }
@@ -66,5 +82,9 @@ public class HomeFragment extends Fragment {
         totalClassesTextView.setText(String.valueOf(classesCount));
         int bookingCount = bookingDAO.getAllBookings().size();
         totalBookingsTextView.setText(String.valueOf(bookingCount));
+        int userCount = userDAO.getAllUsers().size();
+        totalUsersTextView.setText(String.valueOf(userCount));
+        int sessionCount = sessionDAO.getAllClassSessions().size();
+        totalSessionsTextView.setText(String.valueOf(sessionCount));
     }
 }

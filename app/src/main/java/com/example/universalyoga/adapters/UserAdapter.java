@@ -3,6 +3,7 @@ package com.example.universalyoga.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,9 +19,8 @@ import java.util.List;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
-    private List<UserModel> userList;
-    private OnItemClickListener onItemClickListener;
-
+    private final List<UserModel> userList;
+    private final OnItemClickListener onItemClickListener;
     public UserAdapter(List<UserModel> userList, OnItemClickListener onItemClickListener) {
         this.userList = userList;
         this.onItemClickListener = onItemClickListener;
@@ -85,5 +85,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     public interface OnItemClickListener {
         void onItemClick(UserModel userModel);
+    }
+
+    public interface OnDeleteClickListener {
+        void onDeleteClick(UserModel userModel);
     }
 }
