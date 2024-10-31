@@ -178,10 +178,8 @@ public class ClassDetailsActivity extends AppCompatActivity {
             classDAO.updateClass(classModel);
 
             Toast.makeText(this, "Class details saved successfully", Toast.LENGTH_SHORT).show();
-            finish();
         } catch (Exception e) {
             Toast.makeText(this, "Failed to save class details", Toast.LENGTH_SHORT).show();
-            finish();
         }
     }
 

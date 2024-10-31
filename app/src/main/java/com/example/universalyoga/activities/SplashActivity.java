@@ -12,16 +12,16 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
         Intent intent;
+
         if (currentUser != null) {
             intent = new Intent(SplashActivity.this, MainActivity.class);
         } else {
             intent = new Intent(SplashActivity.this, SignInActivity.class);
         }
         startActivity(intent);
+
         finish();
     }
 }

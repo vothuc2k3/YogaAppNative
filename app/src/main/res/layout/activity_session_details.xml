@@ -73,27 +73,6 @@
                         app:layout_constraintStart_toEndOf="@id/iv_instructor_avatar"
                         app:layout_constraintTop_toTopOf="@id/iv_instructor_avatar" />
 
-                    <!-- Session Number -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/input_layout_session_number"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:hint="Session Number"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/iv_instructor_avatar">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_session_index"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:clickable="false"
-                            android:focusable="false"
-                            android:inputType="number"
-                            android:textSize="16sp" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
                     <!-- Session Date -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/input_layout_session_date"
@@ -103,7 +82,7 @@
                         android:hint="Session Date"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/input_layout_session_number">
+                        app:layout_constraintTop_toBottomOf="@id/tv_instructor_name">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_session_date"

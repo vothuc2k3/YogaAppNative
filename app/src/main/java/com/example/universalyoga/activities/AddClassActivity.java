@@ -37,11 +37,19 @@ public class AddClassActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_class);
 
+        initializeDAOs();
+        setupToolbar();
+        initializeFields();
+        setupListeners();
+    }
+
+    private void initializeDAOs() {
         classDAO = new ClassDAO(this);
         categoryDAO = new CategoryDAO(this);
         categoryList = categoryDAO.getAllCategories();
+    }
 
-        // Setup Toolbar
+    private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -58,8 +66,9 @@ public class AddClassActivity extends AppCompatActivity {
         }
 
         toolbar.setNavigationOnClickListener(v -> finish());
+    }
 
-        // Initialize input fields
+    private void initializeFields() {
         inputClassDuration = findViewById(R.id.input_class_duration);
         inputClassStartTime = findViewById(R.id.input_class_start_time);
         inputClassDescription = findViewById(R.id.input_class_description);
@@ -68,12 +77,14 @@ public class AddClassActivity extends AppCompatActivity {
         inputClassType = findViewById(R.id.input_class_type);
         inputNumberOfSessions = findViewById(R.id.input_number_of_sessions);
         inputClassCapacity = findViewById(R.id.input_class_capacity);
-        Button btnSubmitClass = findViewById(R.id.btn_submit_class);
+    }
 
+    private void setupListeners() {
         inputClassType.setOnClickListener(v -> showClassTypeDialog());
         inputDayOfWeek.setOnClickListener(v -> showDayOfWeekDialog());
         inputClassStartTime.setOnClickListener(v -> showTimePickerDialog());
         inputFirstDay.setOnClickListener(v -> showDatePickerDialog(inputFirstDay));
+        Button btnSubmitClass = findViewById(R.id.btn_submit_class);
         btnSubmitClass.setOnClickListener(v -> createClass());
     }
 
@@ -92,7 +103,7 @@ public class AddClassActivity extends AppCompatActivity {
                 .setTitle("Select Class Type")
                 .setItems(categoryList.stream().map(ClassCategoryModel::getName).toArray(String[]::new), (dialog, which) -> {
                     inputClassType.setText(categoryList.get(which).getName());
-                    inputClassType.setTag(categoryList.get(which).getId()); // Lưu ID vào tag
+                    inputClassType.setTag(categoryList.get(which).getId());
                 })
                 .show();
     }
@@ -142,42 +153,16 @@ public class AddClassActivity extends AppCompatActivity {
     }
 
     private void createClass() {
+        if (!validateInputs()) {
+            return;
+        }
+
         String classTypeId = (String) inputClassType.getTag();
         String classCapacityStr = inputClassCapacity.getText().toString();
         String classDurationStr = inputClassDuration.getText().toString();
         String classDescription = inputClassDescription.getText().toString();
         String dayOfWeek = inputDayOfWeek.getText().toString();
         String numberOfSessionsStr = inputNumberOfSessions.getText().toString();
-
-        if (TextUtils.isEmpty(classTypeId)) {
-            inputClassType.setError("Class type is required");
-            return;
-        }
-
-        if (TextUtils.isEmpty(classDurationStr)) {
-            inputClassDuration.setError("Duration is required");
-            return;
-        }
-
-        if (TextUtils.isEmpty(inputClassStartTime.getText())) {
-            inputClassStartTime.setError("Start time is required");
-            return;
-        }
-
-        if (TextUtils.isEmpty(inputFirstDay.getText())) {
-            inputFirstDay.setError("Start date is required");
-            return;
-        }
-
-        if (TextUtils.isEmpty(classCapacityStr)) {
-            inputClassCapacity.setError("Capacity is required");
-            return;
-        }
-
-        if (TextUtils.isEmpty(numberOfSessionsStr)) {
-            inputNumberOfSessions.setError("Number of sessions is required");
-            return;
-        }
 
         String timeStartStr = inputClassStartTime.getText().toString();
         String[] timeParts = timeStartStr.split(":");
@@ -233,6 +218,54 @@ public class AddClassActivity extends AppCompatActivity {
         Toast.makeText(this, "New Class Added!", Toast.LENGTH_SHORT).show();
         finish();
     }
+
+    private boolean validateInputs() {
+        String classTypeId = (String) inputClassType.getTag();
+        String classCapacityStr = inputClassCapacity.getText().toString();
+        String classDurationStr = inputClassDuration.getText().toString();
+        String numberOfSessionsStr = inputNumberOfSessions.getText().toString();
+        String dayOfWeek = inputDayOfWeek.getText().toString();
+        String classStartTime = inputClassStartTime.getText().toString();
+        String startDate = inputFirstDay.getText().toString();
+
+        if (TextUtils.isEmpty(classTypeId)) {
+            inputClassType.setError("Class type is required");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(classDurationStr)) {
+            inputClassDuration.setError("Duration is required");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(classStartTime)) {
+            inputClassStartTime.setError("Start time is required");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(startDate)) {
+            inputFirstDay.setError("Start date is required");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(classCapacityStr)) {
+            inputClassCapacity.setError("Capacity is required");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(numberOfSessionsStr)) {
+            inputNumberOfSessions.setError("Number of sessions is required");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(dayOfWeek)) {
+            inputDayOfWeek.setError("Day of the week is required");
+            return false;
+        }
+
+        return true;
+    }
+
 
     private int getDayOfWeekInt(String dayOfWeek) {
         switch (dayOfWeek) {

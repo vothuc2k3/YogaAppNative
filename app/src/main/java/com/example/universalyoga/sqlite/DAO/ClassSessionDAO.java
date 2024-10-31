@@ -139,7 +139,7 @@ public class ClassSessionDAO {
         values.put(COLUMN_ROOM, session.getRoom());
         values.put(COLUMN_NOTE, session.getNote());
 
-        long result = db.insert(TABLE_CLASS_SESSION, null, values);
+        long result = db.insertWithOnConflict(TABLE_CLASS_SESSION, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         close();
         return result;
     }
@@ -193,7 +193,6 @@ public class ClassSessionDAO {
         close();
     }
 
-    // Hàm xóa tất cả sessions theo ClassId
     public void deleteSessionsByClassId(String classId) {
         openWritableDb();
         db.delete(TABLE_CLASS_SESSION, COLUMN_CLASS_ID + "=?", new String[]{classId});
@@ -262,5 +261,23 @@ public class ClassSessionDAO {
         Collections.sort(sessionList, Comparator.comparingLong(ClassSessionModel::getDate));
 
         return sessionList;
+    }
+
+    public void resetTable() {
+        openWritableDb();
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS_SESSION);
+        db.execSQL("CREATE TABLE class_sessions ("
+            + "id TEXT PRIMARY KEY, "
+            + "classId TEXT, "
+            + "instructorId TEXT, "
+            + "date INTEGER, "
+            + "startTime INTEGER, "
+            + "endTime INTEGER, "
+            + "price INTEGER, "
+            + "room TEXT, "
+            + "note TEXT, "
+            + "isDeleted INTEGER DEFAULT 0, "
+            + "FOREIGN KEY (classId) REFERENCES classes(id))");
+        close();
     }
 }

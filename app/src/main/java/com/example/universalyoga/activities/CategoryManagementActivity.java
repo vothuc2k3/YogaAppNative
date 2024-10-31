@@ -31,24 +31,37 @@ public class CategoryManagementActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_category_management);
 
+        setupToolbar();
+        initializeDAO();
+        initializeRecyclerView();
+        setupFloatingActionButton();
+    }
+
+    private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        toolbar.setNavigationOnClickListener(v->finish());
+        toolbar.setNavigationOnClickListener(v -> finish());
         toolbar.setTitleTextColor(getResources().getColor(R.color.white));
         toolbar.setTitle("Category Management");
+    }
 
+    private void initializeDAO() {
         categoryDAO = new CategoryDAO(this);
         categoryList = categoryDAO.getAllCategories();
+    }
 
-        FloatingActionButton floatingActionButton = findViewById(R.id.fab_add_category);
+    private void initializeRecyclerView() {
         recyclerView = findViewById(R.id.recycler_view_categories);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new CategoryAdapter(categoryList, this));
+    }
 
-        floatingActionButton.setOnClickListener(v->showDialogAddCategory());
+    private void setupFloatingActionButton() {
+        FloatingActionButton floatingActionButton = findViewById(R.id.fab_add_category);
+        floatingActionButton.setOnClickListener(v -> showDialogAddCategory());
     }
 
     private void showDialogAddCategory() {

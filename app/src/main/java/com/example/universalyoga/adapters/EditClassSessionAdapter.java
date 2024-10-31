@@ -162,7 +162,7 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
 
         holder.itemView.setOnLongClickListener(v -> {
 
-            new androidx.appcompat.app.AlertDialog.Builder(context).setTitle("Delete Session").setMessage("Are you sure you want to delete this session?").setPositiveButton("Yes", (dialog, which) -> {
+            new AlertDialog.Builder(context).setTitle("Delete Session").setMessage("Are you sure you want to delete this session?").setPositiveButton("Yes", (dialog, which) -> {
                 sessionList.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, sessionList.size());

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.ClassSessionModel;
@@ -268,9 +267,27 @@ public class ClassDAO {
 
     public void hardDelete(String classId) {
         openWritableDb();
-
         db.delete(TABLE_CLASS, COLUMN_CLASS_ID + "=?", new String[]{classId});
+        close();
+    }
 
+    public void resetTable() {
+        openWritableDb();
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLASS);
+        db.execSQL("CREATE TABLE classes ("
+            + "id TEXT PRIMARY KEY, "
+            + "dayOfWeek TEXT, "
+            + "timeStart TEXT, "
+            + "capacity INTEGER, "
+            + "duration INTEGER, "
+            + "sessionCount INTEGER, "
+            + "typeId TEXT, "
+            + "status TEXT, "
+            + "description TEXT, "
+            + "createdAt INTEGER, "
+            + "startAt INTEGER, "
+            + "endAt INTEGER, "
+            + "isDeleted INTEGER DEFAULT 0)");
         close();
     }
 }

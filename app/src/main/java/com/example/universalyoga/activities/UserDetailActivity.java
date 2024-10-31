@@ -1,5 +1,6 @@
 package com.example.universalyoga.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
@@ -91,9 +92,12 @@ public class UserDetailActivity extends AppCompatActivity {
             userModel.setName(newName);
             userModel.setPhoneNumber(newPhoneNumber);
             userDAO.updateUser(userModel);
-
             Toast.makeText(UserDetailActivity.this, "User updated successfully!", Toast.LENGTH_SHORT).show();
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("UPDATED_USER", userModel);
+            setResult(RESULT_OK, resultIntent);
             finish();
+
         });
     }
 }

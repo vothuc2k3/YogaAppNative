@@ -102,14 +102,4 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
     }
-
-    public void resetDatabase(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS users");
-        db.execSQL("DROP TABLE IF EXISTS classes");
-        db.execSQL("DROP TABLE IF EXISTS class_sessions");
-        db.execSQL("DROP TABLE IF EXISTS bookings");
-        db.execSQL("DROP TABLE IF EXISTS booking_sessions");
-        db.execSQL("DROP TABLE IF EXISTS categories");
-        onCreate(db);
-    }
 }

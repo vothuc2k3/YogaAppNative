@@ -48,10 +48,19 @@ public class AddSessionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_session);
 
+        initializeDAOs();
+        initializeFields();
+        setupToolbar();
+        setupListeners();
+    }
+
+    private void initializeDAOs() {
         classSessionDAO = new ClassSessionDAO(this);
         classDAO = new ClassDAO(this);
         userDAO = new UserDAO(this);
+    }
 
+    private void initializeFields() {
         inputPrice = findViewById(R.id.input_price);
         inputRoom = findViewById(R.id.input_room);
         inputNotes = findViewById(R.id.input_notes);
@@ -66,7 +75,9 @@ public class AddSessionActivity extends AppCompatActivity {
 
         classId = getIntent().getStringExtra("classId");
         sessionCount = getIntent().getIntExtra("sessionCount", 1);
+    }
 
+    private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -74,9 +85,10 @@ public class AddSessionActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Add Session");
         }
         toolbar.setNavigationOnClickListener(v -> finish());
+    }
 
+    private void setupListeners() {
         btnAddSession.setOnClickListener(v -> addSession());
-
         inputInstructor.setOnClickListener(v -> showInstructorDialog());
     }
 
@@ -110,7 +122,6 @@ public class AddSessionActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-
     private void addSession() {
         String priceStr = inputPrice.getText().toString().trim();
         String room = inputRoom.getText().toString().trim();
@@ -122,8 +133,6 @@ public class AddSessionActivity extends AppCompatActivity {
         }
 
         int price = Integer.parseInt(priceStr);
-
-        List<UserModel> allInstructors = userDAO.getAllInstructors();
         ClassModel classModel = classDAO.getClassById(classId);
 
         if (classModel != null) {
@@ -140,38 +149,6 @@ public class AddSessionActivity extends AppCompatActivity {
             long startTimeInMillis = calendar.getTimeInMillis();
             long endTimeInMillis = startTimeInMillis + durationInMillis;
 
-            UserModel selectedInstructor = null;
-
-            for (UserModel instructor : allInstructors) {
-                List<ClassSessionModel> instructorSessions = classSessionDAO.getSessionsByInstructorId(instructor.getUid());
-                boolean isConflict = false;
-
-                for (ClassSessionModel session : instructorSessions) {
-                    long sessionStartTime = session.getStartTime();
-                    long sessionEndTime = session.getEndTime();
-
-                    if ((startTimeInMillis >= sessionStartTime && startTimeInMillis < sessionEndTime) ||
-                            (endTimeInMillis > sessionStartTime && endTimeInMillis <= sessionEndTime)) {
-                        isConflict = true;
-                        break;
-                    }
-                }
-
-                if (!isConflict) {
-                    selectedInstructor = instructor;
-                    break;
-                }
-            }
-
-            if (selectedInstructor == null) {
-                Toast.makeText(this, "All instructors have schedule conflicts during this time.", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            if (!selectedInstructor.getUid().equals(instructorUid)) {
-                Toast.makeText(this, "Instructor " + selectedInstructor.getName() + " was automatically selected due to schedule conflict.", Toast.LENGTH_LONG).show();
-            }
-
             int currentSessionCount = classSessionDAO.getClassSessionsByClassId(classId).size();
             int remainingSessionsToAdd = classModel.getSessionCount() - currentSessionCount;
 
@@ -186,7 +163,7 @@ public class AddSessionActivity extends AppCompatActivity {
                 newSession.setId(UUID.randomUUID().toString());
                 newSession.setClassId(classId);
                 newSession.setPrice(price);
-                newSession.setInstructorId(selectedInstructor.getUid());
+                newSession.setInstructorId(instructorUid);
                 newSession.setStartTime(startTimeInMillis);
                 newSession.setEndTime(endTimeInMillis);
                 newSession.setDate(calendar.getTimeInMillis());
@@ -213,5 +190,4 @@ public class AddSessionActivity extends AppCompatActivity {
         Toast.makeText(this, "Sessions added successfully!", Toast.LENGTH_SHORT).show();
         finish();
     }
-
 }

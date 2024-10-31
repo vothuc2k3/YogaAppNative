@@ -30,12 +30,13 @@ public class SignUpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+        initializeUI();
+        setUpListeners();
+    }
 
+    private void initializeUI() {
         mAuth = FirebaseAuth.getInstance();
-
         userDAO = new UserDAO(this);
-
-        // Initialize UI components
         nameEditText = findViewById(R.id.username);
         emailEditText = findViewById(R.id.email);
         phoneNumberEditText = findViewById(R.id.phone_number);
@@ -44,12 +45,13 @@ public class SignUpActivity extends AppCompatActivity {
         signUpButton = findViewById(R.id.sign_up_button);
         loginButton = findViewById(R.id.login_button);
         progressBar = findViewById(R.id.progressBar);
+    }
 
+    private void setUpListeners() {
         signUpButton.setOnClickListener(v -> registerUser());
-
         loginButton.setOnClickListener(v -> {
             startActivity(new Intent(SignUpActivity.this, SignInActivity.class));
-            finish(); // Close this activity
+            finish();
         });
     }
 
@@ -60,43 +62,10 @@ public class SignUpActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
         String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-        // Validation
-        if (TextUtils.isEmpty(name)) {
-            nameEditText.setError("Name is required.");
+        if (!validateInput(name, email, phoneNumber, password, confirmPassword)) {
             return;
         }
 
-        if (TextUtils.isEmpty(email)) {
-            emailEditText.setError("Email is required.");
-            return;
-        }
-
-        if (TextUtils.isEmpty(phoneNumber)) {
-            phoneNumberEditText.setError("Phone number is required.");
-            return;
-        }
-
-        if (TextUtils.isEmpty(password)) {
-            passwordEditText.setError("Password is required.");
-            return;
-        }
-
-        if (TextUtils.isEmpty(confirmPassword)) {
-            confirmPasswordEditText.setError("Please confirm your password.");
-            return;
-        }
-
-        if (!password.equals(confirmPassword)) {
-            confirmPasswordEditText.setError("Passwords do not match.");
-            return;
-        }
-
-        if (password.length() < 6) {
-            passwordEditText.setError("Password must be >= 6 characters.");
-            return;
-        }
-
-        // Show progress bar
         progressBar.setVisibility(View.VISIBLE);
 
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -130,7 +99,44 @@ public class SignUpActivity extends AppCompatActivity {
 
                     progressBar.setVisibility(View.GONE);
                 });
-
     }
 
+    private boolean validateInput(String name, String email, String phoneNumber, String password, String confirmPassword) {
+        if (TextUtils.isEmpty(name)) {
+            nameEditText.setError("Name is required.");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(email)) {
+            emailEditText.setError("Email is required.");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(phoneNumber)) {
+            phoneNumberEditText.setError("Phone number is required.");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(password)) {
+            passwordEditText.setError("Password is required.");
+            return false;
+        }
+
+        if (TextUtils.isEmpty(confirmPassword)) {
+            confirmPasswordEditText.setError("Please confirm your password.");
+            return false;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            confirmPasswordEditText.setError("Passwords do not match.");
+            return false;
+        }
+
+        if (password.length() < 6) {
+            passwordEditText.setError("Password must be >= 6 characters.");
+            return false;
+        }
+
+        return true;
+    }
 }

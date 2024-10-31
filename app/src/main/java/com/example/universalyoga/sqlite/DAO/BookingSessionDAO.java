@@ -145,4 +145,16 @@ public class BookingSessionDAO {
         closeDb();
         return rowsAffected;
     }
+
+    public void resetTable() {
+        openWritableDb();
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        db.execSQL("CREATE TABLE booking_sessions ("
+            + "bookingId TEXT, "
+            + "sessionId TEXT, "
+            + "PRIMARY KEY (bookingId, sessionId), "
+            + "FOREIGN KEY (bookingId) REFERENCES bookings(id), "
+            + "FOREIGN KEY (sessionId) REFERENCES class_sessions(id))");
+        closeDb();
+    }
 }

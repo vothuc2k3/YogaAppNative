@@ -22,26 +22,24 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class BookingExpandableAdapter extends BaseExpandableListAdapter {
 
     private final Context context;
     private final List<BookingModel> bookings;
-    private final HashMap<BookingModel, List<ClassSessionModel>> sessionMap;
+    private final Map<BookingModel, List<ClassSessionModel>> sessionMap;
     private final UserDAO userDAO;
     private final BookingDAO bookingDAO;
-    private final BookingSessionDAO bookingSessionDAO;
-    private final ClassSessionDAO classSessionDAO;
 
     public BookingExpandableAdapter(Context context, List<BookingModel> bookings,
-                                    HashMap<BookingModel, List<ClassSessionModel>> sessionMap) {
+                                    Map<BookingModel, List<ClassSessionModel>> sessionMap) {
         this.context = context;
         this.bookings = bookings;
         this.sessionMap = sessionMap;
         this.userDAO = new UserDAO(context);
         this.bookingDAO = new BookingDAO(context);
-        this.bookingSessionDAO = new BookingSessionDAO(context);
-        this.classSessionDAO = new ClassSessionDAO(context);
     }
 
     @Override
@@ -61,7 +59,7 @@ public class BookingExpandableAdapter extends BaseExpandableListAdapter {
 
     @Override
     public ClassSessionModel getChild(int groupPosition, int childPosition) {
-        return sessionMap.get(bookings.get(groupPosition)).get(childPosition);
+        return Objects.requireNonNull(sessionMap.get(bookings.get(groupPosition))).get(childPosition);
     }
 
     @Override
@@ -168,7 +166,6 @@ public class BookingExpandableAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.item_class_session, parent, false);
         }
-
         ImageView ivInstructor = convertView.findViewById(R.id.icon_instructor_image);
         TextView tvInstructorName = convertView.findViewById(R.id.tv_instructor_name);
         TextView tvSessionNumber = convertView.findViewById(R.id.tv_session_number);

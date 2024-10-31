@@ -106,4 +106,26 @@ public class CategoryDAO {
         closeDb();
         return null;
     }
+
+    public boolean isCategoryUsed(String categoryId) {
+        openReadableDb();
+        Cursor cursor = db.query("classes", null, "typeId = ?", new String[]{categoryId}, null, null, null);
+        boolean isUsed = cursor != null && cursor.getCount() > 0;
+        if (cursor != null) {
+            cursor.close();
+        }
+        closeDb();
+        return isUsed;
+    }
+
+
+    public void resetTable() {
+        openWritableDb();
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        db.execSQL("CREATE TABLE categories ("
+                + "id TEXT PRIMARY KEY, "
+                + "name TEXT, "
+                + "description TEXT)");
+        closeDb();
+    }
 }

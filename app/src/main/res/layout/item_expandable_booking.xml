@@ -5,6 +5,8 @@
     android:layout_margin="8dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:id="@+id/expandable_list_view_bookings">
 
     <LinearLayout
@@ -39,7 +41,6 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Booking Title -->
         <TextView
             android:id="@+id/tv_booking_title"
             android:layout_width="wrap_content"
@@ -58,7 +59,6 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!-- Total Price -->
         <TextView
             android:id="@+id/tv_total_price"
             android:layout_width="wrap_content"
@@ -79,16 +79,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/colorPrimaryDark"
+                android:backgroundTint="@color/colorError"
                 android:text="Decline"
                 android:focusable="false"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"/>
 
             <Button
                 android:id="@+id/btn_confirm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorPrimary"
+                android:backgroundTint="@color/colorPrimaryDark"
                 android:text="Confirm"
                 android:textColor="@android:color/white"
                 android:focusable="false" />

@@ -15,8 +15,8 @@ public class BookingDAO {
 
     private static final String TABLE_NAME = "bookings";
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_UID = "uid";  // User ID
-    private static final String COLUMN_STATUS = "status";  // Change to status column (pending, confirmed, rejected)
+    private static final String COLUMN_UID = "uid";
+    private static final String COLUMN_STATUS = "status";
     private static final String COLUMN_CREATED_AT = "createdAt";
 
     private AppDatabaseHelper dbHelper;
@@ -80,7 +80,6 @@ public class BookingDAO {
         return bookings;
     }
 
-    // Update booking status
     public int updateBooking(BookingModel booking) {
         openWritableDb();
         ContentValues values = new ContentValues();
@@ -91,5 +90,17 @@ public class BookingDAO {
         int rowsAffected = db.update(TABLE_NAME, values, COLUMN_ID + "=?", new String[]{booking.getId()});
         closeDb();
         return rowsAffected;
+    }
+
+    public void resetTable() {
+        openWritableDb();
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        db.execSQL("CREATE TABLE bookings ("
+            + "id TEXT PRIMARY KEY, "
+            + "createdAt INTEGER, "
+            + "status TEXT, "
+            + "uid TEXT, "
+            + "FOREIGN KEY (uid) REFERENCES users(uid))");
+        closeDb();
     }
 }

@@ -7,15 +7,16 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.universalyoga.R;
-import com.example.universalyoga.activities.CategoryManagementActivity;
 import com.example.universalyoga.models.ClassCategoryModel;
 import com.example.universalyoga.sqlite.DAO.CategoryDAO;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -79,6 +80,19 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     }
 
     private void showDialogDeleteCategory(ClassCategoryModel category, int position) {
+        boolean isUsed = categoryDAO.isCategoryUsed(category.getId());
+        if(isUsed) {
+            Toast.makeText(context, "Category is used in classes", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        AlertDialog.Builder builder = getBuilder(category, position);
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        builder.show();
+    }
+
+    private AlertDialog.Builder getBuilder(ClassCategoryModel category, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Delete Category");
 
@@ -86,12 +100,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
         builder.setPositiveButton("Delete", (dialog, which) -> {
             categoryDAO.deleteCategory(category.getId());
+            FirebaseFirestore.getInstance().collection("categories").document(category.getId()).delete();
+            Toast.makeText(context, "Category deleted", Toast.LENGTH_SHORT).show();
             notifyItemRemoved(position);
         });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-        builder.show();
+        return builder;
     }
 
     public static class CategoryViewHolder extends RecyclerView.ViewHolder {

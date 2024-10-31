@@ -1,5 +1,6 @@
 package com.example.universalyoga.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
@@ -18,10 +19,11 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Objects;
+
 public class AddAccountActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etUsername, etPhoneNumber, etPassword, etConfirmPassword;
-    private Button btnConfirm;
     private FirebaseAuth mAuth;
 
     @Override
@@ -29,6 +31,12 @@ public class AddAccountActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_account);
 
+        setupToolbar();
+        initializeFields();
+        setupConfirmButton();
+    }
+
+    private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -36,28 +44,29 @@ public class AddAccountActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Add Account");
         }
         toolbar.setNavigationOnClickListener(v -> finish());
-
-
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
+    }
 
+    private void initializeFields() {
         mAuth = FirebaseAuth.getInstance();
-
         etEmail = findViewById(R.id.et_email);
         etUsername = findViewById(R.id.et_username);
         etPhoneNumber = findViewById(R.id.et_phone_number);
         etPassword = findViewById(R.id.et_password);
         etConfirmPassword = findViewById(R.id.et_confirm_password);
-        btnConfirm = findViewById(R.id.btn_confirm);
+    }
 
+    private void setupConfirmButton() {
+        Button btnConfirm = findViewById(R.id.btn_confirm);
         btnConfirm.setOnClickListener(v -> validateAndCreateAccount());
     }
 
     private void validateAndCreateAccount() {
-        String email = etEmail.getText().toString().trim();
-        String username = etUsername.getText().toString().trim();
-        String phoneNumber = etPhoneNumber.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
-        String confirmPassword = etConfirmPassword.getText().toString().trim();
+        String email = Objects.requireNonNull(etEmail.getText()).toString().trim();
+        String username = Objects.requireNonNull(etUsername.getText()).toString().trim();
+        String phoneNumber = Objects.requireNonNull(etPhoneNumber.getText()).toString().trim();
+        String password = Objects.requireNonNull(etPassword.getText()).toString().trim();
+        String confirmPassword = Objects.requireNonNull(etConfirmPassword.getText()).toString().trim();
 
         if (TextUtils.isEmpty(email)) {
             etEmail.setError("Email is required");
@@ -83,7 +92,6 @@ public class AddAccountActivity extends AppCompatActivity {
             return;
         }
 
-        // Kiểm tra định dạng số điện thoại
         if (!phoneNumber.matches("^0\\d{9}$")) {
             etPhoneNumber.setError("Phone number must be in the format 0xxxxxxxxx");
             etPhoneNumber.requestFocus();
@@ -114,7 +122,6 @@ public class AddAccountActivity extends AppCompatActivity {
             return;
         }
 
-        // Nếu tất cả đều hợp lệ, tạo tài khoản
         createAccount(email, password, username, phoneNumber);
     }
 
@@ -128,15 +135,15 @@ public class AddAccountActivity extends AppCompatActivity {
                             String uid = user.getUid();
                             UserModel newUser = new UserModel(uid, username, email, phoneNumber);
 
-                            // Lưu trữ vào Firestore
                             FirebaseFirestore db = FirebaseFirestore.getInstance();
                             db.collection("users").document(uid)
                                     .set(newUser.toMap())
                                     .addOnSuccessListener(aVoid -> {
-                                        // Thêm vào SQLite
                                         UserDAO userDAO = new UserDAO(AddAccountActivity.this);
                                         userDAO.addUser(newUser);
-
+                                        Intent resultIntent = new Intent();
+                                        resultIntent.putExtra("NEW_USER", newUser);
+                                        setResult(RESULT_OK, resultIntent);
                                         Toast.makeText(AddAccountActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
                                         finish();
                                     })

@@ -57,7 +57,7 @@ public class UserDAO {
         values.put(COLUMN_USER_PROFILE_IMAGE, user.getProfileImage());
         values.put(COLUMN_USER_ROLE, user.getRole());
 
-        long result = db.insert(TABLE_USER, null, values);
+        long result = db.insertWithOnConflict(TABLE_USER, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         close();
         return result;
     }

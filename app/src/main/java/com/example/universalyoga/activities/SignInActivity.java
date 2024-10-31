@@ -21,107 +21,127 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SignInActivity extends AppCompatActivity {
-
     private EditText emailEditText, passwordEditText;
-    private Button loginButton, signUpButton;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
     private UserDAO userDAO;
-    private static String USERS_COLLECTION = "users";
+    private static final String USERS_COLLECTION = "users";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+        initializeUI();
+        setUpListeners();
+    }
 
+    private void initializeUI() {
         mAuth = FirebaseAuth.getInstance();
-
         userDAO = new UserDAO(this);
-
         emailEditText = findViewById(R.id.email);
         passwordEditText = findViewById(R.id.password);
-        loginButton = findViewById(R.id.login_button);
-        signUpButton = findViewById(R.id.sign_up_button);
         progressBar = findViewById(R.id.progressBar);
+    }
 
-        loginButton.setOnClickListener(v -> loginUser());
+    private void setUpListeners() {
+        Button loginButton = findViewById(R.id.login_button);
+        Button signUpButton = findViewById(R.id.sign_up_button);
+
+        loginButton.setOnClickListener(v -> attemptUserLogin());
 
         signUpButton.setOnClickListener(v -> {
             startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
         });
     }
 
-    private void loginUser() {
+    private void attemptUserLogin() {
         String email = emailEditText.getText().toString().trim().toLowerCase();
         String password = passwordEditText.getText().toString().trim();
 
-        // Validate email and password input
-        if (TextUtils.isEmpty(email)) {
-            emailEditText.setError("Email is required.");
-            return;
-        }
-        if (TextUtils.isEmpty(password)) {
-            passwordEditText.setError("Password is required.");
-            return;
-        }
-        if (password.length() < 6) {
-            passwordEditText.setError("Password must be >= 6 characters.");
+        if (!validateInput(email, password)) {
             return;
         }
 
         progressBar.setVisibility(View.VISIBLE);
-
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        // Successfully signed in, now retrieve the current user
-                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                        if (firebaseUser != null) {
-                            String uid = firebaseUser.getUid();
-                            FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-                            // Retrieve user data from Firestore
-                            db.collection(USERS_COLLECTION).document(uid).get()
-                                    .addOnCompleteListener(userTask -> {
-                                        progressBar.setVisibility(View.GONE);
-
-                                        if (userTask.isSuccessful()) {
-                                            DocumentSnapshot document = userTask.getResult();
-                                            if (document != null && document.exists()) {
-                                                UserModel userModel = document.toObject(UserModel.class);
-                                                if (userModel != null) {
-                                                    String role = userModel.getRole();
-                                                    if (role.equals("admin") || role.equals("instructor")) {
-                                                        boolean isUserStored = userDAO.getUserByUid(userModel.getUid()) != null;
-                                                        if (!isUserStored) {
-                                                            userDAO.addUser(userModel);
-                                                        }
-                                                        Toast.makeText(SignInActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                                                        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-                                                        startActivity(intent);
-                                                        finish();
-                                                    } else {
-                                                        Toast.makeText(SignInActivity.this, "Access denied", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                } else {
-                                                    Toast.makeText(SignInActivity.this, "User data conversion failed.", Toast.LENGTH_SHORT).show();
-                                                }
-                                            } else {
-                                                Toast.makeText(SignInActivity.this, "User data not found in Firestore.", Toast.LENGTH_SHORT).show();
-                                            }
-                                        } else {
-                                            Toast.makeText(SignInActivity.this, "Failed to retrieve user data.", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(USERS_COLLECTION).whereEqualTo("email", email)
+                .get()
+                .addOnCompleteListener(roleCheckTask -> {
+                    if (roleCheckTask.isSuccessful() && !roleCheckTask.getResult().isEmpty()) {
+                        DocumentSnapshot document = roleCheckTask.getResult().getDocuments().get(0);
+                        String role = document.getString("role");
+                        if ("admin".equals(role) || "instructor".equals(role)) {
+                            signInWithEmail(email, password, db);
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(SignInActivity.this, "Access denied: Unauthorized role.", Toast.LENGTH_SHORT)
+                                    .show();
                         }
                     } else {
-                        // If sign in fails, display a message to the user.
                         progressBar.setVisibility(View.GONE);
-                        String errorMessage = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
-                        Toast.makeText(SignInActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignInActivity.this, "User not found or role check failed.", Toast.LENGTH_SHORT)
+                                .show();
                     }
                 });
     }
 
-}
+    private void signInWithEmail(String email, String password, FirebaseFirestore db) {
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    progressBar.setVisibility(View.GONE);
+                    if (task.isSuccessful()) {
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            String uid = firebaseUser.getUid();
+                            retrieveUserData(uid, db);
+                        }
+                    } else {
+                        String errorMessage = task.getException() != null
+                                ? task.getException().getMessage()
+                                : "Authentication failed.";
+                        Toast.makeText(SignInActivity.this, errorMessage, Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                });
+    }
 
+    private void retrieveUserData(String uid, FirebaseFirestore db) {
+        db.collection(USERS_COLLECTION).document(uid).get()
+                .addOnCompleteListener(userTask -> {
+                    if (userTask.isSuccessful() && userTask.getResult().exists()) {
+                        UserModel userModel = userTask.getResult().toObject(UserModel.class);
+                        if (userModel != null && ("admin".equals(userModel.getRole()) || "instructor".equals(userModel.getRole()))) {
+                            boolean isUserStored = userDAO.getUserByUid(userModel.getUid()) != null;
+                            if (!isUserStored) {
+                                userDAO.addUser(userModel);
+                            }
+                            Toast.makeText(SignInActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(SignInActivity.this, "Access denied", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(SignInActivity.this, "User data not found in Firestore.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+
+    private boolean validateInput(String email, String password) {
+        if (TextUtils.isEmpty(email)) {
+            emailEditText.setError("Email is required.");
+            return false;
+        }
+        if (TextUtils.isEmpty(password)) {
+            passwordEditText.setError("Password is required.");
+            return false;
+        }
+        if (password.length() < 6) {
+            passwordEditText.setError("Password must be >= 6 characters.");
+            return false;
+        }
+        return true;
+    }
+}
