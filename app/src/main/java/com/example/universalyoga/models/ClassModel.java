@@ -5,19 +5,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ClassModel {
-    private String id; // id of the class
-    private String dayOfWeek; // monday, tuesday, etc.
-    private Time timeStart; // 11h, 12h, etc.
-    private int capacity; // 15, 20, 25, etc.
-    private int duration; // 1h, 2h, etc.
-    private int sessionCount; // number of sessions of the class    
-    private String typeId; // id of the type of the class
-    private String status; // active, inactive, etc.
-    private String description; // description of the class
-    private long createdAt; // epoch time
-    private long startAt; // epoch time
-    private long endAt; // epoch time
-
+    private String id;
+    private String dayOfWeek;
+    private Time timeStart;
+    private int capacity;
+    private int duration;
+    private int sessionCount; 
+    private String typeId;
+    private String status;
+    private String description;
+    private long createdAt;
+    private long startAt;
+    private long endAt;
     private boolean isDeleted;
 
     public ClassModel() {

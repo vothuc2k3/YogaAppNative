@@ -34,6 +34,14 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_class_management);
 
+        initializeToolbar();
+        initializeDAOs();
+        initializeFirestore();
+        initializeRecyclerView();
+        loadClassData();
+    }
+
+    private void initializeToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -41,18 +49,26 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Classes Management");
         }
-
         toolbar.setNavigationOnClickListener(v -> finish());
+    }
 
+    private void initializeDAOs() {
         classDAO = new ClassDAO(this);
         classSessionDAO = new ClassSessionDAO(this);
+    }
 
+    private void initializeFirestore() {
         db = FirebaseFirestore.getInstance();
+    }
 
+    private void initializeRecyclerView() {
         recyclerViewClasses = findViewById(R.id.recycler_view_classes);
         recyclerViewClasses.setLayoutManager(new LinearLayoutManager(this));
+    }
 
-        loadClassData();
+    private void setupAdapter(List<ClassModel> classList) {
+        classAdapter = new ClassAdapter(classList, this, this);
+        recyclerViewClasses.setAdapter(classAdapter);
     }
 
     private void loadClassData() {
@@ -64,16 +80,17 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
         }
     }
 
-    private void setupAdapter(List<ClassModel> classList) {
-        classAdapter = new ClassAdapter(classList, this, this);
-        recyclerViewClasses.setAdapter(classAdapter);
-    }
 
     @Override
     public void onItemClick(ClassModel classModel) {
-        Intent intent = new Intent(ClassManagementActivity.this, ClassDetailsActivity.class);
-        intent.putExtra("id", classModel.getId());
-        startActivity(intent);
+        if (classModel.isDeleted()) {
+            Toast.makeText(ClassManagementActivity.this, "This class is deleted...", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent intent = new Intent(ClassManagementActivity.this, ClassDetailsActivity.class);
+            intent.putExtra("id", classModel.getId());
+            startActivity(intent);
+        }
+
     }
 
     @Override
@@ -89,31 +106,16 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
                                     .setTitle("Class has sessions")
                                     .setMessage("This class has sessions. Do you want to hard delete the class and all its sessions?")
                                     .setPositiveButton("Yes", (dialog2, which2) -> {
-                                        classDAO.hardDelete(classModel.getId());
-                                        classSessionDAO.deleteSessionsByClassId(classModel.getId());
-                                        db.collection("classes")
-                                                .document(classModel.getId())
-                                                .delete()
-                                                .addOnSuccessListener(aVoid -> Toast.makeText(ClassManagementActivity.this, "Class and its sessions deleted from Firestore", Toast.LENGTH_SHORT).show())
-                                                .addOnFailureListener(e -> Toast.makeText(ClassManagementActivity.this, "Failed to delete class from Firestore", Toast.LENGTH_SHORT).show());
-                                        classList = classDAO.getAllClasses();
-                                        classAdapter.updateData(classList);
-                                        Toast.makeText(ClassManagementActivity.this, "Class and its sessions deleted", Toast.LENGTH_SHORT).show();
+                                        deleteLocalClass(classModel);
+                                        deleteFirestoreClass(classModel);
                                     })
                                     .setNegativeButton("No", null)
                                     .show();
-                        } else {
-                            classDAO.hardDelete(classModel.getId());
-
-                            db.collection("classes")
-                                    .document(classModel.getId())
-                                    .delete()
-                                    .addOnSuccessListener(aVoid -> Toast.makeText(ClassManagementActivity.this, "Class deleted from Firestore", Toast.LENGTH_SHORT).show())
-                                    .addOnFailureListener(e -> Toast.makeText(ClassManagementActivity.this, "Failed to delete class from Firestore", Toast.LENGTH_SHORT).show());
-                            classList = classDAO.getAllClasses();
-                            classAdapter.updateData(classList);
-                            Toast.makeText(ClassManagementActivity.this, "Class deleted", Toast.LENGTH_SHORT).show();
+                        }else {
+                            deleteLocalClass(classModel);
+                            deleteFirestoreClass(classModel);
                         }
+
                     })
                     .setNegativeButton("No", null)
                     .show();
@@ -124,11 +126,41 @@ public class ClassManagementActivity extends AppCompatActivity implements ClassA
                     .setPositiveButton("Yes", (dialog, which) -> {
                         classDAO.softDeleteClass(classModel.getId());
                         classList = classDAO.getAllClasses();
-                        classAdapter.updateData(classList);
+                        classAdapter.updateItem(classModel);
                         Toast.makeText(ClassManagementActivity.this, "Class deleted", Toast.LENGTH_SHORT).show();
                     })
                     .setNegativeButton("No", null)
                     .show();
         }
+    }
+
+    @Override
+    public void onRestoreClick(ClassModel classModel) {
+        new AlertDialog.Builder(ClassManagementActivity.this)
+                .setTitle("Restore class")
+                .setMessage("Are you sure you want to restore this class?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    classModel.setDeleted(false);
+                    classDAO.updateClass(classModel);
+                    classAdapter.updateItem(classModel);
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void deleteLocalClass(ClassModel classModel) {
+        classDAO.hardDelete(classModel.getId());
+        classSessionDAO.deleteSessionsByClassId(classModel.getId());
+        classList = classDAO.getAllClasses();
+        classAdapter.removeItem(classModel);
+        Toast.makeText(ClassManagementActivity.this, "Class and its sessions deleted", Toast.LENGTH_SHORT).show();
+    }
+
+    private void deleteFirestoreClass(ClassModel classModel) {
+        db.collection("classes")
+                .document(classModel.getId())
+                .delete()
+                .addOnSuccessListener(aVoid -> Toast.makeText(ClassManagementActivity.this, "Class and its sessions deleted from Firestore", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(ClassManagementActivity.this, "Failed to delete class from Firestore", Toast.LENGTH_SHORT).show());
     }
 }

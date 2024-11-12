@@ -22,6 +22,7 @@ import com.example.universalyoga.activities.SessionDetailsActivity;
 import com.example.universalyoga.adapters.ClassExpandableListAdapter;
 import com.example.universalyoga.models.ClassModel;
 import com.example.universalyoga.models.ClassSessionModel;
+import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class SearchFragment extends Fragment {
 
@@ -148,43 +150,52 @@ public class SearchFragment extends Fragment {
     }
 
     private void setupExpandableListAdapter() {
-        expandableListAdapter = new ClassExpandableListAdapter(getContext(), classModels, sessionMap, userDAO, userDAO.getUserByUid(FirebaseAuth.getInstance().getUid()).getRole(), new ClassExpandableListAdapter.OnItemClickListener() {
-            @Override
-            public void onEditClick(ClassModel classModel) {
-                Intent intent = new Intent(getActivity(), ClassDetailsActivity.class);
-                intent.putExtra("id", classModel.getId());
-                if (classModel.getTimeStart() != null) {
-                    intent.putExtra("timeStart", classModel.getTimeStart().toString());
-                }
-                startActivity(intent);
-            }
+        expandableListAdapter = new ClassExpandableListAdapter(getContext(),
+                classModels,
+                sessionMap,
+                userDAO,
+                userDAO.getUserByUid(FirebaseAuth.getInstance().getUid()).getRole(),
+                new ClassExpandableListAdapter.OnItemClickListener() {
+                    @Override
+                    public void onEditClick(ClassModel classModel) {
+                        Intent intent = new Intent(getActivity(), ClassDetailsActivity.class);
+                        intent.putExtra("id", classModel.getId());
+                        if (classModel.getTimeStart() != null) {
+                            intent.putExtra("timeStart", classModel.getTimeStart().toString());
+                        }
+                        startActivity(intent);
+                    }
 
-            @Override
-            public void onDeleteClick(ClassModel classModel) {
-                new androidx.appcompat.app.AlertDialog.Builder(getContext())
-                        .setTitle("Delete Class")
-                        .setMessage("Are you sure you want to delete this class?")
-                        .setPositiveButton("Yes", (dialog, which) -> {
-                            classDAO.softDeleteClass(classModel.getId());
-                            classModels = classDAO.getAllUndeletedClasses();
-                            expandableListAdapter.updateData(classModels, loadSessionDataForClasses(classModels));
-                            Toast.makeText(getContext(), "Class deleted", Toast.LENGTH_SHORT).show();
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
-            }
-        });
+                    @Override
+                    public void onDeleteClick(ClassModel classModel) {
+                        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                                .setTitle("Delete Class")
+                                .setMessage("Are you sure you want to delete this class?")
+                                .setPositiveButton("Yes", (dialog, which) -> {
+                                    classDAO.softDeleteClass(classModel.getId());
+                                    classModels = classDAO.getAllUndeletedClasses();
+                                    expandableListAdapter.updateData(classModels, loadSessionDataForClasses(classModels));
+                                    Toast.makeText(getContext(), "Class deleted", Toast.LENGTH_SHORT).show();
+                                })
+                                .setNegativeButton("No", null)
+                                .show();
+                    }
+                });
 
         expandableListView.setAdapter(expandableListAdapter);
 
         expandableListView.setOnGroupClickListener((parent, v, groupPosition, id) -> false);
 
         expandableListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
-            ClassSessionModel sessionModel = (ClassSessionModel) expandableListAdapter.getChild(groupPosition, childPosition);
-            Intent intent = new Intent(getContext(), SessionDetailsActivity.class);
-            intent.putExtra("classSessionId", sessionModel.getId());
-            startActivity(intent);
-            return false;
+            UserModel currentUser = userDAO.getUserByUid(FirebaseAuth.getInstance().getUid());
+            if (currentUser.getRole().equals("admin")) {
+                ClassSessionModel sessionModel = (ClassSessionModel) expandableListAdapter.getChild(groupPosition, childPosition);
+                Intent intent = new Intent(getContext(), SessionDetailsActivity.class);
+                intent.putExtra("classSessionId", sessionModel.getId());
+                startActivity(intent);
+                return false;
+            }
+            return true;
         });
     }
 }

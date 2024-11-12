@@ -44,6 +44,11 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         this.categoryDAO = new CategoryDAO(context);
     }
 
+    @Override
+    public int getItemCount() {
+        return classList.size();
+    }
+
     @NonNull
     @Override
     public ClassViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -75,12 +80,13 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         int currentSessionCount = classSessionDAO.getClassSessionsByClassId(classModel.getId()).size();
 
         if (classModel.isDeleted()) {
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.deleted_class));  // Set màu cho lớp đã xóa (VD: màu xám)
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.deleted_class));
+            holder.btnRestore.setVisibility(View.VISIBLE);
         } else if (currentSessionCount < classModel.getSessionCount()) {
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.incomplete_class));  // Incomplete session color
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.incomplete_class));
             holder.sessionWarningTextView.setVisibility(View.VISIBLE);
         } else {
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.complete_class));    // Complete session color
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.complete_class));
             holder.sessionWarningTextView.setVisibility(View.GONE);
         }
         holder.btnAddSession.setOnClickListener(v -> {
@@ -94,40 +100,23 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             }
         });
 
-        holder.btnEdit.setOnClickListener(v -> {
-            if (onItemClickListener != null) {
-                onItemClickListener.onItemClick(classModel);
-            }
-        });
-
-        holder.btnDelete.setOnClickListener(v -> {
-            if (onItemClickListener != null) {
-                onItemClickListener.onDeleteClick(classModel);
-            }
-        });
-
-
-        holder.itemView.setOnClickListener(v -> {
-            if (onItemClickListener != null) {
-                onItemClickListener.onItemClick(classModel);
-            }
-        });
+        holder.btnEdit.setOnClickListener(v -> onItemClickListener.onItemClick(classModel));
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(classModel));
+        holder.btnDelete.setOnClickListener((v) -> onItemClickListener.onDeleteClick(classModel));
+        holder.btnRestore.setOnClickListener((v) -> onItemClickListener.onRestoreClick(classModel));
     }
 
-    // Method to show confirmation dialog
     private void showAddSessionConfirmationDialog(ClassModel classModel) {
         new AlertDialog.Builder(context)
                 .setTitle("Add More Sessions")
                 .setMessage("All sessions are filled. Do you want to add more sessions?")
                 .setPositiveButton("Yes", (dialog, which) -> {
-                    // Show input dialog to ask how many sessions to add
                     showSessionCountInputDialog(classModel);
                 })
                 .setNegativeButton("No", null)
                 .show();
     }
 
-    // Method to show input dialog for session count
     private void showSessionCountInputDialog(ClassModel classModel) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Enter Number of Sessions to Add");
@@ -158,21 +147,39 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
         builder.show();
     }
 
-    @Override
-    public int getItemCount() {
-        return classList.size();
+    public void updateItem(ClassModel classModel) {
+        int position = -1;
+        for (int i = 0; i < classList.size(); i++) {
+            if (classList.get(i).getId().equals(classModel.getId())) {
+                classList.set(i, classModel);
+                position = i;
+                break;
+            }
+        }
+        if (position != -1) {
+            notifyItemChanged(position);
+        }
     }
 
-    public void updateData(List<ClassModel> newClassList) {
-        this.classList.clear();
-        this.classList.addAll(newClassList);
-        notifyDataSetChanged();
+    public void removeItem(ClassModel classModel) {
+        int position = -1;
+        for (int i = 0; i < classList.size(); i++) {
+            if (classList.get(i).getId().equals(classModel.getId())) {
+                position = i;
+                break;
+            }
+        }
+
+        if (position != -1) {
+            classList.remove(position);
+            notifyItemRemoved(position);
+        }
     }
 
 
     public static class ClassViewHolder extends RecyclerView.ViewHolder {
         TextView classNameTextView, capacityTextView, sessionCountTextView, startTimeTextView, durationTextView, sessionWarningTextView, dayOfWeekTextView;
-        Button btnDelete, btnAddSession, btnEdit;
+        Button btnDelete, btnAddSession, btnEdit, btnRestore;
 
         public ClassViewHolder(@NonNull View itemView, OnItemClickListener onItemClickListener) {
             super(itemView);
@@ -186,11 +193,13 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
             btnDelete = itemView.findViewById(R.id.btn_delete_class);
             btnAddSession = itemView.findViewById(R.id.btn_add_session);
             btnEdit = itemView.findViewById(R.id.btn_edit_class);
+            btnRestore = itemView.findViewById(R.id.btn_restore_class);
         }
     }
 
     public interface OnItemClickListener {
         void onItemClick(ClassModel classModel);
         void onDeleteClick(ClassModel classModel);
+        void onRestoreClick(ClassModel classModel);
     }
 }

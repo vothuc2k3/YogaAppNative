@@ -1,5 +1,7 @@
 package com.example.universalyoga.adapters;
 
+import static com.example.universalyoga.R.drawable.ic_default_profile_image;
+
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -34,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
 
@@ -96,16 +99,23 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         ClassModel classModel = (ClassModel) getGroup(groupPosition);
         final ClassCategoryModel category = categoryDAO.getCategoryById(classModel.getTypeId());
-
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            if (role.equals("admin")) {
-                convertView = inflater.inflate(R.layout.item_class, null);
-            } else {
-                convertView = inflater.inflate(R.layout.item_instructor_class, null);
-            }
+            convertView = inflateViewBasedOnRole(inflater);
         }
+        bindGroupView(convertView, classModel, category);
+        return convertView;
+    }
 
+    private View inflateViewBasedOnRole(LayoutInflater inflater) {
+        if (role.equals("admin")) {
+            return inflater.inflate(R.layout.item_class, null);
+        } else {
+            return inflater.inflate(R.layout.item_instructor_class, null);
+        }
+    }
+
+    private void bindGroupView(View convertView, ClassModel classModel, ClassCategoryModel category) {
         TextView classNameTextView = convertView.findViewById(R.id.class_name);
         TextView capacityTextView = convertView.findViewById(R.id.capacity_value);
         TextView startTimeTextView = convertView.findViewById(R.id.start_time_value);
@@ -139,26 +149,28 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
         }
 
         if (role.equals("admin")) {
-            Button btnAddSession = convertView.findViewById(R.id.btn_add_session);
-            Button btnEdit = convertView.findViewById(R.id.btn_edit_class);
-            Button btnDelete = convertView.findViewById(R.id.btn_delete_class);
-
-            btnAddSession.setOnClickListener(v -> {
-                if (currentSessionCount >= classModel.getSessionCount()) {
-                    showAddSessionConfirmationDialog(classModel);
-                } else {
-                    Intent intent = new Intent(context, AddSessionActivity.class);
-                    intent.putExtra("classId", classModel.getId());
-                    intent.putExtra("sessionCount", classModel.getSessionCount());
-                    context.startActivity(intent);
-                }
-            });
-
-            btnEdit.setOnClickListener(v -> onItemClickListener.onEditClick(classModel));
-            btnDelete.setOnClickListener(v -> onItemClickListener.onDeleteClick(classModel));
+            setupAdminButtons(convertView, classModel, currentSessionCount);
         }
+    }
 
-        return convertView;
+    private void setupAdminButtons(View convertView, ClassModel classModel, int currentSessionCount) {
+        Button btnAddSession = convertView.findViewById(R.id.btn_add_session);
+        Button btnEdit = convertView.findViewById(R.id.btn_edit_class);
+        Button btnDelete = convertView.findViewById(R.id.btn_delete_class);
+
+        btnAddSession.setOnClickListener(v -> {
+            if (currentSessionCount >= classModel.getSessionCount()) {
+                showAddSessionConfirmationDialog(classModel);
+            } else {
+                Intent intent = new Intent(context, AddSessionActivity.class);
+                intent.putExtra("classId", classModel.getId());
+                intent.putExtra("sessionCount", classModel.getSessionCount());
+                context.startActivity(intent);
+            }
+        });
+
+        btnEdit.setOnClickListener(v -> onItemClickListener.onEditClick(classModel));
+        btnDelete.setOnClickListener(v -> onItemClickListener.onDeleteClick(classModel));
     }
 
     @Override
@@ -169,19 +181,55 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.item_class_session, null);
         }
 
-        final UserModel instructor = userDAO.getUserByUid(sessionModel.getInstructorId());
+        setInstructorDetails(sessionModel, convertView);
+        setSessionDetails(sessionModel, convertView);
+        highlightCurrentInstructor(sessionModel, convertView);
 
+        return convertView;
+    }
+
+    private void setInstructorDetails(ClassSessionModel sessionModel, View convertView) {
+        UserModel instructor = userDAO.getUserByUid(sessionModel.getInstructorId());
+
+        TextView sessionInstructorTextView = convertView.findViewById(R.id.tv_instructor_name);
+        ImageView instructorImageView = convertView.findViewById(R.id.icon_instructor_image);
+
+        sessionInstructorTextView.setText(instructor.getName());
+        if (instructor.getProfileImage() != null && !instructor.getProfileImage().isEmpty()) {
+            Picasso.get()
+                    .load(instructor.getProfileImage())
+                    .placeholder(ic_default_profile_image)
+                    .into(instructorImageView);
+        } else {
+            instructorImageView.setImageResource(ic_default_profile_image);
+        }
+    }
+
+    private void setSessionDetails(ClassSessionModel sessionModel, View convertView) {
         TextView sessionNumberTextView = convertView.findViewById(R.id.tv_session_number);
         TextView sessionDateTextView = convertView.findViewById(R.id.tv_session_date);
         TextView sessionPriceTextView = convertView.findViewById(R.id.tv_session_price);
         TextView sessionRoomTextView = convertView.findViewById(R.id.tv_session_room);
         TextView sessionNoteTextView = convertView.findViewById(R.id.tv_session_note);
-        TextView sessionInstructorTextView = convertView.findViewById(R.id.tv_instructor_name);
-        ImageView instructorImageView = convertView.findViewById(R.id.icon_instructor_image);
-
         TextView sessionStartTimeTextView = convertView.findViewById(R.id.tv_start_time);
         TextView sessionEndTimeTextView = convertView.findViewById(R.id.tv_end_time);
 
+        int sessionIndex = calculateSessionIndex(sessionModel);
+        sessionNumberTextView.setText(" " + sessionIndex);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        sessionDateTextView.setText(" " + dateFormat.format(new Date(sessionModel.getDate())));
+
+        sessionPriceTextView.setText(" $ " + sessionModel.getPrice());
+        sessionRoomTextView.setText(sessionModel.getRoom() != null ? " " + sessionModel.getRoom() : "N/A");
+        sessionNoteTextView.setText(sessionModel.getNote() != null ? " " + sessionModel.getNote() : "No notes");
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        sessionStartTimeTextView.setText(" " + timeFormat.format(new Date(sessionModel.getStartTime())));
+        sessionEndTimeTextView.setText(" " + timeFormat.format(new Date(sessionModel.getEndTime())));
+    }
+
+    private int calculateSessionIndex(ClassSessionModel sessionModel) {
         List<ClassSessionModel> allSessions = classSessionDAO.getClassSessionsByClassId(sessionModel.getClassId());
         Collections.sort(allSessions, Comparator.comparingLong(ClassSessionModel::getDate));
 
@@ -192,49 +240,18 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
             }
             sessionIndex++;
         }
+        return sessionIndex;
+    }
 
-        sessionNumberTextView.setText(" " + sessionIndex);
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-        String formattedDate = dateFormat.format(new Date(sessionModel.getDate()));
-        sessionDateTextView.setText(" " + formattedDate);
-
-        sessionPriceTextView.setText(" $ " + sessionModel.getPrice());
-        sessionRoomTextView.setText(sessionModel.getRoom() != null ? " " + sessionModel.getRoom() : "N/A");
-        sessionNoteTextView.setText(sessionModel.getNote() != null ? " " + sessionModel.getNote() : "No notes");
-
-        sessionInstructorTextView.setText(instructor.getName());
-
-        if (instructor.getProfileImage() != null && !instructor.getProfileImage().isEmpty()) {
-            Picasso.get()
-                    .load(instructor.getProfileImage())
-                    .placeholder(R.drawable.ic_default_profile_image)
-                    .into(instructorImageView);
-        } else {
-            instructorImageView.setImageResource(R.drawable.ic_default_profile_image);
-        }
-
-        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        String startTime = timeFormat.format(new Date(sessionModel.getStartTime()));
-        String endTime = timeFormat.format(new Date(sessionModel.getEndTime()));
-
-        sessionStartTimeTextView.setText(" " + startTime);
-        sessionEndTimeTextView.setText(" " + endTime);
-
-        String currentInstructorUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private void highlightCurrentInstructor(ClassSessionModel sessionModel, View convertView) {
+        String currentInstructorUid = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         if (sessionModel.getInstructorId().equals(currentInstructorUid)) {
             convertView.setBackgroundColor(context.getResources().getColor(R.color.colorPrimary));
         } else {
             convertView.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
         }
-
-        return convertView;
     }
 
-    @Override
-    public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return true;
-    }
 
     private void showAddSessionConfirmationDialog(ClassModel classModel) {
         new AlertDialog.Builder(context)
@@ -281,6 +298,11 @@ public class ClassExpandableListAdapter extends BaseExpandableListAdapter {
         this.classList = newClassList;
         this.sessionMap = newSessionMap;
         notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean isChildSelectable(int groupPosition, int childPosition) {
+        return true;
     }
 
     public interface OnItemClickListener {

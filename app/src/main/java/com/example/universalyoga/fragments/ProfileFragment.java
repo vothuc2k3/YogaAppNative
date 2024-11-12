@@ -32,6 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 public class ProfileFragment extends Fragment {
 
@@ -41,8 +42,8 @@ public class ProfileFragment extends Fragment {
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
     private ActivityResultLauncher<String> cameraPermissionLauncher;
-    private UserDAO userDAO;
     private Uri imageUri;
+    private UserDAO userDAO;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,16 +54,15 @@ public class ProfileFragment extends Fragment {
         if (getArguments() != null) {
             user = (UserModel) getArguments().getSerializable("user");
         }
-
         cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
-                Bitmap photo = (Bitmap) result.getData().getExtras().get("data");
+                Bitmap photo = (Bitmap) Objects.requireNonNull(result.getData().getExtras()).get("data");
                 ivAvatar.setImageBitmap(photo);
+                assert photo != null;
                 imageUri = saveBitmapToFile(photo);
                 uploadImage(imageUri);
             }
         });
-
         galleryLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
             if (uri != null) {
                 ivAvatar.setImageURI(uri);
@@ -70,7 +70,6 @@ public class ProfileFragment extends Fragment {
                 uploadImage(imageUri);
             }
         });
-
         cameraPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 isGranted -> {
@@ -138,7 +137,6 @@ public class ProfileFragment extends Fragment {
         if (imageUri != null) {
             String path = "users/profile_images/";
             String id = user.getUid();
-
             Util.storeFile(path, id, imageUri, new Util.OnCompleteListener<Uri>() {
                 @Override
                 public void onComplete(Uri downloadUri) {
@@ -151,7 +149,6 @@ public class ProfileFragment extends Fragment {
 
                     Toast.makeText(getActivity(), "Profile image updated!", Toast.LENGTH_SHORT).show();
                 }
-
                 @Override
                 public void onError(String errorMessage) {
                     Toast.makeText(getActivity(), "Error uploading image: " + errorMessage, Toast.LENGTH_SHORT).show();

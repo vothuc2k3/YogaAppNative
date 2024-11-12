@@ -19,7 +19,7 @@ public class BookingDAO {
     private static final String COLUMN_STATUS = "status";
     private static final String COLUMN_CREATED_AT = "createdAt";
 
-    private AppDatabaseHelper dbHelper;
+    private final AppDatabaseHelper dbHelper;
     private SQLiteDatabase db;
 
     public BookingDAO(Context context) {
@@ -40,21 +40,17 @@ public class BookingDAO {
         }
     }
 
-    // Add a booking with status
-    public long addBooking(BookingModel booking) {
+    public void addBooking(BookingModel booking) {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, booking.getId());
         values.put(COLUMN_UID, booking.getUid());
-        values.put(COLUMN_STATUS, booking.getStatus());  // Save status (pending, confirmed, rejected)
+        values.put(COLUMN_STATUS, booking.getStatus());
         values.put(COLUMN_CREATED_AT, booking.getCreatedAt());
-
-        long result = db.insertWithOnConflict(TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.insertWithOnConflict(TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         closeDb();
-        return result;
     }
 
-    // Get all bookings with status
     public List<BookingModel> getAllBookings() {
         List<BookingModel> bookings = new ArrayList<>();
         openReadableDb();
@@ -65,31 +61,27 @@ public class BookingDAO {
                 BookingModel booking = new BookingModel();
                 booking.setId(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)));
                 booking.setUid(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_UID)));
-                booking.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS)));  // Get status
+                booking.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS)));
                 booking.setCreatedAt(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)));
 
                 bookings.add(booking);
             } while (cursor.moveToNext());
         }
-
         if (cursor != null) {
             cursor.close();
         }
-
         closeDb();
         return bookings;
     }
 
-    public int updateBooking(BookingModel booking) {
+    public void updateBooking(BookingModel booking) {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_UID, booking.getUid());
-        values.put(COLUMN_STATUS, booking.getStatus());  // Update status
+        values.put(COLUMN_STATUS, booking.getStatus());
         values.put(COLUMN_CREATED_AT, booking.getCreatedAt());
-
-        int rowsAffected = db.update(TABLE_NAME, values, COLUMN_ID + "=?", new String[]{booking.getId()});
+        db.update(TABLE_NAME, values, COLUMN_ID + "=?", new String[]{booking.getId()});
         closeDb();
-        return rowsAffected;
     }
 
     public void resetTable() {

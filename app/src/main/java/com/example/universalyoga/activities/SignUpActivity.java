@@ -3,6 +3,7 @@ package com.example.universalyoga.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,7 +51,9 @@ public class SignUpActivity extends AppCompatActivity {
     private void setUpListeners() {
         signUpButton.setOnClickListener(v -> registerUser());
         loginButton.setOnClickListener(v -> {
-            startActivity(new Intent(SignUpActivity.this, SignInActivity.class));
+            Intent intent = new Intent(SignUpActivity.this, SignInActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
             finish();
         });
     }
@@ -77,21 +80,7 @@ public class SignUpActivity extends AppCompatActivity {
                         if (firebaseUser != null) {
                             String uid = firebaseUser.getUid();
                             UserModel userModel = new UserModel(uid, name, email, phoneNumber);
-                            FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-                            db.collection("users").document(uid)
-                                    .set(userModel.toMap())
-                                    .addOnSuccessListener(aVoid -> {
-                                        userDAO.addUser(userModel);
-                                        Toast.makeText(SignUpActivity.this, "User data synced to Firestore and SQLite", Toast.LENGTH_SHORT).show();
-
-                                        Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(SignUpActivity.this, "Failed to sync user data to Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    });
+                            storeUserData(userModel);
                         }
                     } else {
                         Toast.makeText(SignUpActivity.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -101,39 +90,69 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
+    private void storeUserData(UserModel userModel) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("users").document(userModel.getUid())
+                .set(userModel.toMap())
+                .addOnSuccessListener(aVoid -> {
+                    userDAO.addUser(userModel);
+                    Toast.makeText(SignUpActivity.this, "User data synced to Firestore and SQLite", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(SignUpActivity.this, "Failed to sync user data to Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
     private boolean validateInput(String name, String email, String phoneNumber, String password, String confirmPassword) {
         if (TextUtils.isEmpty(name)) {
             nameEditText.setError("Name is required.");
+            Toast.makeText(SignUpActivity.this, "Name is required.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (TextUtils.isEmpty(email)) {
             emailEditText.setError("Email is required.");
+            Toast.makeText(SignUpActivity.this, "Email is required.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+            emailEditText.setError("Invalid email address.");
+            Toast.makeText(SignUpActivity.this, "Invalid email address.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (TextUtils.isEmpty(phoneNumber)) {
             phoneNumberEditText.setError("Phone number is required.");
+            Toast.makeText(SignUpActivity.this, "Phone number is required.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (TextUtils.isEmpty(password)) {
             passwordEditText.setError("Password is required.");
+            Toast.makeText(SignUpActivity.this, "Password is required.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (TextUtils.isEmpty(confirmPassword)) {
             confirmPasswordEditText.setError("Please confirm your password.");
+            Toast.makeText(SignUpActivity.this, "Please confirm your password.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (!password.equals(confirmPassword)) {
             confirmPasswordEditText.setError("Passwords do not match.");
+            Toast.makeText(SignUpActivity.this, "Passwords do not match.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (password.length() < 6) {
             passwordEditText.setError("Password must be >= 6 characters.");
+            Toast.makeText(SignUpActivity.this, "Password must be >= 6 characters.", Toast.LENGTH_SHORT).show();
             return false;
         }
 

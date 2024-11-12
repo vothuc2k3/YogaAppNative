@@ -3,6 +3,7 @@ package com.example.universalyoga.activities;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -75,7 +76,16 @@ public class CategoryManagementActivity extends AppCompatActivity {
         EditText descriptionInput = dialogView.findViewById(R.id.edit_text_category_description);
 
         builder.setPositiveButton("Add", (dialog, which) -> {
+            if (!validateInput(nameInput)) {
+                return;
+            }
+
             String name = nameInput.getText().toString();
+
+            if (!validateDuplicateName(name)) {
+                return;
+            }
+
             String description = descriptionInput.getText().toString();
             ClassCategoryModel category = new ClassCategoryModel(UUID.randomUUID().toString(), name, description);
             categoryDAO.addCategory(category);
@@ -86,5 +96,24 @@ public class CategoryManagementActivity extends AppCompatActivity {
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         builder.show();
+    }
+
+    private boolean validateInput(EditText nameInput) {
+        String name = nameInput.getText().toString();
+        if (name.isEmpty()) {
+            Toast.makeText(CategoryManagementActivity.this, "Name is required.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validateDuplicateName(String name) {
+        for (ClassCategoryModel category : categoryList) {
+            if (category.getName().equals(name)) {
+                Toast.makeText(CategoryManagementActivity.this, "Name is already taken.", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        return true;
     }
 }

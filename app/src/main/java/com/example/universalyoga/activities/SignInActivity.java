@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.universalyoga.models.UserModel;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
+import com.example.universalyoga.utils.Util;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -50,7 +51,9 @@ public class SignInActivity extends AppCompatActivity {
         loginButton.setOnClickListener(v -> attemptUserLogin());
 
         signUpButton.setOnClickListener(v -> {
-            startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
+            Intent intent = new Intent(SignInActivity.this, SignUpActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         });
     }
 
@@ -59,6 +62,12 @@ public class SignInActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (!validateInput(email, password)) {
+            return;
+        }
+
+        if (!Util.checkNetworkConnection(this)) {
+            Toast.makeText(SignInActivity.this, "No internet connection, try again later...", Toast.LENGTH_SHORT)
+                    .show();
             return;
         }
 

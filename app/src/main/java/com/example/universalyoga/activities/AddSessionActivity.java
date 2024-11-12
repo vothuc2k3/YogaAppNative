@@ -1,5 +1,6 @@
 package com.example.universalyoga.activities;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -102,7 +103,7 @@ public class AddSessionActivity extends AppCompatActivity {
         title.setText("Choose Instructor");
         title.setPadding(20, 30, 20, 10);
         title.setTextSize(20f);
-        title.setTextColor(getResources().getColor(android.R.color.black));
+        title.setTextColor(getResources().getColor(android.R.color.black, null));
 
         View dialogView = inflater.inflate(R.layout.dialog_instructor_selection, null);
         builder.setView(dialogView);
@@ -118,76 +119,87 @@ public class AddSessionActivity extends AppCompatActivity {
             alertDialog.dismiss();
         });
         recyclerView.setAdapter(adapter);
-
         alertDialog.show();
     }
 
     private void addSession() {
+        if(!validateInput()){
+            return;
+        }
         String priceStr = inputPrice.getText().toString().trim();
         String room = inputRoom.getText().toString().trim();
         String notes = inputNotes.getText().toString().trim();
-
-        if (TextUtils.isEmpty(priceStr)) {
-            inputPrice.setError("Price is required");
-            return;
-        }
-
         int price = Integer.parseInt(priceStr);
         ClassModel classModel = classDAO.getClassById(classId);
+        long startAtDate = classModel.getStartAt();
+        Time timeStart = classModel.getTimeStart();
+        int durationInMinutes = classModel.getDuration();
+        long durationInMillis = (long) durationInMinutes * 60 * 1000;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(startAtDate);
+        calendar.set(Calendar.HOUR_OF_DAY, timeStart.getHours());
+        calendar.set(Calendar.MINUTE, timeStart.getMinutes());
+        long startTimeInMillis = calendar.getTimeInMillis();
+        long endTimeInMillis = startTimeInMillis + durationInMillis;
+        int currentSessionCount = classSessionDAO.getClassSessionsByClassId(classId).size();
+        int remainingSessionsToAdd = classModel.getSessionCount() - currentSessionCount;
 
-        if (classModel != null) {
-            long startAtDate = classModel.getStartAt();
-            Time timeStart = classModel.getTimeStart();
-            int durationInMinutes = classModel.getDuration();
-            long durationInMillis = durationInMinutes * 60 * 1000;
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(startAtDate);
-            calendar.set(Calendar.HOUR_OF_DAY, timeStart.getHours());
-            calendar.set(Calendar.MINUTE, timeStart.getMinutes());
-
-            long startTimeInMillis = calendar.getTimeInMillis();
-            long endTimeInMillis = startTimeInMillis + durationInMillis;
-
-            int currentSessionCount = classSessionDAO.getClassSessionsByClassId(classId).size();
-            int remainingSessionsToAdd = classModel.getSessionCount() - currentSessionCount;
-
-            if (sessionCount > remainingSessionsToAdd) {
-                sessionCount = remainingSessionsToAdd;
-            }
-
-            long lastSessionDate = startAtDate;
-
-            for (int i = 0; i < sessionCount; i++) {
-                ClassSessionModel newSession = new ClassSessionModel();
-                newSession.setId(UUID.randomUUID().toString());
-                newSession.setClassId(classId);
-                newSession.setPrice(price);
-                newSession.setInstructorId(instructorUid);
-                newSession.setStartTime(startTimeInMillis);
-                newSession.setEndTime(endTimeInMillis);
-                newSession.setDate(calendar.getTimeInMillis());
-                newSession.setRoom(room);
-                newSession.setNote(notes);
-
-                long result = classSessionDAO.addClassSession(newSession);
-                if (result == -1) {
-                    Toast.makeText(this, "Failed to add session", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                calendar.add(Calendar.DAY_OF_YEAR, 7);
-                startTimeInMillis = calendar.getTimeInMillis();
-                endTimeInMillis = startTimeInMillis + durationInMillis;
-                lastSessionDate = calendar.getTimeInMillis();
-            }
-
-            classModel.setEndAt(lastSessionDate);
-            classModel.setStatus("open");
-            classDAO.updateClass(classModel);
+        if (sessionCount > remainingSessionsToAdd) {
+            sessionCount = remainingSessionsToAdd;
         }
+
+        long lastSessionDate = startAtDate;
+
+        for (int i = 0; i < sessionCount; i++) {
+            ClassSessionModel newSession = new ClassSessionModel();
+            newSession.setId(UUID.randomUUID().toString());
+            newSession.setClassId(classId);
+            newSession.setPrice(price);
+            newSession.setInstructorId(instructorUid);
+            newSession.setStartTime(startTimeInMillis);
+            newSession.setEndTime(endTimeInMillis);
+            newSession.setDate(calendar.getTimeInMillis());
+            newSession.setRoom(room);
+            newSession.setNote(notes);
+
+            long result = classSessionDAO.addClassSession(newSession);
+            if (result == -1) {
+                Toast.makeText(this, "Failed to add session", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            calendar.add(Calendar.DAY_OF_YEAR, 7);
+            startTimeInMillis = calendar.getTimeInMillis();
+            endTimeInMillis = startTimeInMillis + durationInMillis;
+            lastSessionDate = calendar.getTimeInMillis();
+        }
+
+        classModel.setEndAt(lastSessionDate);
+        classModel.setStatus("open");
+        classDAO.updateClass(classModel);
 
         Toast.makeText(this, "Sessions added successfully!", Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    private boolean validateInput(){
+        String priceStr = inputPrice.getText().toString().trim();
+        if(TextUtils.isEmpty(priceStr)){
+            inputPrice.setError("Price is required");
+            Toast.makeText(this, "Price is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(TextUtils.isEmpty(inputRoom.getText().toString().trim())){
+            inputRoom.setError("Room is required");
+            Toast.makeText(this, "Room is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(TextUtils.isEmpty(inputInstructor.getText().toString().trim())){
+            inputInstructor.setError("Instructor is required");
+            Toast.makeText(this, "Instructor is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
     }
 }

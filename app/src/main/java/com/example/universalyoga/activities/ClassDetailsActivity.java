@@ -5,6 +5,7 @@ import static com.example.universalyoga.utils.Util.convertToTime;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +31,7 @@ import com.example.universalyoga.sqlite.DAO.CategoryDAO;
 import com.example.universalyoga.sqlite.DAO.ClassDAO;
 import com.example.universalyoga.sqlite.DAO.ClassSessionDAO;
 import com.example.universalyoga.sqlite.DAO.UserDAO;
+import com.example.universalyoga.utils.Util;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.sql.Time;
@@ -39,6 +41,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class ClassDetailsActivity extends AppCompatActivity {
 
@@ -50,7 +53,6 @@ public class ClassDetailsActivity extends AppCompatActivity {
     private ClassDAO classDAO;
     private UserDAO userDAO;
     private CategoryDAO categoryDAO;
-
     private String classId;
     private int dayOfWeek;
 
@@ -59,16 +61,22 @@ public class ClassDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_class_details);
 
-        // Initialize DAOs
+        initializeDAOs();
+        initializeViews();
+        setupToolbar();
+        setupListeners();
+        loadClassDetails();
+    }
+
+    private void initializeDAOs() {
         userDAO = new UserDAO(this);
         classSessionDAO = new ClassSessionDAO(this);
         classDAO = new ClassDAO(this);
+    }
 
-        // Initialize RecyclerView for class sessions
+    private void initializeViews() {
         recyclerViewClassSessions = findViewById(R.id.recycler_view_sessions);
         recyclerViewClassSessions.setLayoutManager(new LinearLayoutManager(this));
-
-        // Initialize inputs
         etCapacity = findViewById(R.id.et_capacity);
         etDuration = findViewById(R.id.et_duration);
         etType = findViewById(R.id.et_type);
@@ -78,15 +86,12 @@ public class ClassDetailsActivity extends AppCompatActivity {
         etDayOfWeek = findViewById(R.id.et_day_of_week);
         etTimeStart = findViewById(R.id.et_time_start);
         etSessionNumber = findViewById(R.id.et_number_of_sessions);
-
         btnSaveChanges = findViewById(R.id.btn_save_changes);
 
-        // Get data from Intent
         classId = getIntent().getStringExtra("id");
-        // Load class details
-        loadClassDetails();
+    }
 
-        // Toolbar setup
+    private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -96,9 +101,10 @@ public class ClassDetailsActivity extends AppCompatActivity {
         }
 
         toolbar.setNavigationOnClickListener(v -> finish());
+    }
 
+    private void setupListeners() {
         etTimeStart.setOnClickListener(v -> showTimePickerDialog());
-
         btnSaveChanges.setOnClickListener(v -> saveChanges());
     }
 
@@ -124,36 +130,14 @@ public class ClassDetailsActivity extends AppCompatActivity {
         etDayOfWeek.setText(classModel.getDayOfWeek());
         etTimeStart.setText(classModel.getTimeStart().toString());
 
-        dayOfWeek = getDayOfWeekFromString(classModel.getDayOfWeek());
+        dayOfWeek = Util.getDayOfWeekFromString(classModel.getDayOfWeek());
 
         loadClassSessions(classModel.getId());
     }
 
-    private int getDayOfWeekFromString(String dayOfWeekString) {
-        switch (dayOfWeekString.toLowerCase()) {
-            case "monday":
-                return Calendar.MONDAY;
-            case "tuesday":
-                return Calendar.TUESDAY;
-            case "wednesday":
-                return Calendar.WEDNESDAY;
-            case "thursday":
-                return Calendar.THURSDAY;
-            case "friday":
-                return Calendar.FRIDAY;
-            case "saturday":
-                return Calendar.SATURDAY;
-            case "sunday":
-                return Calendar.SUNDAY;
-            default:
-                return -1;
-        }
-    }
-
     private void loadClassSessions(String classId) {
         List<ClassSessionModel> classSessions = classSessionDAO.getClassSessionsByClassId(classId);
-
-        editClassSessionAdapter = new EditClassSessionAdapter(classSessionDAO,classSessions, this, dayOfWeek, userDAO, updatedSession -> {
+        editClassSessionAdapter = new EditClassSessionAdapter(classSessionDAO, classSessions, this, dayOfWeek, userDAO, updatedSession -> {
             classSessionDAO.updateClassSession(updatedSession);
         });
         recyclerViewClassSessions.setAdapter(editClassSessionAdapter);
@@ -161,6 +145,10 @@ public class ClassDetailsActivity extends AppCompatActivity {
 
     private void saveChanges() {
         try {
+            if(!validateInput()){
+                return;
+            }
+
             ClassModel classModel = classDAO.getClassById(classId);
 
             int capacity = Integer.parseInt(etCapacity.getText().toString().trim());
@@ -177,9 +165,10 @@ public class ClassDetailsActivity extends AppCompatActivity {
 
             classDAO.updateClass(classModel);
 
+
             Toast.makeText(this, "Class details saved successfully", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Toast.makeText(this, "Failed to save class details", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -202,5 +191,19 @@ public class ClassDetailsActivity extends AppCompatActivity {
         }, Math.max(6, Math.min(20, currentHour)), currentMinute, true);
 
         timePickerDialog.show();
+    }
+
+    private boolean validateInput(){
+        if(TextUtils.isEmpty(Objects.requireNonNull(etCapacity.getText()).toString().trim())){
+            etCapacity.setError("Capacity is required");
+            Toast.makeText(this, "Capacity is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(TextUtils.isEmpty(Objects.requireNonNull(etDuration.getText()).toString().trim())){
+            etDuration.setError("Duration is required");
+            Toast.makeText(this, "Duration is required", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

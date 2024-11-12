@@ -63,21 +63,17 @@ public class ClassDAO {
 
     public List<ClassModel> getClassesWithSessionsByInstructor(String instructorId) {
         List<ClassModel> classList = new ArrayList<>();
-
         List<ClassSessionModel> instructorSessions = classSessionDAO.getSessionsByInstructorId(instructorId);
-
         Set<String> classIds = new HashSet<>();
         for (ClassSessionModel session : instructorSessions) {
             classIds.add(session.getClassId());
         }
-
         for (String classId : classIds) {
             ClassModel classModel = getClassById(classId);
             if (classModel != null) {
                 classList.add(classModel);
             }
         }
-
         return classList;
     }
 
@@ -85,16 +81,13 @@ public class ClassDAO {
     public List<ClassModel> searchClassesByDay(String dayOfWeek) {
         List<ClassModel> classList = new ArrayList<>();
         openReadableDb();
-
         String sqlQuery = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_DAY_OF_WEEK + "=? AND " + COLUMN_IS_DELETED + "=?";
         Cursor cursor = db.rawQuery(sqlQuery, new String[]{dayOfWeek, "0"});
-
         if (cursor.moveToFirst()) {
             do {
                 classList.add(populateClassModel(cursor));
             } while (cursor.moveToNext());
         }
-
         cursor.close();
         close();
         return classList;
@@ -120,10 +113,9 @@ public class ClassDAO {
         return classModel;
     }
 
-    public long addClass(ClassModel classModel) {
+    public void addClass(ClassModel classModel) {
         openWritableDb();
         ContentValues values = new ContentValues();
-
         values.put(COLUMN_CLASS_ID, classModel.getId());
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
         values.put(COLUMN_DURATION, classModel.getDuration());
@@ -132,21 +124,15 @@ public class ClassDAO {
         values.put(COLUMN_DESCRIPTION, classModel.getDescription());
         values.put(COLUMN_STATUS, classModel.getStatus());
         values.put(COLUMN_DAY_OF_WEEK, classModel.getDayOfWeek());
-
         values.put(COLUMN_CREATED_AT, classModel.getCreatedAt());
         values.put(COLUMN_START_AT, classModel.getStartAt());
         values.put(COLUMN_END_AT, classModel.getEndAt());
-
         if (classModel.getTimeStart() != null) {
             values.put(COLUMN_TIME_START, classModel.getTimeStart().getTime());
         }
-
         values.put(COLUMN_IS_DELETED, classModel.isDeleted());
-
-        long result = db.insertWithOnConflict(TABLE_CLASS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-
+        db.insertWithOnConflict(TABLE_CLASS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         close();
-        return result;
     }
 
 
@@ -164,7 +150,7 @@ public class ClassDAO {
         return classModel;
     }
 
-    public int updateClass(ClassModel classModel) {
+    public void updateClass(ClassModel classModel) {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_CAPACITY, classModel.getCapacity());
@@ -177,16 +163,12 @@ public class ClassDAO {
         values.put(COLUMN_CREATED_AT, classModel.getCreatedAt());
         values.put(COLUMN_START_AT, classModel.getStartAt());
         values.put(COLUMN_END_AT, classModel.getEndAt());
-
         if (classModel.getTimeStart() != null) {
             values.put(COLUMN_TIME_START, classModel.getTimeStart().getTime());
         }
-
         values.put(COLUMN_IS_DELETED, classModel.isDeleted());
-
-        int rowsAffected = db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classModel.getId()});
+        db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classModel.getId()});
         close();
-        return rowsAffected;
     }
 
     public void softDeleteClass(String classId) {
@@ -200,20 +182,16 @@ public class ClassDAO {
     public List<ClassModel> getAllClasses() {
         List<ClassModel> classList = new ArrayList<>();
         openReadableDb();
-
         Cursor cursor = db.query(TABLE_CLASS, null, null, null, null, null, null);  // Không lọc isDeleted
-
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 classList.add(populateClassModel(cursor));
             } while (cursor.moveToNext());
         }
-
         if (cursor != null) {
             cursor.close();
         }
         close();
-
         return classList;
     }
 
@@ -237,11 +215,9 @@ public class ClassDAO {
 
     public void updateClassStartAndEndDate(String classId) {
         List<ClassSessionModel> sessionList = classSessionDAO.getClassSessionsByClassId(classId);
-
         if (sessionList == null || sessionList.isEmpty()) {
             return;
         }
-
         long minDate = Long.MAX_VALUE;
         long maxDate = Long.MIN_VALUE;
 
@@ -254,12 +230,9 @@ public class ClassDAO {
                 maxDate = sessionDate;
             }
         }
-
         ContentValues values = new ContentValues();
         values.put(COLUMN_START_AT, minDate);
         values.put(COLUMN_END_AT, maxDate);
-
-
         openWritableDb();
         db.update(TABLE_CLASS, values, COLUMN_CLASS_ID + "=?", new String[]{classId});
         close();

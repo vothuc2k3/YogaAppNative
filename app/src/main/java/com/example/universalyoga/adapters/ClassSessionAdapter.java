@@ -48,7 +48,7 @@ public class ClassSessionAdapter extends RecyclerView.Adapter<ClassSessionAdapte
         ClassSessionModel session = classSessionList.get(position);
 
         List<ClassSessionModel> allSessions = classSessionDAO.getClassSessionsByClassId(session.getClassId());
-        Collections.sort(allSessions, Comparator.comparingLong(ClassSessionModel::getDate));
+        allSessions.sort(Comparator.comparingLong(ClassSessionModel::getDate));
 
         int sessionIndex = 0;
         for (int i = 0; i < allSessions.size(); i++) {

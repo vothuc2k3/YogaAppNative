@@ -47,7 +47,7 @@ public class UserDAO {
         }
     }
 
-    public long addUser(UserModel user) {
+    public void addUser(UserModel user) {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ID, user.getUid());
@@ -57,40 +57,33 @@ public class UserDAO {
         values.put(COLUMN_USER_PROFILE_IMAGE, user.getProfileImage());
         values.put(COLUMN_USER_ROLE, user.getRole());
 
-        long result = db.insertWithOnConflict(TABLE_USER, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.insertWithOnConflict(TABLE_USER, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         close();
-        return result;
     }
 
     public UserModel getUserByUid(String uid) {
         openReadableDb();
-        Cursor cursor = null;
+        Cursor cursor;
         UserModel user = null;
-        try {
-            cursor = db.query(TABLE_USER, null, COLUMN_USER_ID + "=?", new String[]{uid}, null, null, null);
-
-            if (cursor != null && cursor.moveToFirst()) {
-                user = new UserModel();
-                user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
-                user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
-                user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
-                user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
-                user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
-                user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
+        cursor = db.query(TABLE_USER, null, COLUMN_USER_ID + "=?", new String[]{uid}, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            user = new UserModel();
+            user.setUid(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ID)));
+            user.setName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_NAME)));
+            user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL)));
+            user.setPhoneNumber(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_PHONE)));
+            user.setProfileImage(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_PROFILE_IMAGE)));
+            user.setRole(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ROLE)));
+        }
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
             close();
         }
         return user;
     }
 
 
-    public int updateUser(UserModel user) {
+    public void updateUser(UserModel user) {
         openWritableDb();
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_NAME, user.getName());
@@ -99,43 +92,31 @@ public class UserDAO {
         values.put(COLUMN_USER_PROFILE_IMAGE, user.getProfileImage());
         values.put(COLUMN_USER_ROLE, user.getRole());
 
-        int rowsAffected = db.update(TABLE_USER, values, COLUMN_USER_ID + "=?", new String[]{user.getUid()});
-        close();
-        return rowsAffected;
-    }
-
-    public void deleteUser(String uid) {
-        openWritableDb();
-        db.delete(TABLE_USER, COLUMN_USER_ID + "=?", new String[]{uid});
+        db.update(TABLE_USER, values, COLUMN_USER_ID + "=?", new String[]{user.getUid()});
         close();
     }
 
     public List<UserModel> getAllUsers() {
         List<UserModel> userList = new ArrayList<>();
-
         openReadableDb();
-
         Cursor cursor = db.query(TABLE_USER, null, null, null, null, null, null);
-
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 UserModel user = new UserModel();
-                user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
-                user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
-                user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
-                user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
-                user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
-                user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
+                user.setUid(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ID)));
+                user.setName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_NAME)));
+                user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL)));
+                user.setPhoneNumber(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_PHONE)));
+                user.setProfileImage(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_PROFILE_IMAGE)));
+                user.setRole(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ROLE)));
 
                 userList.add(user);
             } while (cursor.moveToNext());
         }
-
         if (cursor != null) {
             cursor.close();
         }
         close();
-
         return userList;
     }
 
@@ -148,12 +129,12 @@ public class UserDAO {
         if (cursor.moveToFirst()) {
             do {
                 UserModel user = new UserModel();
-                user.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
-                user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
-                user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
-                user.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
-                user.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
-                user.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
+                user.setUid(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ID)));
+                user.setName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_NAME)));
+                user.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL)));
+                user.setPhoneNumber(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_PHONE)));
+                user.setProfileImage(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_PROFILE_IMAGE)));
+                user.setRole(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ROLE)));
                 userList.add(user);
             } while (cursor.moveToNext());
         }
@@ -171,19 +152,16 @@ public class UserDAO {
         if (cursor.moveToFirst()) {
             do {
                 UserModel instructor = new UserModel();
-                instructor.setUid(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ID)));
-                instructor.setName(cursor.getString(cursor.getColumnIndex(COLUMN_USER_NAME)));
-                instructor.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_USER_EMAIL)));
-                instructor.setPhoneNumber(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PHONE)));
-                instructor.setProfileImage(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PROFILE_IMAGE)));
-                instructor.setRole(cursor.getString(cursor.getColumnIndex(COLUMN_USER_ROLE)));
+                instructor.setUid(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ID)));
+                instructor.setName(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_NAME)));
+                instructor.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL)));
+                instructor.setPhoneNumber(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_PHONE)));
+                instructor.setProfileImage(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_PROFILE_IMAGE)));
+                instructor.setRole(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ROLE)));
                 instructorList.add(instructor);
             } while (cursor.moveToNext());
         }
-
-        if (cursor != null) {
-            cursor.close();
-        }
+        cursor.close();
         close();
         return instructorList;
     }

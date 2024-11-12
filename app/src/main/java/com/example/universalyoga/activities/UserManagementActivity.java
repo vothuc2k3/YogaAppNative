@@ -34,27 +34,67 @@ public class UserManagementActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_management);
 
-        SearchView searchView = findViewById(R.id.search_view_users);
-        RecyclerView recyclerView = findViewById(R.id.rv_user_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        initializeViews();
+        initializeToolbar();
+        initializeDAOs();
+        initializeLaunchers();
+        setupRecyclerView();
+        setupSearchView();
+    }
 
+    private void initializeViews() {
+        SearchView searchView = findViewById(R.id.search_view_users);
+        searchView.setIconified(false);
+        searchView.requestFocus();
+    }
+
+    private void initializeToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("User Management");
         }
-
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.white));
         toolbar.setNavigationOnClickListener(v -> finish());
+    }
 
-        searchView.setIconified(false);
-        searchView.requestFocus();
-
+    private void initializeDAOs() {
         userDAO = new UserDAO(this);
         userList = userDAO.getAllUsers();
+    }
 
-        // Register ActivityResultLaunchers
+    private void setupRecyclerView() {
+        RecyclerView recyclerView = findViewById(R.id.rv_user_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        userAdapter = new UserAdapter(userList, userModel -> {
+            Intent intent = new Intent(UserManagementActivity.this, UserDetailActivity.class);
+            intent.putExtra("uid", userModel.getUid());
+            userDetailLauncher.launch(intent);
+        });
+
+        recyclerView.setAdapter(userAdapter);
+    }
+
+    private void setupSearchView() {
+        SearchView searchView = findViewById(R.id.search_view_users);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                performSearch(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                performSearch(newText);
+                return true;
+            }
+        });
+    }
+
+    private void initializeLaunchers() {
         userDetailLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -80,28 +120,11 @@ public class UserManagementActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
 
-        userAdapter = new UserAdapter(userList, userModel -> {
-            Intent intent = new Intent(UserManagementActivity.this, UserDetailActivity.class);
-            intent.putExtra("USER_MODEL", userModel);
-            userDetailLauncher.launch(intent);
-        });
-
-        recyclerView.setAdapter(userAdapter);
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                performSearch(query);
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                performSearch(newText);
-                return true;
-            }
-        });
+    private void performSearch(String query) {
+        List<UserModel> filteredUsers = userDAO.searchUsersByName(query);
+        userAdapter.updateData(filteredUsers);
     }
 
     private void addUserInList(UserModel newUser) {
@@ -133,10 +156,5 @@ public class UserManagementActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void performSearch(String query) {
-        List<UserModel> filteredUsers = userDAO.searchUsersByName(query);
-        userAdapter.updateData(filteredUsers);
     }
 }

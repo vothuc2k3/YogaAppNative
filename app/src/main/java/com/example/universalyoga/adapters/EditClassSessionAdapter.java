@@ -30,16 +30,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessionAdapter.EditClassSessionViewHolder> {
 
-    private ClassSessionDAO classSessionDAO;
-    private UserDAO userDAO;
-    private List<ClassSessionModel> sessionList;
-    private Context context;
-    private OnSaveSessionListener onSaveSessionListener;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-    private int dayOfWeek;
+    private final ClassSessionDAO classSessionDAO;
+    private final UserDAO userDAO;
+    private final List<ClassSessionModel> sessionList;
+    private final Context context;
+    private final OnSaveSessionListener onSaveSessionListener;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private final int dayOfWeek;
 
     public EditClassSessionAdapter(ClassSessionDAO classSessionDAO, List<ClassSessionModel> sessionList, Context context, int dayOfWeek, UserDAO userDAO, OnSaveSessionListener onSaveSessionListener) {
         this.classSessionDAO = classSessionDAO;
@@ -61,11 +62,17 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
     public void onBindViewHolder(@NonNull EditClassSessionViewHolder holder, int position) {
         ClassSessionModel sessionModel = sessionList.get(position);
 
-        UserModel instructor = userDAO.getUserByUid(sessionModel.getInstructorId());
+        setupInstructor(holder, sessionModel);
+        setupSessionDetails(holder, sessionModel);
+        setupDatePicker(holder, sessionModel);
+        setupSaveButton(holder, sessionModel);
+        setupDeleteSession(holder, position, sessionModel);
+    }
 
+    private void setupInstructor(EditClassSessionViewHolder holder, ClassSessionModel sessionModel) {
+        UserModel instructor = userDAO.getUserByUid(sessionModel.getInstructorId());
         if (instructor != null) {
             holder.tvInstructorName.setText(instructor.getName());
-
             Picasso.get().load(instructor.getProfileImage()).placeholder(R.drawable.ic_default_profile_image).into(holder.ivInstructorAvatar);
         } else {
             holder.tvInstructorName.setText("Unknown Instructor");
@@ -73,107 +80,106 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
         }
 
         View.OnClickListener changeInstructorListener = v -> showInstructorSelectionDialog(sessionModel, holder);
-
         holder.tvInstructorName.setOnClickListener(changeInstructorListener);
         holder.ivInstructorAvatar.setOnClickListener(changeInstructorListener);
+    }
 
+    private void setupSessionDetails(EditClassSessionViewHolder holder, ClassSessionModel sessionModel) {
         holder.etSessionDate.setText(dateFormat.format(new Date(sessionModel.getDate())));
         holder.etSessionPrice.setText(String.valueOf(sessionModel.getPrice()));
         holder.etSessionRoom.setText(sessionModel.getRoom());
         holder.etSessionNote.setText(sessionModel.getNote());
+    }
 
+    private void setupDatePicker(EditClassSessionViewHolder holder, ClassSessionModel sessionModel) {
         holder.etSessionDate.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(sessionModel.getDate());
 
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(context, (view, year1, month1, dayOfMonth1) -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(context, (view, year, month, dayOfMonth) -> {
                 Calendar selectedDate = Calendar.getInstance();
-                selectedDate.set(year1, month1, dayOfMonth1);
+                selectedDate.set(year, month, dayOfMonth);
 
                 String formattedDate = dateFormat.format(selectedDate.getTime());
                 holder.etSessionDate.setText(formattedDate);
 
                 sessionModel.setDate(selectedDate.getTimeInMillis());
-            }, year, month, dayOfMonth);
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
 
             datePickerDialog.show();
         });
+    }
 
+    private void setupSaveButton(EditClassSessionViewHolder holder, ClassSessionModel sessionModel) {
         holder.btnSaveSession.setOnClickListener(v -> {
             try {
-                String sessionDate = holder.etSessionDate.getText().toString().trim();
-                double sessionPrice = Double.parseDouble(holder.etSessionPrice.getText().toString().trim());
-                String sessionRoom = holder.etSessionRoom.getText().toString().trim();
-                String sessionNote = holder.etSessionNote.getText().toString().trim();
-
-                Date date = dateFormat.parse(sessionDate);
-                long dateMillis = date != null ? date.getTime() : System.currentTimeMillis();
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(dateMillis);
-                int selectedDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-
-                if (selectedDayOfWeek != dayOfWeek) {
-                    Toast.makeText(context, "Session must be on the same day of the week as the class.", Toast.LENGTH_SHORT).show();
+                if(holder.etSessionRoom.getText().toString().trim().isEmpty()){
+                    holder.etSessionRoom.setError("Room is required");
+                    Toast.makeText(context, "Room is required", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-                List<ClassSessionModel> instructorSessions = classSessionDAO.getSessionsByInstructorId(sessionModel.getInstructorId());
-                for (ClassSessionModel session : instructorSessions) {
-                    if (!session.getId().equals(sessionModel.getId()) && isSameDay(session.getDate(), dateMillis)) {
-                        Toast.makeText(context, "Instructor already has a session scheduled on this date.", Toast.LENGTH_SHORT).show();
-                        return;
+                if (validateSessionDate(holder)) {
+                    updateSessionModel(holder, sessionModel);
+                    if (onSaveSessionListener != null) {
+                        onSaveSessionListener.onSaveSession(sessionModel);
+                        updateClassDates(sessionModel);
                     }
+                    Toast.makeText(context, "Session updated!", Toast.LENGTH_SHORT).show();
                 }
-
-                for (ClassSessionModel session : sessionList) {
-                    if (!session.getId().equals(sessionModel.getId()) && isSameDay(session.getDate(), dateMillis)) {
-                        Toast.makeText(context, "Another session is already scheduled on this date.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                }
-
-                sessionModel.setDate(dateMillis);
-                sessionModel.setPrice((int) sessionPrice);
-                sessionModel.setRoom(sessionRoom);
-                sessionModel.setNote(sessionNote);
-
-                if (onSaveSessionListener != null) {
-                    onSaveSessionListener.onSaveSession(sessionModel);
-
-                    ClassDAO classDAO = new ClassDAO(context);
-                    classDAO.updateClassStartAndEndDate(sessionModel.getClassId());
-
-                    ClassSessionDAO classSessionDAO = new ClassSessionDAO(context);
-                }
-
-                Toast.makeText(context, "Session updated!", Toast.LENGTH_SHORT).show();
-            } catch (ParseException e) {
-                Toast.makeText(context, "Invalid date format!", Toast.LENGTH_SHORT).show();
-            } catch (NumberFormatException e) {
+            } catch (ParseException | NumberFormatException e) {
                 Toast.makeText(context, "Invalid input!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
 
-
+    private void setupDeleteSession(EditClassSessionViewHolder holder, int position, ClassSessionModel sessionModel) {
         holder.itemView.setOnLongClickListener(v -> {
-
-            new AlertDialog.Builder(context).setTitle("Delete Session").setMessage("Are you sure you want to delete this session?").setPositiveButton("Yes", (dialog, which) -> {
-                sessionList.remove(position);
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position, sessionList.size());
-                classSessionDAO.softDeleteClassSession(sessionModel.getId());
-                Toast.makeText(context, "Session deleted", Toast.LENGTH_SHORT).show();
-            }).setNegativeButton("No", null).show();
-
+            new AlertDialog.Builder(context)
+                    .setTitle("Delete Session")
+                    .setMessage("Are you sure you want to delete this session?")
+                    .setPositiveButton("Yes", (dialog, which) -> deleteSession(position, sessionModel))
+                    .setNegativeButton("No", null)
+                    .show();
             return true;
         });
-
     }
+
+    private boolean validateSessionDate(EditClassSessionViewHolder holder) throws ParseException {
+        String sessionDate = Objects.requireNonNull(holder.etSessionDate.getText()).toString().trim();
+        Date date = dateFormat.parse(sessionDate);
+
+        if (date == null) throw new ParseException("Invalid date", 0);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        if (calendar.get(Calendar.DAY_OF_WEEK) != dayOfWeek) {
+            Toast.makeText(context, "Session must be on the same day of the week as the class.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private void updateSessionModel(EditClassSessionViewHolder holder, ClassSessionModel sessionModel) throws ParseException {
+        sessionModel.setDate(dateFormat.parse(holder.etSessionDate.getText().toString().trim()).getTime());
+        sessionModel.setPrice(Integer.parseInt(holder.etSessionPrice.getText().toString().trim()));
+        sessionModel.setRoom(holder.etSessionRoom.getText().toString().trim());
+        sessionModel.setNote(holder.etSessionNote.getText().toString().trim());
+    }
+
+    private void deleteSession(int position, ClassSessionModel sessionModel) {
+        sessionList.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, sessionList.size());
+        classSessionDAO.softDeleteClassSession(sessionModel.getId());
+        Toast.makeText(context, "Session deleted", Toast.LENGTH_SHORT).show();
+        updateClassDates(sessionModel);
+    }
+
+    private void updateClassDates(ClassSessionModel sessionModel) {
+        ClassDAO classDAO = new ClassDAO(context);
+        classDAO.updateClassStartAndEndDate(sessionModel.getClassId());
+    }
+
 
     private void showInstructorSelectionDialog(ClassSessionModel sessionModel, EditClassSessionViewHolder holder) {
         List<UserModel> instructors = userDAO.getAllInstructors();
@@ -197,14 +203,6 @@ public class EditClassSessionAdapter extends RecyclerView.Adapter<EditClassSessi
 
         recyclerView.setAdapter(adapter);
         dialog.show();
-    }
-
-    private boolean isSameDay(long date1, long date2) {
-        Calendar cal1 = Calendar.getInstance();
-        Calendar cal2 = Calendar.getInstance();
-        cal1.setTimeInMillis(date1);
-        cal2.setTimeInMillis(date2);
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
     @Override

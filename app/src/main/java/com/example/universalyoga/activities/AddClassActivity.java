@@ -112,15 +112,18 @@ public class AddClassActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-
         TimePickerDialog timePickerDialog = new TimePickerDialog(this, (view, hourOfDay, minuteOfHour) -> {
-            startHour = hourOfDay;
-            startMinute = minuteOfHour;
-            inputClassStartTime.setText(String.format("%02d:%02d", startHour, startMinute));
+            if (hourOfDay >= 6 && hourOfDay <= 20) {
+                startHour = hourOfDay;
+                startMinute = minuteOfHour;
+                inputClassStartTime.setText(String.format("%02d:%02d", startHour, startMinute));
+            } else {
+                Toast.makeText(this, "Please choose a time between 6 AM and 8 PM", Toast.LENGTH_SHORT).show();
+            }
         }, hour, minute, true);
-
         timePickerDialog.show();
     }
+
 
     private void showDatePickerDialog(EditText editText) {
         Calendar calendar = Calendar.getInstance();
@@ -142,6 +145,7 @@ public class AddClassActivity extends AppCompatActivity {
             if (selectedCalendar.get(Calendar.DAY_OF_WEEK) != selectedDayOfWeek) {
                 editText.setError("Selected date must be a " + dayOfWeek);
                 editText.setText("");
+                Toast.makeText(AddClassActivity.this, "Selected date must be a " + dayOfWeek, Toast.LENGTH_SHORT).show();
             } else {
                 editText.setText(selectedDate);
                 editText.setError(null);
@@ -156,7 +160,6 @@ public class AddClassActivity extends AppCompatActivity {
         if (!validateInputs()) {
             return;
         }
-
         String classTypeId = (String) inputClassType.getTag();
         String classCapacityStr = inputClassCapacity.getText().toString();
         String classDurationStr = inputClassDuration.getText().toString();

@@ -21,6 +21,7 @@ import com.example.universalyoga.fragments.HomeInstructorFragment;
 import com.example.universalyoga.fragments.ProfileFragment;
 import com.example.universalyoga.fragments.SearchFragment;
 import com.example.universalyoga.models.UserModel;
+import com.example.universalyoga.sqlite.AppDatabaseHelper;
 import com.example.universalyoga.sqlite.DAO.*;
 import com.example.universalyoga.worker.SyncManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -74,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_search) {
                 loadFragment(new SearchFragment(), "Search");
             } else if (itemId == R.id.nav_profile) {
+                AppDatabaseHelper db = new AppDatabaseHelper(this);
+                db.getWritableDatabase();
                 ProfileFragment profileFragment = new ProfileFragment();
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("user", currentUser);

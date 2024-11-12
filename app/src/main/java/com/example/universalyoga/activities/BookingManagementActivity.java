@@ -94,7 +94,6 @@ public class BookingManagementActivity extends AppCompatActivity {
         Map<BookingModel, List<ClassSessionModel>> sessionMap = new HashMap<>();
         for (BookingModel booking : bookings) {
             List<String> sessionIds = bookingSessionDAO.getSessionIdsByBookingId(booking.getId());
-            Log.d("SessionIds", "" + sessionIds);
             List<ClassSessionModel> sessions = new ArrayList<>();
             for (String sessionId : sessionIds) {
                 ClassSessionModel session = classSessionDAO.getClassSessionById(sessionId);

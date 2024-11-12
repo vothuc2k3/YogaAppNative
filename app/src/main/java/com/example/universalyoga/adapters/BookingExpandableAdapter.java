@@ -94,6 +94,14 @@ public class BookingExpandableAdapter extends BaseExpandableListAdapter {
 
         tvBookingTitle.setText("Booking #" + (groupPosition + 1));
 
+        setupUserDetails(booking, ivAvatar, tvUserName);
+        setupBookingStatus(booking, tvBookingStatus, btnConfirm, btnReject);
+        setupTotalPrice(booking, tvTotalPrice);
+
+        return convertView;
+    }
+
+    private void setupUserDetails(BookingModel booking, ImageView ivAvatar, TextView tvUserName) {
         UserModel user = userDAO.getUserByUid(booking.getUid());
         if (user != null) {
             tvUserName.setText(user.getName());
@@ -105,7 +113,9 @@ public class BookingExpandableAdapter extends BaseExpandableListAdapter {
             tvUserName.setText("Unknown User");
             ivAvatar.setImageResource(R.drawable.ic_default_profile_image);
         }
+    }
 
+    private void setupBookingStatus(BookingModel booking, TextView tvBookingStatus, Button btnConfirm, Button btnReject) {
         switch (booking.getStatus()) {
             case "confirmed":
                 tvBookingStatus.setText("Confirmed");
@@ -150,14 +160,14 @@ public class BookingExpandableAdapter extends BaseExpandableListAdapter {
                 btnReject.setVisibility(View.GONE);
                 break;
         }
+    }
 
+    private void setupTotalPrice(BookingModel booking, TextView tvTotalPrice) {
         int totalPrice = 0;
         for (ClassSessionModel session : sessionMap.get(booking)) {
             totalPrice += session.getPrice();
         }
         tvTotalPrice.setText("Total Price: £" + totalPrice);
-
-        return convertView;
     }
 
     @Override

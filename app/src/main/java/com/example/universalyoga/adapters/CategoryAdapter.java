@@ -31,6 +31,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         this.categoryDAO = new CategoryDAO(context);
     }
 
+    @Override
+    public int getItemCount() {
+        return categoryList.size();
+    }
+
     @NonNull
     @Override
     public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -44,13 +49,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         holder.tvCategoryName.setText(category.getName());
         holder.tvCategoryDescription.setText(category.getDescription());
 
-        holder.btnEditCategory.setOnClickListener(v->showDialogEditCategory(category, position));
-        holder.btnDeleteCategory.setOnClickListener(v->showDialogDeleteCategory(category, position));
-    }
-
-    @Override
-    public int getItemCount() {
-        return categoryList.size();
+        holder.btnEditCategory.setOnClickListener(v -> showDialogEditCategory(category, position));
+        holder.btnDeleteCategory.setOnClickListener(v -> showDialogDeleteCategory(category, position));
     }
 
     private void showDialogEditCategory(ClassCategoryModel category, int position) {
@@ -67,21 +67,26 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         builder.setView(dialogView);
 
         builder.setPositiveButton("Edit", (dialog, which) -> {
+            if(!validateInput(nameInput)){
+                return;
+            }
+            if(!validateDuplicateName(nameInput.getText().toString(), category.getName())){
+                return;
+            }
+
             String name = nameInput.getText().toString();
             String description = descriptionInput.getText().toString();
             categoryDAO.updateCategory(new ClassCategoryModel(category.getId(), name, description));
             categoryList.set(position, new ClassCategoryModel(category.getId(), name, description));
             notifyItemChanged(position);
         });
-
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
         builder.show();
     }
 
     private void showDialogDeleteCategory(ClassCategoryModel category, int position) {
         boolean isUsed = categoryDAO.isCategoryUsed(category.getId());
-        if(isUsed) {
+        if (isUsed) {
             Toast.makeText(context, "Category is used in classes", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -107,10 +112,33 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         return builder;
     }
 
+        private boolean validateInput(EditText nameInput) {
+        String name = nameInput.getText().toString();
+        if (name.isEmpty()) {
+            Toast.makeText(context, "Name is required.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+        }
+    
+    private boolean validateDuplicateName(String newName, String oldName){
+        if(newName.equals(oldName)){
+            Toast.makeText(context, "Enter a different name.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        for(ClassCategoryModel category : categoryList){
+            if(category.getName().equals(newName)){
+                Toast.makeText(context, "Name is already taken.", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static class CategoryViewHolder extends RecyclerView.ViewHolder {
         public TextView tvCategoryName, tvCategoryDescription;
         public ImageButton btnEditCategory, btnDeleteCategory;
-    
+
         public CategoryViewHolder(@NonNull View itemView) {
             super(itemView);
             tvCategoryName = itemView.findViewById(R.id.tv_category_name);

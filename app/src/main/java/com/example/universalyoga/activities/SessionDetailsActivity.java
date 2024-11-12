@@ -44,6 +44,14 @@ public class SessionDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session_details);
 
+        initializeToolbar();
+        initializeDAOs();
+        initializeViews();
+        setupListeners();
+        loadSessionData();
+    }
+
+    private void initializeToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -52,28 +60,35 @@ public class SessionDetailsActivity extends AppCompatActivity {
         }
 
         toolbar.setNavigationOnClickListener(v -> finish());
+    }
 
-        final String sessionId = getIntent().getStringExtra("classSessionId");
-
+    private void initializeDAOs() {
         classSessionDAO = new ClassSessionDAO(this);
         userDAO = new UserDAO(this);
+    }
 
-        classSessionModel = classSessionDAO.getClassSessionById(sessionId);
-        instructor = userDAO.getUserByUid(classSessionModel.getInstructorId());
-
+    private void initializeViews() {
         ivInstructorAvatar = findViewById(R.id.iv_instructor_avatar);
         tvInstructorName = findViewById(R.id.tv_instructor_name);
         etSessionDate = findViewById(R.id.et_session_date);
         etSessionPrice = findViewById(R.id.et_session_price);
         etSessionRoom = findViewById(R.id.et_session_room);
         etSessionNote = findViewById(R.id.et_session_note);
+    }
+
+    private void setupListeners() {
+        ivInstructorAvatar.setOnClickListener(v -> showInstructorSelectionDialog());
         Button btnSaveSession = findViewById(R.id.btn_save_session);
+        btnSaveSession.setOnClickListener(v -> saveSessionData());
+    }
+
+    private void loadSessionData() {
+        final String sessionId = getIntent().getStringExtra("classSessionId");
+        classSessionModel = classSessionDAO.getClassSessionById(sessionId);
+        instructor = userDAO.getUserByUid(classSessionModel.getInstructorId());
 
         if (classSessionModel != null) {
             updateUI();
-
-            ivInstructorAvatar.setOnClickListener(v -> showInstructorSelectionDialog());
-            btnSaveSession.setOnClickListener(v -> saveSessionData());
         }
     }
 
